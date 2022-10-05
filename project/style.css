@@ -1,0 +1,115 @@
+*{
+    padding: 0;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+body{
+    color: #ffffff;
+    background-color: #000000;
+}
+
+.Menu{
+    width: 100vw;
+    height: auto;
+    display: flex;
+    justify-content: space-between;
+}
+
+.center{
+    justify-content: center;
+}
+
+.Menu h1{
+    flex: 1;
+    padding-top: 5vh;
+    text-align: center;
+}
+
+.articlebox .iframe {
+    width: 50%;
+    max-width: 700px;
+    padding-left: 6vw;
+    aspect-ratio: 16 / 9;
+}
+
+a{
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.articlebox{
+    padding-top: 3vh;
+    display: flex;
+}
+
+.explain{
+    display: none;
+}
+
+.show {display:block;}
+
+.articlebox h3, h2, h1{
+    display: flex;
+    margin-left: 3vw;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+.title{
+    display: flex;  
+    padding-left: 5vw;
+}
+
+.title h2{
+    padding-left: 1vw;
+}
+
+.article{
+    padding-top: 7.5vh;
+    padding-bottom: 7.5vh;
+}
+
+
+.Headline h1 a{
+    font-family: 'Orehfont', 'Pretendard';
+    font-size: 60px;
+}
+
+h1{
+    font-family: 'Orehfont', 'Pretendard';
+    font-size: 50px;
+}
+
+h2{
+    font-family: 'Orehfont', 'Pretendard';
+    font-size: 24px;
+}
+
+h3{
+    font-family: 'Orehfont', 'Pretendard';
+    font-size: 20px;
+}
+
+
+@font-face {
+font-family: 'Orehfont';
+src: url('/Orehfont-Regular.ttf') format('truetype');
+}
+
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.5/dist/web/static/pretendard-dynamic-subset.css");
+
+button{
+    background-color: #668675;
+    color: #ffffff;
+    border: none;
+    margin: 5vh;
+    z-index: 1;
+    cursor: pointer;
+}
+
+iframe{
+    display: none;
+}
