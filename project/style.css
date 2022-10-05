@@ -26,7 +26,7 @@ body{
     text-align: center;
 }
 
-.articlebox .iframe {
+.dropdown-content .iframe {
     width: 50%;
     max-width: 700px;
     padding-left: 6vw;
@@ -38,18 +38,18 @@ a{
     color: #ffffff;
 }
 
-.articlebox{
+.dropdown-content{
     padding-top: 3vh;
-    display: flex;
+    display: none;
 }
 
 .explain{
     display: none;
 }
 
-.show {display:block;}
+.show {display:flex;}
 
-.articlebox h3, h2, h1{
+.dropdown-content h3, h2, h1{
     display: flex;
     margin-left: 3vw;
 }
@@ -68,8 +68,8 @@ a:hover{
 }
 
 .article{
-    padding-top: 7.5vh;
-    padding-bottom: 7.5vh;
+    padding-top: 2vh;
+    padding-bottom: 2vh;
 }
 
 
@@ -101,8 +101,8 @@ src: url('/Orehfont-Regular.ttf') format('truetype');
 
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.5/dist/web/static/pretendard-dynamic-subset.css");
 
-button{
-    background-color: #668675;
+.dropbtn{
+    background-color: #000000;
     color: #ffffff;
     border: none;
     margin: 5vh;
@@ -111,5 +111,5 @@ button{
 }
 
 iframe{
-    display: none;
+    display: flex;
 }
