@@ -28,19 +28,20 @@
         </button>
 
         <div class="articlebox">
-            <!-- 유튜브 인베드 -->
-            <iframe id="myDropdown" class="iframe" src="https://www.youtube.com/embed/f68d8Br95_Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-            <sapn id="myDropdown">
-                <!-- 프로젝트 제목 기입 -->
-                <h2>고양시&nbsp;<span style="font-size: 40px;">X DMZ</span>국제다큐멘터리영화제 청소년 38초 다큐 공모전 대상 수상</h2>
-                <!-- 설명
-                    h3 태그를 복사 후 아랫줄에 추가하면 한줄 내려감
-                    줄내림 없이 사용하려면 한 태그 안에 내용을 이어적을 것-->
-                <h3 style="padding-top: 3vh;">제목 : 고양이가 내게 알려준 것</h3>
-                <h3 style="padding-top: 3vh;">역할 : 감독, 촬영, 편집</h3>
-                <h3 style="padding-top: 3vh;">의의 : 룸이에게서 배울점이 많다.</h3>
-            </sapn>
+                <!-- 유튜브 인베드 -->
+                <iframe class="iframe" src="https://www.youtube.com/embed/f68d8Br95_Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <span id="myDropdown">
+                <div class="explain" >
+                    <!-- 프로젝트 제목 기입 -->
+                    <h2>고양시&nbsp;<span style="font-size: 40px;">X DMZ</span>국제다큐멘터리영화제 청소년 38초 다큐 공모전 대상 수상</h2>
+                    <!-- 설명
+                        h3 태그를 복사 후 아랫줄에 추가하면 한줄 내려감
+                        줄내림 없이 사용하려면 한 태그 안에 내용을 이어적을 것-->
+                    <h3 style="padding-top: 3vh;">제목 : 고양이가 내게 알려준 것</h3>
+                    <h3 style="padding-top: 3vh;">역할 : 감독, 촬영, 편집</h3>
+                    <h3 style="padding-top: 3vh;">의의 : 룸이에게서 배울점이 많다.</h3>
+                </div>
+            </span>
         </div>
     </div>
 
@@ -92,6 +93,10 @@
 
     .articlebox{
         padding-top: 3vh;
+        display: flex;
+    }
+
+    .explain{
         display: none;
     }
 
@@ -120,10 +125,6 @@
         padding-bottom: 7.5vh;
     }
 
-    .explain{
-        position: absolute;
-        padding-left: 60%;  
-    }
 
     .Headline h1 a{
         font-family: 'Orehfont', 'Pretendard';
@@ -158,6 +159,12 @@
         color: #ffffff;
         border: none;
         margin: 5vh;
+        z-index: 1;
+        cursor: pointer;
+    }
+
+    iframe{
+        display: none;
     }
 
 </style>    
@@ -169,11 +176,13 @@ toggle between hiding and showing the dropdown content */
 function myFunction() {
   document.getElementById("myDropdown").classList.toggle("show");
 }
-
+var a;
+    var a=a+1
 // Close the dropdown menu if the user clicks outside of it
 window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')) {
-    var dropdowns = document.getElementsByClassName("dropdown-content");
+    console.log(a)
+  if (!event.target.matches('.title')) {
+    var dropdowns = document.getElementsByClassName("iframe");
     var i;
     for (i = 0; i < dropdowns.length; i++) {
       var openDropdown = dropdowns[i];
