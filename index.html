@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포트폴리오</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.5/dist/web/variable/pretendardvariable.css" />
+</head>
+<body>
+
+    <!-- 메뉴 바 -->
+
+    <div class="Menu Headline">
+        <h1><a style="margin-left : 5vw ;" href="#Orehfill">Orehfill</a></h1>
+        <h1 class="center"><a href="#Projects">Projects</a></h1>
+        <h1></h1>
+    </div>
+
+    <!-- 하나의 아티클 단위 -->
+
+    <div class="article">
+
+        <button class="title" onclick="myFunction()">
+            <!-- 날짜 및 제목 기입 -->
+            <h3>2022.09.27</h3>
+            <h2>고양이가 내게 알려준 것</h2>
+        </button>
+
+        <div class="articlebox">
+            <!-- 유튜브 인베드 -->
+            <iframe id="myDropdown" class="iframe" src="https://www.youtube.com/embed/f68d8Br95_Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+            <sapn id="myDropdown">
+                <!-- 프로젝트 제목 기입 -->
+                <h2>고양시&nbsp;<span style="font-size: 40px;">X DMZ</span>국제다큐멘터리영화제 청소년 38초 다큐 공모전 대상 수상</h2>
+                <!-- 설명
+                    h3 태그를 복사 후 아랫줄에 추가하면 한줄 내려감
+                    줄내림 없이 사용하려면 한 태그 안에 내용을 이어적을 것-->
+                <h3 style="padding-top: 3vh;">제목 : 고양이가 내게 알려준 것</h3>
+                <h3 style="padding-top: 3vh;">역할 : 감독, 촬영, 편집</h3>
+                <h3 style="padding-top: 3vh;">의의 : 룸이에게서 배울점이 많다.</h3>
+            </sapn>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
+<style>
+
+    *{
+        padding: 0;
+        margin: 0;
+        overflow-x: hidden;
+    }
+
+    body{
+        color: #ffffff;
+        background-color: #000000;
+    }
+
+    .Menu{
+        width: 100vw;
+        height: auto;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .center{
+        justify-content: center;
+    }
+
+    .Menu h1{
+        flex: 1;
+        padding-top: 5vh;
+        text-align: center;
+    }
+
+    .articlebox .iframe {
+        width: 50%;
+        max-width: 700px;
+        padding-left: 6vw;
+        aspect-ratio: 16 / 9;
+    }
+
+    a{
+        text-decoration: none;
+        color: #ffffff;
+    }
+
+    .articlebox{
+        padding-top: 3vh;
+        display: none;
+    }
+
+    .show {display:block;}
+
+    .articlebox h3, h2, h1{
+        display: flex;
+        margin-left: 3vw;
+    }
+
+    a:hover{
+        text-decoration: underline;
+    }
+
+    .title{
+        display: flex;  
+        padding-left: 5vw;
+    }
+
+    .title h2{
+        padding-left: 1vw;
+    }
+
+    .article{
+        padding-top: 7.5vh;
+        padding-bottom: 7.5vh;
+    }
+
+    .explain{
+        position: absolute;
+        padding-left: 60%;  
+    }
+
+    .Headline h1 a{
+        font-family: 'Orehfont', 'Pretendard';
+        font-size: 60px;
+    }
+
+    h1{
+        font-family: 'Orehfont', 'Pretendard';
+        font-size: 50px;
+    }
+
+    h2{
+        font-family: 'Orehfont', 'Pretendard';
+        font-size: 24px;
+    }
+
+    h3{
+        font-family: 'Orehfont', 'Pretendard';
+        font-size: 20px;
+    }
+
+
+    @font-face {
+    font-family: 'Orehfont';
+    src: url('/Orehfont-Regular.ttf') format('truetype');
+}
+    
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.5/dist/web/static/pretendard-dynamic-subset.css");
+
+    button{
+        background-color: #668675;
+        color: #ffffff;
+        border: none;
+        margin: 5vh;
+    }
+
+</style>    
+
+
+<script>
+    /* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+function myFunction() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+// Close the dropdown menu if the user clicks outside of it
+window.onclick = function(event) {
+  if (!event.target.matches('.dropbtn')) {
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')) {
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+</script>
