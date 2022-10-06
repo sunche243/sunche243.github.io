@@ -18,12 +18,12 @@ body{
 
 .center{
     justify-content: center;
+    text-align: center;
 }
 
 .Menu h1{
     flex: 1;
     padding-top: 5vh;
-    text-align: center;
 }
 
 .dropdown-content .iframe {
