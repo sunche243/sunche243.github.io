@@ -40,7 +40,8 @@ a{
 
 .dropdown-content{
     padding-top: 3vh;
-    display: none;
+    display: flex;
+    padding-left: 5vw;
 }
 
 .explain{
