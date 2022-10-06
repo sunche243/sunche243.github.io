@@ -28,7 +28,7 @@ body{
 
 .dropdown-content .iframe {
     width: 50%;
-    max-width: 700px;
+    max-width: 600px;
     padding-left: 6vw;
     aspect-ratio: 16 / 9;
 }
@@ -39,9 +39,10 @@ a{
 }
 
 .dropdown-content{
-    padding-top: 3vh;
+    padding-top: 2vh;
     display: flex;
-    padding-left: 5vw;
+    padding-left: 3vw;
+    padding-bottom: 4vh;
 }
 
 .explain{
@@ -51,8 +52,8 @@ a{
 .show {display:flex;}
 
 .dropdown-content h3, h2, h1{
-    display: flex;
-    margin-left: 3vw;
+    display: inline-block;
+    margin-left: 2vw;
 }
 
 a:hover{
@@ -73,7 +74,6 @@ a:hover{
     padding-bottom: 2vh;
 }
 
-
 .Headline h1 a{
     font-family: 'Orehfont', 'Pretendard';
     font-size: 60px;
@@ -82,16 +82,19 @@ a:hover{
 h1{
     font-family: 'Orehfont', 'Pretendard';
     font-size: 50px;
+    display: inline-block;
 }
 
 h2{
     font-family: 'Orehfont', 'Pretendard';
     font-size: 24px;
+    display: inline-block;
 }
 
 h3{
     font-family: 'Orehfont', 'Pretendard';
     font-size: 20px;
+    display: inline-block;
 }
 
 
@@ -106,7 +109,7 @@ src: url('/Orehfont-Regular.ttf') format('truetype');
     background-color: #000000;
     color: #ffffff;
     border: none;
-    margin: 5vh;
+    margin: 1vh;
     z-index: 1;
     cursor: pointer;
 }
