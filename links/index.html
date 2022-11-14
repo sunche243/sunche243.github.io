@@ -8,52 +8,57 @@
 </head>
 
 <body>
-    <h1 style="text-align: center;">
-        20DC All links
-    </h1>
-    <h3 style="text-align: center; color:gray">
-        *일부 과목은 마우스를 올리고 기다리면 비밀번호가 나옵니다!<br>
-        <br>
-        *웨일온 과목은 링크를 통한 입장 방법을 찾고있습니다.. 조금만 기다려주세요!
-    </h3>
+    <div class="flex_box">
+        <h1>
+            20DC All Links
+        </h1>
+    </div>
+    <div class="flex_box">
+        <h3 style="color:#808080">
+            *일부 과목은 마우스를 올리고 기다리면 비밀번호가 나옵니다!<br>
+            <br>
+            *웨일온 과목은 링크를 통한 입장 방법을 찾고있습니다.. 조금만 기다려주세요!
+        </h3>
+    </div>
     <div class="center">
         <div class="wrapper">
             <div onclick="window.open('//us04web.zoom.us/j/6971690768?pwd=Vk1LWmxGRlZJTGsvVENneU12YjJpZz09');" class="button">
-                진로(조회 및 종례)
+                <p>진로(조종례)</p>
             </div>
             <div onclick="window.open('//meet.google.com/fvw-wejh-dws');" class="button">
-                음콘
+                <p>음콘</p>
             </div>
             <div onclick="window.open('//whaleon.us/o/CSqulM/3cae958ee68d426399e39bc7712720a7');" class="button" title="비번 : 123456">
-                중국어
+                <p>중국어</p>
             </div>
             <div onclick="window.open('//whaleon.us/o/CSpbmQ/84e09870decf4e92b43bb9da908c8c40');" class="button">
-                문학
+                <p>문학</p>
             </div>
             <div onclick="window.open('//whaleon.us/o/CSph7K/e77352b981d74296944794a13729fc76');" class="button">
-                수학
+                <p>수학</p>
             </div>
             <div onclick="window.open('//discord.gg/RyAbZT7h');" class="button">
-                광콘
+                <p>광콘</p>
             </div>
             <div onclick="window.open('//zep.us/play/8L3rp3');" class="button" title="비번 : lovedimigoebdc20">
-                회계(젭)
+                <p>회계(젭)</p>
             </div>
             <div onclick="window.open('//whaleon.us/o/CSq3sG/ce42566b88dd429cae222d0fece9fb60');" class="button" title="비번 : 123456">
-                운동
+                <p>운동</p>
             </div>
             <div  onclick="window.open('//whaleon.us/o/CSqtbC/fc87539162c340a0a32e0677462157e4');" class="button" title="비번 :822069">
-                영어
+                <p>영어</p>
             </div>
-            <div  class="button_gray" title="">
-                마광
+            <div  class="button_gray" title="ID : 210 843 1517 / 비번 : 123456">
+                <p>마케팅</p>
             </div>
-            <div  class="button_gray" title="">
-                플밍
+            <div  class="button_gray" title="ID : 210 721 0082 / 비번 : 123456">
+                <p>플밍</p>
             </div>
         </div>
+        <div class="padding"></div>
         <div class="center" style="padding-top: 10vh;">
-            <div onclick="window.open('https://sunche.me');" class="button_big">
+            <div onclick="window.open('https://sunche.me');" class="button_footer">
                     오늘의 시간표 보러가기
             </div>
         </div>
@@ -67,6 +72,8 @@
         text-decoration: none;
         padding: 0;
         margin: 0;
+        overflow: visible;
+        font-size: 62.5%;
     }
     body{
         background-color: #fff;
@@ -84,8 +91,9 @@
 
     .wrapper{
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 3vh 5vw;
+        padding-top: 5vh;
     }
     
     .button{
@@ -100,9 +108,10 @@
         display: inline-block;
         font-size: 30px;
         font-weight: bold;
+        min-width: 160px
     }
 
-    .button_big{
+    .button_footer{
         position: fixed;
         left: 0;
         bottom: 0;
@@ -111,8 +120,9 @@
         background-color: #f66;
         color: #fff;
         text-align: center;
-        font-size: 50px;
+        font-size: 3rem;
         line-height: 10vh;
+        font-weight: bold;
     }
 
     .center{
@@ -134,16 +144,31 @@
         display: inline-block;
         font-size: 30px;
         font-weight: bold;
+        min-width: 160px;
     }
 
     h1{
-        font-size: 80px;
         padding-top: 5vh;
         color: #f66;
+        font-size: 19em;
     }
-    
+
     h3{
-        font-size: 15.625px;
+        font-size: 4em;
     }
     
+    .flex_box{
+        display: flex;
+        justify-content: center;
+        text-align: center;
+        min-width: 190px;
+    }
+
+    p{
+        font-size: 1em;
+    }
+
+    .padding{
+        padding-top: 20vh;
+    }
 </style>
