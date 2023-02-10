@@ -20,11 +20,11 @@ function Add(a){
     };
 
     if(count < 0){
-        count++
-        alert('0 미만 되겠냐 ㅋ')
+        count++ ;
+        alert('0 미만 되겠냐 ㅋ');
     }else{
 
-    }
+    };
 
     document.getElementById('number').innerHTML = count;
 };
