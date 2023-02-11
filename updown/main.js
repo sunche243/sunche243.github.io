@@ -5,9 +5,12 @@ var guess = Math.floor(Math.random() * (max - min + 1)) + min;
 
 console.log(guess);
 
-document.getElementById('minn').innerHTML = min;
-document.getElementById('maxn').innerHTML = max;
-document.getElementById('attemptn').innerHTML = attempt;
+if(guess == 50 || guess == 0){
+    var guess = Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+console.log(min, max, guess);
+console.log(min)
 
 function bring(){
     if(attempt < 5){
@@ -67,4 +70,5 @@ function bring(){
         location.reload();
     };
 };
+
 

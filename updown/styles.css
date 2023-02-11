@@ -10,13 +10,12 @@
 
 span{
     text-align: center;
-    padding-top: 50;
+    padding-top: 4vh;
 }
 
 input{
     display: block;
     font-size: calc(4px + 10vw);
-    width: 19vw;
     text-align: center;
 }
 
