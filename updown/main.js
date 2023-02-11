@@ -2,7 +2,6 @@ var attempt = 1;
 var min = 0;
 var max = 50;
 var guess = Math.floor(Math.random() * (max - min + 1)) + min;
-var input = null;
 
 console.log(guess);
 
@@ -11,9 +10,9 @@ document.getElementById('maxn').innerHTML = max;
 document.getElementById('attemptn').innerHTML = attempt;
 
 function bring(){
-    if(attempt < 4){
+    if(attempt < 5){
 
-        var input = document.getElementById('ans').value;
+        input = document.getElementById('ans').value;
         console.log(input)
 
         if(min < input && input < max)
@@ -36,12 +35,18 @@ function bring(){
 
             document.getElementById('ans').value = null;
             attempt++;
-            document.getElementById('attemptn').innerHTML = attempt;
+            if(attempt == 5){
+                document.getElementById('attemptn', 'word').innerHTML = null;
+                document.getElementById('attem').innerHTML = '마지막 시도';
+            }
+            else{
+                document.getElementById('attemptn').innerHTML = attempt;
+            };
 
         }
         else
         {
-            if(input == 'undefined')
+            if(!input)
             {
                 alert('값을 입력하세요');
             }
@@ -62,3 +67,4 @@ function bring(){
         location.reload();
     };
 };
+
