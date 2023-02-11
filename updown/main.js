@@ -10,13 +10,14 @@ if(guess == 50 || guess == 0){
 }
 
 console.log(min, max, guess);
-console.log(min)
+console.log(min, max)
 
 function bring(){
-    if(attempt < 5){
+    if(attempt <=5){
 
-        input = document.getElementById('ans').value;
-        console.log(input)
+        var input = document.getElementById('ans').value;
+        input = parseInt(input)
+        console.log(input);
 
         if(min < input && input < max)
         {
@@ -39,7 +40,6 @@ function bring(){
             document.getElementById('ans').value = null;
             attempt++;
             if(attempt == 5){
-                document.getElementById('attemptn', 'word').innerHTML = null;
                 document.getElementById('attem').innerHTML = '마지막 시도';
             }
             else{
@@ -69,6 +69,7 @@ function bring(){
         alert('실패!');
         location.reload();
     };
+
+    console.log(min, max)
+
 };
-
-
