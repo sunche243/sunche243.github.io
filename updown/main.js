@@ -5,7 +5,13 @@ var guess = Math.floor(Math.random() * (max - min + 1)) + min;
 
 if(guess == 50 || guess == 0){
     var guess = Math.floor(Math.random() * (max - min + 1)) + min;
-}
+};
+
+document.addEventListener("keyup", function(event) {
+    if(event.code === 'Enter') {
+        bring();
+    };
+});
 
 function bring(){
     if(attempt <=5){
