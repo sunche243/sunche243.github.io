@@ -37,7 +37,6 @@ function bring(){
                 location.reload();
             };
 
-            document.getElementById('ans').value = null;
             attempt++;
             if(attempt == 5){
                 document.getElementById('attem').innerHTML = '마지막 시도';
@@ -55,14 +54,15 @@ function bring(){
             }
             else if(input >= max)
             {
-                alert('max보다 작은 값을 입력하세요');
+                alert(max + "보다 작은 값을 입력하세요");
             }
             else if(input <= min)
             {
-                alert('min보다 큰 값을 입력하세요');
+                alert(min + "보다 큰 값을 입력하세요");
+                
             };
         };
-
+    document.getElementById('ans').value = null;
     }
     else
     {
