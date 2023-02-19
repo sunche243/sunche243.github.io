@@ -3,21 +3,15 @@ var min = 0;
 var max = 50;
 var guess = Math.floor(Math.random() * (max - min + 1)) + min;
 
-console.log(guess);
-
 if(guess == 50 || guess == 0){
     var guess = Math.floor(Math.random() * (max - min + 1)) + min;
 }
-
-console.log(min, max, guess);
-console.log(min, max)
 
 function bring(){
     if(attempt <=5){
 
         var input = document.getElementById('ans').value;
         input = parseInt(input)
-        console.log(input);
 
         if(min < input && input < max)
         {
@@ -69,7 +63,4 @@ function bring(){
         alert('실패!');
         location.reload();
     };
-
-    console.log(min, max)
-
 };
