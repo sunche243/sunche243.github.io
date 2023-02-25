@@ -7,8 +7,6 @@ if(guess == 50 || guess == 0){
     var guess = Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-console.log(guess)
-
 document.addEventListener("keyup", function(event) {
     if(event.code === 'Enter') {
         bring();
