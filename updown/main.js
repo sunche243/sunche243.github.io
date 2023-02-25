@@ -7,6 +7,8 @@ if(guess == 50 || guess == 0){
     var guess = Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+console.log(guess)
+
 document.addEventListener("keyup", function(event) {
     if(event.code === 'Enter') {
         bring();
@@ -14,7 +16,6 @@ document.addEventListener("keyup", function(event) {
 });
 
 function bring(){
-    if(attempt <=5){
 
         var input = document.getElementById('ans').value;
         input = parseInt(input)
@@ -25,26 +26,37 @@ function bring(){
             {
                 document.getElementById('maxn').innerHTML = input;
                 max = input;
+
+                attempt++; 
+                if(attempt == 5){
+                    document.getElementById('attem').innerHTML = '마지막 시도';
+                }else if(attempt == 6){
+                    alert('실패') ;
+                    location.reload();
+                }else{
+                    document.getElementById('attemptn').innerHTML = attempt;
+                };
             }
             else if(input < guess)
             {
                 document.getElementById('minn').innerHTML = input;
                 min = input;
+
+                attempt++; 
+                if(attempt == 5){
+                    document.getElementById('attem').innerHTML = '마지막 시도';
+                }else if(attempt == 6){
+                    alert('실패') ;
+                    location.reload();
+                }else{
+                    document.getElementById('attemptn').innerHTML = attempt;
+                };
             }
             else
             {
                 alert('정답');
                 location.reload();
             };
-
-            attempt++;
-            if(attempt == 5){
-                document.getElementById('attem').innerHTML = '마지막 시도';
-            }
-            else{
-                document.getElementById('attemptn').innerHTML = attempt;
-            };
-
         }
         else
         {
@@ -59,14 +71,9 @@ function bring(){
             else if(input <= min)
             {
                 alert(min + "보다 큰 값을 입력하세요");
-                
             };
         };
+
     document.getElementById('ans').value = null;
-    }
-    else
-    {
-        alert('실패!');
-        location.reload();
-    };
+
 };
