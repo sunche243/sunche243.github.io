@@ -45,3 +45,11 @@ input{
     gap: 1vh 1vw;
     padding-top: 10vh;
 }
+
+.ad_bar{
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    width: 100vw;
+    height: 5vh;
+}
