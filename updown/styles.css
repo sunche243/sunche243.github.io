@@ -42,7 +42,7 @@ input{
 .grid{
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    gap: 1vh 1vw;
+    gap: 1vh;
     padding-top: 10vh;
 }
 
