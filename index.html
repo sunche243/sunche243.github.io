@@ -4,170 +4,39 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>dicon-time table</title>
+    <title>updown</title>
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
 </head>
 <body>
-    <div class="button_top" onclick="window.open('//www.instagram.com/ar/381409800869795?utm_source=qr');">
-        Orehfont 인스타그램 필터가 출시되었어요!
+    <ins class="kakao_ad_area center"
+    data-ad-unit = "DAN-4FctGGMNjwKACDPY"
+    data-ad-width = "728"
+    data-ad-height = "90">
+    </ins>
+    <div style="padding-top: 10vh;"></div>
+    <span class="center smfont" id="attem">
+        <span id="attemptn" class="smfont">1</span>
+        <span class="smfont" id="word">번째 시도</span>
+    </span>
+    <div class="grid">
+        <span id="minn">0</span>
+        <span><</span>
+        <input type="number" min="0" max="50" id="ans">
+        <span><</span>
+        <span id="maxn">50</span>
     </div>
-    <div class="flex_box">
-        <h1>
-            20DC Time Table
-        </h1>
+    <ins class="kakao_ad_area" style="display:none; position: absolute;"
+    data-ad-unit = "DAN-rfnWkPcBcV2J6aBa"
+    data-ad-width = "160"
+    data-ad-height = "600"></ins>
+    <div class="center" style="padding-top: 5vh;">
+        <div class="but" onclick="bring()">이거버튼임</div>
     </div>
-    <div class="flex_box">
-        <h3 style="color:#808080">
-            *일부 과목은 마우스를 올리고 기다리면 비밀번호가 나옵니다!<br>
-            <br>
-            *웨일온 과목은 링크를 통한 입장 방법을 찾고있습니다.. 조금만 기다려주세요!
-        </h3>
-    </div>
-    <div class="center">
-        <div onclick="window.open('//us04web.zoom.us/j/6971690768?pwd=Vk1LWmxGRlZJTGsvVENneU12YjJpZz09');" class="button">
-            <p>아침조회 및 종례</p>
-        </div>
-    </div>
-    <div class="center">
-        <div onclick="window.open('//whaleon.us/o/CSpbmQ/84e09870decf4e92b43bb9da908c8c40');" class="button">
-            <p>문학</p>
-        </div>
-    </div>
-    <div class="center">
-        <div onclick="window.open('//whaleon.us/o/CSq3sG/ce42566b88dd429cae222d0fece9fb60');" class="button" title="비번 : 123456">
-            <p>운동</p>
-        </div>
-    </div>
-    <div class="center">
-    <div  class="button" title="ID : 210 843 1517 / 비번 : 123456">
-        <p>마케팅</p>
-    </div>
-    <div class="center" style="padding-top: 10vh;">
-        <div onclick="window.open('/links');" class="button_footer">
-                모든링크 보러가기
-        </div>
-    </div>
-
 </body>
+
+<script src="main.js"></script>
+</script>
+
 </html>
-
-<style>
-    *{
-        text-decoration: none;
-        padding: 0;
-        margin: 0;
-        overflow: visible;
-        font-size: calc(4px + 0.4vw);
-        font-family: 'Pretendard';
-    }
-    body{
-        background-color: #fff;
-        color: #000;
-        width: 100%;
-    }
-    
-    a{
-        color: #fff;
-    }
-
-    a:hover{
-        text-decoration: underline;
-    }
-
-    .wrapper{
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 3vh 5vw;
-    }
-
-    .button{
-        border-radius: 5px;
-        background: #f66;
-        color: #fff;
-        width: 30vw;
-        height: 5vh;
-        line-height: 5vh;
-        text-align: center;
-        cursor: pointer;
-        display: inline-block;
-        font-size: 2rem;
-        font-weight: bold;
-        min-width: 190px;
-    }
-
-    .button_footer{
-        position: fixed;
-        left: 0;
-        bottom: 0;
-        width: 100%;
-        height: 10vh;
-        background-color: #f66;
-        color: #fff;
-        text-align: center;
-        font-size: 3rem;
-        line-height: 10vh;
-        font-weight: bold;
-    }
-
-    .button_top{
-        width: 100%;
-        height: 4vh;
-        background-color: rgb(17, 54, 173);
-        color: #fff;
-        text-align: center;
-        font-size: 2rem;
-        line-height: 4vh;
-        font-weight: bold;
-        display: block;
-    }
-
-    .center{
-        display: flex;
-        justify-content: center;
-        text-align: center;
-        padding-top: 3vh;
-    }
-
-    h1{
-        padding-top: 1vh;
-        color: #f66;
-        font-size: 6rem;
-        font-family: 'Orehfont', 'Pretendard';
-    }
-
-    h3{
-        font-size: 2rem;
-    }
-
-    .button_gray{
-        border-radius: 5px;
-        background: #808080;
-        color: #fff;
-        width: 30vw;
-        height: 5vh;
-        line-height: 5vh;
-        text-align: center;
-        cursor: pointer;
-        display: inline-block;
-        font-weight: bold;
-        min-width: 190px;
-    }
-
-    .flex_box{
-        display: flex;
-        justify-content: center;
-        text-align: center;
-        min-width: 190px;
-    }
-    
-    p{
-        font-size: 3rem;
-    }
-
-    @font-face {
-font-family: 'Orehfont';
-src: url('https://sunche.me/Orehfont.ttf') format('truetype');
-}
-
-@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.5/dist/web/static/pretendard-dynamic-subset.css");
-
-</style>
