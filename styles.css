@@ -41,11 +41,10 @@ input{
 
 .grid{
     display: grid;
-    position: absolute;
     grid-template-columns: repeat(5, 1fr);
     gap: 1vh 1vw;
     padding-top: 10vh;
-    padding-left: 200px;
+    padding-right: 200px;
 }
 
 .ad_bar{
