@@ -7,8 +7,6 @@ if(guess == 50 || guess == 0){
     var guess = Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-console.log(guess)
-
 document.addEventListener("keyup", function(event) {
     if(event.code === 'Enter') {
         bring();
@@ -18,11 +16,12 @@ document.addEventListener("keyup", function(event) {
 function add_attempt(){
     
     attempt++; 
-    if(attempt == 5){
+    if(attempt == 3){
         document.getElementById('attem').innerHTML = '마지막 시도';
-    }else if(attempt == 6){
+    }else if(attempt == 4){
         alert('실패') ;
-                    
+        location.reload();
+        
     }else{
         document.getElementById('attemptn').innerHTML = attempt;
     };
@@ -39,17 +38,14 @@ function bring(){
         if(input > guess)
         {
             document.getElementById('maxn').innerHTML = input;
-            max = input;
-
             add_attempt();
-
+            max = input;
         }
         else if(input < guess)
         {
             document.getElementById('minn').innerHTML = input;
-            min = input;
-
             add_attempt();
+            min = input;
         }
         else
         {
