@@ -43,6 +43,14 @@
             margin-right: 40px;
         }
 
+        .light a{
+            color: #000000;
+        }
+
+        .dark a{
+            color: white;
+        }
+
         a:visited{
             color: black;
         }
@@ -233,7 +241,7 @@
         <div class="grid" style="padding-top: 2vh;">
             <div>
                 <div class="img_box center_box">
-                    <img src="hi.png" alt="인사하는 미모티콘">
+                    <img src="https://sunche.me/sapp/hi.png" alt="인사하는 미모티콘">
                 </div>
             </div>
             <div class="bdfont" style="padding-top: 40%;">
@@ -247,7 +255,7 @@
     </div>
     <div class="grid">
         <div class="img_box center_box">
-            <img src="mac.png" alt="맥북보는 미모티콘">
+            <img src="https://sunche.me/sapp/mac.png" alt="맥북보는 미모티콘">
         </div>
         <div class="sbfont" style="padding-top: 30%;">
             <p>박찬준</p>
@@ -270,7 +278,7 @@
     <div class="footer" id="footer">
         <h2>Contact</h2>
         <div class="footer_pa">
-            <a href="tel:010-9678-4100" style="color: #000000;" id="phone">(+82)010-9678-4100</a>
+            <a href="tel:010-9678-4100">(+82)010-9678-4100</a>
             <a href="mailto:starcj@dimigo.hs.kr">starcj@dimigo.hs.kr</a>
             <a href="https://instagram.com/sunche_0326">Instagram</a>
         </div>
@@ -282,13 +290,11 @@
             if(switch_num == 0){  
                 switch_num +=1;
                 document.getElementById('mode').className = "dark";
-                document.getElementById('phone').style = "color: #FFFFFF"
                 document.getElementById('footer').style = "background-color: #828282"
             }
             else{
                 switch_num -=1;
                 document.getElementById('mode').className = "light";
-                document.getElementById('phone').style = "color: #000000"
                 document.getElementById('footer').style = "background-color: #c7c7c7"
             }
         }
