@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sunche`s web</title>
+    <style>
+
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200&display=swap');
+
+        *{
+            font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        .dark{
+            background-color: #000000;
+            color: white;
+        }
+
+        .dark a:visited{
+            color: white;
+        }
+
+        .light{
+            background-color: white;
+            color: #000000;
+        }
+
+        li{
+            display: inline;
+        }
+
+        li a{
+            display: block;
+            float: right;
+            margin-top: 3vh;
+            margin-left: 5vw;
+            margin-right: 40px;
+        }
+
+        a:visited{
+            color: black;
+        }
+
+        .logo{
+            float: left;
+        }
+
+        .switch{
+            position: relative;
+            display: inline-block;
+            width: 36px;
+            height: 22px;
+        }
+
+        .switch input{
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider{
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider::before{
+            position: absolute;
+            content: "";
+            height: 14px;
+            width: 14px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked + .slider{
+            background-color: #09355a;
+        }
+
+        input:focus + .slider{
+            box-shadow: 0 0 1px #09355a;
+        }
+
+        input:checked + .slider::before{
+            -webkit-transform: translateX(14px);
+            -ms-transform: translateX(14px);
+            transform: translateX(14px);
+        }
+
+        .slider.round{
+            border-radius: 28px;
+        }
+
+        .slider.round::before{
+            border-radius: 50%;
+        }
+
+        .header{
+            height: 59px;
+            width: 100vw;
+            backdrop-filter: blur(10px);
+            position: fixed;
+        }
+        
+        .center{
+            text-align: center;
+        }
+
+        .center_box{
+            padding-left: 8vw;
+            padding-right: 8vw;
+        }
+
+        .bdfont{
+            font-weight: bold;
+            font-size: calc(2px + 3vw);
+        }
+
+        .explain{
+            font-weight: bold;
+            font-size: calc(2px + 2vw);
+        }
+
+        .hi{
+            position: absolute;
+            width: 30vw;
+        }
+
+        .grid{
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1vh 1vw;
+            padding-left: 8vw;
+            padding-right: 8vw;
+        }
+
+        .img_box{
+            width: 30vw;
+        }
+
+        .section{
+            width: 100%;
+            height: auto;
+        }
+
+        .smfont{
+            font-size: calc(2px + 1vw);
+            padding-top: 1vh;
+        }
+
+        img{
+            width: 100%;
+            height: 100%;
+        }
+
+        .video_box{
+            width: 30vw;
+            height: 16vw;
+        }
+
+        .sbfont{
+            font-size: calc(2px + 2vw);
+            font-weight: 600;
+        }
+
+        .footer{
+            background-color: rgb(199, 199, 199);
+            height: 20vh;
+            margin-top: 20vh;
+            padding-left: 5vw;
+            padding-top: 3vh;
+            padding-right: 5vw;
+            bottom: 0;
+        }
+
+        .footer_pa{
+            font-size: calc(2px + 1vw);
+            margin-top: 2vh;
+            text-decoration: none;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2vh;
+        }
+
+        .copyright{
+            float: right;
+            font-size: calc(2px + 1vw);
+        }
+
+        iframe{
+            width: 100%;
+            height: 100%;
+        }
+
+        a .dark{
+            color: white;
+        }
+
+        a .light{
+            color: black;
+        }
+
+    </style>
+</head>
+<body class="light" id="mode"></body>
+    <div class="header">
+        <ul>
+            <li><a href="#" class="logo">박찬준</a></li>
+            <li><a href="https://instagram.com/sunche_0326">Instagram</a></li>
+            <li><a href="https://github.com/sunche243">GitHub</a></li>
+            <li><a style="font-size: 12px; line-height: 20px;" id="switch">Dark Mode :&nbsp;&nbsp;<label class="switch">
+                <input type="checkbox" onclick="dark_mode()">
+                <span class="slider round"></span>
+              </label></a></li>
+        </ul>
+    </div>
+    <div>
+        <div class="grid" style="padding-top: 2vh;">
+            <div>
+                <div class="img_box center_box">
+                    <img src="hi.png" alt="인사하는 미모티콘">
+                </div>
+            </div>
+            <div class="bdfont" style="padding-top: 40%;">
+                <p>만나서 반가워요!</p>
+                <div style="padding-top: 1vh;"></div>
+                <p>하고 싶은 일만 하고싶은</p>
+                <div style="padding-top: 1vh;"></div>
+                <p>K-고삼이에요 :)</p>
+            </div>
+        </div>
+    </div>
+    <div class="grid">
+        <div class="img_box center_box">
+            <img src="mac.png" alt="맥북보는 미모티콘">
+        </div>
+        <div class="sbfont" style="padding-top: 30%;">
+            <p>박찬준</p>
+            <p>남자</p>
+            <p>KDMHS20DC</p>
+            <p>ESTP</p>
+            <span style="color: gray">contact : </span><a href="mailto:starcj@dimigo.hs.kr" target="_blank">starcj@dimigo.hs.kr</a>
+        </div>
+    </div>
+    <div style="padding-top:10vh"></div>
+    <div class="center center_box">
+        <div style="margin: 0 auto;">
+            <span class="sbfont">자체제작 업다운 게임이에요</span><br>
+            <span class="sbfont"><span style="font-size: calc(2px + 1.5vw);">link : </span><a href="https://sunche.me">sunche.me</a></span>
+        </div>
+        <div style="width: 50vw; height: 80vh; margin: 0 auto;">
+            <iframe src="https://sunche.me" class="light"></iframe>
+        </div>
+    </div>
+    <div class="footer" id="footer">
+        <h2>Contact</h2>
+        <div class="footer_pa">
+            <a href="tel:010-9678-4100" style="color: #000000;" id="phone">(+82)010-9678-4100</a>
+            <a href="mailto:starcj@dimigo.hs.kr">starcj@dimigo.hs.kr</a>
+            <a href="https://instagram.com/sunche_0326">Instagram</a>
+        </div>
+        <p class="copyright" style="margin-top: 4vh;">ⓒ2023 박찬준. All rights reserved.</p>
+    </div>
+    <script>
+        let switch_num = 0;
+        function dark_mode(){
+            if(switch_num == 0){  
+                switch_num +=1;
+                document.getElementById('mode').className = "dark";
+                document.getElementById('phone').style = "color: #FFFFFF"
+                document.getElementById('footer').style = "background-color: #828282"
+            }
+            else{
+                switch_num -=1;
+                document.getElementById('mode').className = "light";
+                document.getElementById('phone').style = "color: #000000"
+                document.getElementById('footer').style = "background-color: #c7c7c7"
+            }
+        }
+    </script>
+</body>
+</html>
