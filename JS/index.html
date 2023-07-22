@@ -5,21 +5,143 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>jspractice</title>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200&display=swap');
+
+        *{
+            font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        body{
+            display: flex;
+            justify-content: center;
+        }
+
+        .popup{
+            text-align: center;
+            display: block;
+            width: 500px;
+            height: 200px;
+            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
+            background-color: white;
+            border-radius: 10px;
+            position: absolute;
+            top: 50%;
+            margin-top: -150px;
+            padding: 50px;
+        }
+
+        .text{
+            width: 300px;
+            height: 30px;
+            font-size: 18px;
+            padding-left: 10px;
+            text-align: center;
+        }
+
+        .button{
+            width: 314px;
+            height: 40px;
+            padding: 4px;
+            font-size: 20px;
+        }
+
+    </style>
 </head>
 <body>
-    <span>
-        <p>지금 숫자</p>
-        <p id="number"></p>
-        <p>이거임</p>
-    </span>
-    <button onclick="Add('plus')">
-        +
-    </button>
-    <button onclick="Add('minus')">
-        -
-    </button>
-</body>
+    <div class="popup" id="popup" style="display: block;">
+        <div class="center">
+            <h1 style="padding-bottom:20px;" class="center_title">제목을 입력해주세요!</h1>
+            <div>
+                <form>
+                    <input class="text" type="text"  placeholder="제목을 입력해주세요" id="title">
+                </form>
+                <button style="margin-top: 20px;" class="button" type="button" onclick="make()">생성하기</button>
+            </div>
+        </div>
+    </div>
 
-<script src="main.js"></script>
+    <div class="counter_area" id="counter_area">
+        <div id="1">
+            <h1 id="title_1"></h1>
+            <h1 id="number_1"></h1>
+            <button>plus</button>
+            <button>minus</button>
+        </div>
+        <div id="2">
+            <h1 id="title_2"></h1>
+            <h1 id="number_2"></h1>
+            <button>plus</button>
+            <button>minus</button>
+        </div>
+        <div id="3">
+            <h1 id="title_3"></h1>
+            <h1 id="number_3"></h1>
+            <button>plus</button>
+            <button>minus</button>
+        </div>
+        <div id="4">
+            <h1 id="title_4"></h1>
+            <h1 id="number_4"></h1>
+            <button>plus</button>
+            <button>minus</button>
+        </div>
+        <div id="5">
+            <h1 id="title_5"></h1>
+            <h1 id="number_5"></h1>
+            <button>plus</button>
+            <button>minus</button>
+        </div>
+    </div>
+
+    <script>
+        // window.onload = function() {
+
+        //     var isFirstVisit = localStorage.getItem('isFirstVisit');
+
+        //     if (isFirstVisit === null) {
+        //         var popup = document.getElementById('popup');
+        //         popup.style.display = 'block';
+        //         localStorage.setItem('isFirstVisit', true);
+        //     }
+        // };
+        
+        function make(){
+            var title = document.getElementById('title').value;
+            console.log(title)
+
+            var n = 1;
+
+            var title_number = 1;
+
+            if('title_' + n != undefined){
+                title_number ++;
+            }
+        }
+
+
+
+function Add(a){
+
+    if(a == 'plus'){
+        count++;
+    }else{
+        count--;
+    };
+
+    if(count < 0){
+        count++ ;
+        alert('0 미만 되겠냐 ㅋ');
+    }else{
+
+    };
+
+    document.getElementById('number').innerHTML = count;
+};
+    </script>
 
 </html>
