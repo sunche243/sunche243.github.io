@@ -33,6 +33,7 @@
             top: 50%;
             margin-top: -150px;
             padding: 50px;
+            z-index: 3;
         }
 
         .text{
@@ -50,10 +51,44 @@
             font-size: 20px;
         }
 
+        .counter{
+            width: 200px;
+            height: 200px;
+            background-color: white;
+            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
+            text-align: center;
+            margin-top: 30px;
+            margin-left: 20px;
+        }
+
+        .counter_inner{
+            position: absolute;
+            top: 50%;
+            margin-top: -68px;
+            padding: 10px;
+            left: 50%;
+            margin-left: -69px;
+        }
+
+        .counter_area{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);;
+            position: absolute;
+            top: 50%;
+            margin-top: -230px;
+        }
+
+        .numbutton{
+            border: none;
+            width: 60px;
+            height: 20px;
+            padding-left: 5px;
+        }
+
     </style>
 </head>
 <body>
-    <div class="popup" id="popup" style="display: block;">
+    <div class="popup" id="popup" style="display: none;">
         <div class="center">
             <h1 style="padding-bottom:20px;" class="center_title">제목을 입력해주세요!</h1>
             <div>
@@ -66,35 +101,65 @@
     </div>
 
     <div class="counter_area" id="counter_area">
-        <div id="1">
-            <h1 id="title_1"></h1>
-            <h1 id="number_1"></h1>
-            <button>plus</button>
-            <button>minus</button>
+        <div id="1" class="counter" style="display: none;">
+            <div class="counter_inner">
+                <h1 id="title_1">title</h1>
+                <div style="padding-top: 10px;"></div>
+                <h1 id="number_1">0</h1>
+                <div style="padding-top: 10px;"></div>
+                <button class="numbutton">plus</button>
+                <button class="numbutton">minus</button>
+            </div>
         </div>
-        <div id="2">
-            <h1 id="title_2"></h1>
-            <h1 id="number_2"></h1>
-            <button>plus</button>
-            <button>minus</button>
+        <div id="2" class="counter" style="display: none;">
+            <div class="counter_inner">
+                <h1 id="title_2">title</h1>
+                <div style="padding-top: 10px;"></div>
+                <h1 id="number_2">0</h1>
+                <div style="padding-top: 10px;"></div>
+                <button class="numbutton">plus</button>
+                <button class="numbutton">minus</button>
+            </div>
         </div>
-        <div id="3">
-            <h1 id="title_3"></h1>
-            <h1 id="number_3"></h1>
-            <button>plus</button>
-            <button>minus</button>
+        <div id="3" class="counter" style="display: none;">
+            <div class="counter_inner">
+                <h1 id="title_3">title</h1>
+                <div style="padding-top: 10px;"></div>
+                <h1 id="number_3">0</h1>
+                <div style="padding-top: 10px;"></div>
+                <button class="numbutton">plus</button>
+                <button class="numbutton">minus</button>
+            </div>
         </div>
-        <div id="4">
-            <h1 id="title_4"></h1>
-            <h1 id="number_4"></h1>
-            <button>plus</button>
-            <button>minus</button>
+        <div id="4" class="counter" style="display: none;">
+            <div class="counter_inner">
+                <h1 id="title_4">title</h1>
+                <div style="padding-top: 10px;"></div>
+                <h1 id="number_4">0</h1>
+                <div style="padding-top: 10px;"></div>
+                <button class="numbutton">plus</button>
+                <button class="numbutton">minus</button>
+            </div>
         </div>
-        <div id="5">
-            <h1 id="title_5"></h1>
-            <h1 id="number_5"></h1>
-            <button>plus</button>
-            <button>minus</button>
+        <div id="5" class="counter" style="display: none;">
+            <div class="counter_inner">
+                <h1 id="title_5">title</h1>
+                <div style="padding-top: 10px;"></div>
+                <h1 id="number_5">0</h1>
+                <div style="padding-top: 10px;"></div>
+                <button class="numbutton">plus</button>
+                <button class="numbutton">minus</button>
+            </div>
+        </div>
+        <div id="6" class="counter" style="display: none;">
+            <div class="counter_inner">
+                <h1 id="title_6">title</h1>
+                <div style="padding-top: 10px;"></div>
+                <h1 id="number_6">0</h1>
+                <div style="padding-top: 10px;"></div>
+                <button class="numbutton">plus</button>
+                <button class="numbutton">minus</button>
+            </div>
         </div>
     </div>
 
@@ -109,39 +174,24 @@
         //         localStorage.setItem('isFirstVisit', true);
         //     }
         // };
+
+        document.addEventListener("keyup", function(event) {
+            if(event.code === 'Enter') {
+                make();
+            };
+        });
+
+        var title = document.getElementById('title').value;
         
-        function make(){
-            var title = document.getElementById('title').value;
-            console.log(title)
+        var n = 1
 
-            var n = 1;
+        function make(title){
 
-            var title_number = 1;
+            
 
-            if('title_' + n != undefined){
-                title_number ++;
-            }
         }
 
 
-
-function Add(a){
-
-    if(a == 'plus'){
-        count++;
-    }else{
-        count--;
-    };
-
-    if(count < 0){
-        count++ ;
-        alert('0 미만 되겠냐 ㅋ');
-    }else{
-
-    };
-
-    document.getElementById('number').innerHTML = count;
-};
     </script>
 
 </html>
