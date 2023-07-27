@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="kr">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -19,21 +19,6 @@
         body{
             display: flex;
             justify-content: center;
-        }
-
-        .popup{
-            text-align: center;
-            display: block;
-            width: 500px;
-            height: 200px;
-            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
-            background-color: white;
-            border-radius: 10px;
-            position: absolute;
-            top: 50%;
-            margin-top: -150px;
-            padding: 50px;
-            z-index: 3;
         }
 
         .text{
@@ -62,15 +47,10 @@
         }
 
         .counter_inner{
-            position: absolute;
-            top: 50%;
-            margin-top: -68px;
-            padding: 10px;
-            left: 50%;
-            margin-left: -69px;
+
         }
 
-        .counter_area{
+        #countersContainer{
             display: grid;
             grid-template-columns: repeat(3, 1fr);;
             position: absolute;
@@ -78,120 +58,201 @@
             margin-top: -230px;
         }
 
-        .numbutton{
+        .numButton{
             border: none;
-            width: 60px;
-            height: 20px;
-            padding-left: 5px;
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .counter_wrapper {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .counterNumber {
+            margin-bottom: 10px;
+        }
+
+        .title_input{
+            text-align: center;
+            display: block;
+            width: 250px;
+            height: 100px;
+            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-top: 100px;
+            z-index: 3;
+        }
+
+        .title{
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        input{
+            width: 70%;
+            border: none;
+            background-color: aqua;
+            text-align: center;
+            height: 30px;
+            font-size: 16px;
+            border-radius: 10px;
+            margin: 5px;
+        }
+
+        .make_button{
+            width: 70%;
+            border: none;
+            background-color: aqua;
+            text-align: center;
+            height: 30px;
+            font-size: 16px;
+            border-radius: 10px;
+            margin: 5px;
+            cursor: pointer;
+        }
+
+        .make_button:hover{
+            background-color: red;
+            color: white;
         }
 
     </style>
 </head>
 <body>
-    <div class="popup" id="popup" style="display: none;">
-        <div class="center">
-            <h1 style="padding-bottom:20px;" class="center_title">제목을 입력해주세요!</h1>
-            <div>
-                <form>
-                    <input class="text" type="text"  placeholder="제목을 입력해주세요" id="title">
-                </form>
-                <button style="margin-top: 20px;" class="button" type="button" onclick="make()">생성하기</button>
-            </div>
-        </div>
+    <!-- 사용자에게 값을 입력받을 input 요소와 버튼을 추가 -->
+    <div class="title_input">
+        <p class="title">제목을 입력해주세요</p>
+        <input type="text" id="titleInput" placeholder="title">
+        <button class="make_button" onclick="get_title()">Counter 만들기</button>
     </div>
 
-    <div class="counter_area" id="counter_area">
-        <div id="1" class="counter" style="display: none;">
-            <div class="counter_inner">
-                <h1 id="title_1">title</h1>
-                <div style="padding-top: 10px;"></div>
-                <h1 id="number_1">0</h1>
-                <div style="padding-top: 10px;"></div>
-                <button class="numbutton">plus</button>
-                <button class="numbutton">minus</button>
-            </div>
-        </div>
-        <div id="2" class="counter" style="display: none;">
-            <div class="counter_inner">
-                <h1 id="title_2">title</h1>
-                <div style="padding-top: 10px;"></div>
-                <h1 id="number_2">0</h1>
-                <div style="padding-top: 10px;"></div>
-                <button class="numbutton">plus</button>
-                <button class="numbutton">minus</button>
-            </div>
-        </div>
-        <div id="3" class="counter" style="display: none;">
-            <div class="counter_inner">
-                <h1 id="title_3">title</h1>
-                <div style="padding-top: 10px;"></div>
-                <h1 id="number_3">0</h1>
-                <div style="padding-top: 10px;"></div>
-                <button class="numbutton">plus</button>
-                <button class="numbutton">minus</button>
-            </div>
-        </div>
-        <div id="4" class="counter" style="display: none;">
-            <div class="counter_inner">
-                <h1 id="title_4">title</h1>
-                <div style="padding-top: 10px;"></div>
-                <h1 id="number_4">0</h1>
-                <div style="padding-top: 10px;"></div>
-                <button class="numbutton">plus</button>
-                <button class="numbutton">minus</button>
-            </div>
-        </div>
-        <div id="5" class="counter" style="display: none;">
-            <div class="counter_inner">
-                <h1 id="title_5">title</h1>
-                <div style="padding-top: 10px;"></div>
-                <h1 id="number_5">0</h1>
-                <div style="padding-top: 10px;"></div>
-                <button class="numbutton">plus</button>
-                <button class="numbutton">minus</button>
-            </div>
-        </div>
-        <div id="6" class="counter" style="display: none;">
-            <div class="counter_inner">
-                <h1 id="title_6">title</h1>
-                <div style="padding-top: 10px;"></div>
-                <h1 id="number_6">0</h1>
-                <div style="padding-top: 10px;"></div>
-                <button class="numbutton">plus</button>
-                <button class="numbutton">minus</button>
-            </div>
-        </div>
-    </div>
+    <!-- 동적으로 생성된 counter들을 담을 div 요소 -->
+    <div id="countersContainer"></div>
 
     <script>
-        // window.onload = function() {
+        
+        // 페이지가 로드될 때 Local Storage의 값을 불러와서 counter를 복원하는 함수
+        window.onload = function() {
+            const storedCounters = JSON.parse(localStorage.getItem("counters"));
+            if (storedCounters && storedCounters.length > 0) {
+                for (const counterData of storedCounters) {
+                    addCounter(counterData.title, counterData.number);
+                }
+            }
+        };
 
-        //     var isFirstVisit = localStorage.getItem('isFirstVisit');
-
-        //     if (isFirstVisit === null) {
-        //         var popup = document.getElementById('popup');
-        //         popup.style.display = 'block';
-        //         localStorage.setItem('isFirstVisit', true);
-        //     }
-        // };
-
+        // 엔터를 눌렀을 때 title값이 입력되는 함수
         document.addEventListener("keyup", function(event) {
             if(event.code === 'Enter') {
-                make();
+                console.log('엔터눌림');
+                if(titleInput.value == ""){
+                    alert('제목을 입력해주세요')
+                    return;
+                } else {
+                    addCounter();
+                }
             };
         });
 
-        var title = document.getElementById('title').value;
-        
-        var n = 1
-
-        function make(title){
-
-            
-
+        function get_title(){
+            const titleInput = document.getElementById("titleInput");
+            const title = titleInput.value;
+            console.log(title)
+            addCounter(title, 0)
         }
 
+        // 사용자가 입력한 title로 counter를 생성하는 함수
+        function addCounter(title, initialNumber = 0) {
 
+            // Reset 버튼을 포함한 counter HTML 생성
+            const counterHtml = `
+                    <div class="counter">
+                        <div class="counter_inner">
+                            <h1>${title}</h1>
+                            <div style="padding-top: 10px;"></div>
+                            <h1 class="counterNumber">${initialNumber}</h1>
+                            <div style="padding-top: 10px;"></div>
+                            <button class="numButton" onclick="incrementCounter(this)">+</button>
+                            <button class="numButton" onclick="decrementCounter(this)">-</button>
+                            <Br>
+                            <button class="numButton" onclick="removeCounter(this)">X</button>
+                            <button class="numButton" onclick="resetCounter(this)">reset</button>
+                        </div>
+                    </div>
+            `;
+
+            // counter를 담을 div 요소를 가져옵니다.
+            const countersContainer = document.getElementById("countersContainer");
+
+            // counter를 추가하고 화면에 표시합니다.
+            countersContainer.insertAdjacentHTML("beforeend", counterHtml);
+
+            // 입력한 title input을 초기화합니다.
+            document.getElementById("titleInput").value = "";
+
+            // Local Storage에 counter 데이터를 저장합니다.
+            saveCountersToLocalStorage();
+        }
+
+        // 특정 버튼을 눌렀을 때 해당 counter의 숫자를 증가시키는 함수
+        function incrementCounter(button) {
+            const counterNumberElement = button.parentElement.querySelector(".counterNumber");
+            const currentNumber = parseInt(counterNumberElement.textContent);
+            counterNumberElement.textContent = currentNumber + 1;
+
+            // 숫자가 변경되면 Local Storage에 counter 데이터를 저장합니다.
+            saveCountersToLocalStorage();
+        }
+
+        // 특정 버튼을 눌렀을 때 해당 counter의 숫자를 감소시키는 함수
+        function decrementCounter(button) {
+            const counterNumberElement = button.parentElement.querySelector(".counterNumber");
+            const currentNumber = parseInt(counterNumberElement.textContent);
+            counterNumberElement.textContent = currentNumber - 1;
+
+            // 숫자가 변경되면 Local Storage에 counter 데이터를 저장합니다.
+            saveCountersToLocalStorage();
+        }
+
+        // 특정 버튼을 눌렀을 때 해당 counter를 초기화하는 함수
+        function resetCounter(button) {
+            const counterNumberElement = button.parentElement.querySelector(".counterNumber");
+            counterNumberElement.textContent = 0;
+
+            // 숫자가 초기화되면 Local Storage에 counter 데이터를 저장합니다.
+            saveCountersToLocalStorage();
+        }
+
+        // 특정 버튼을 눌렀을 때 해당 counter를 삭제하는 함수
+        function removeCounter(button) {
+            const counter = button.parentElement.parentElement;
+            counter.remove();
+
+            // counter가 삭제되면 Local Storage에 counter 데이터를 저장합니다.
+            saveCountersToLocalStorage();
+        }
+
+        // counter 데이터를 Local Storage에 저장하는 함수
+        function saveCountersToLocalStorage() {
+            const counters = document.querySelectorAll(".counter");
+            const countersData = [];
+
+            for (const counter of counters) {
+                const title = counter.querySelector("h1").textContent;
+                const number = parseInt(counter.querySelector(".counterNumber").textContent);
+                countersData.push({ title, number });
+            }
+
+            localStorage.setItem("counters", JSON.stringify(countersData));
+        }
     </script>
-
+</body>
 </html>
