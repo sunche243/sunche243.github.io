@@ -153,14 +153,16 @@
                     alert('제목을 입력해주세요')
                     return;
                 } else {
-                    addCounter();
+                    get_title();
                 }
             };
         });
 
+
+        // 타이틀을 한번에 인식하지 못하는 오류를 해결하기 위한 함수
         function get_title(){
-            const titleInput = document.getElementById("titleInput");
-            const title = titleInput.value;
+            var titleInput = document.getElementById("titleInput");
+            var title = titleInput.value;
             console.log(title)
             addCounter(title, 0)
         }
@@ -168,7 +170,7 @@
         // 사용자가 입력한 title로 counter를 생성하는 함수
         function addCounter(title, initialNumber = 0) {
 
-            // Reset 버튼을 포함한 counter HTML 생성
+            // counter HTML 생성
             const counterHtml = `
                     <div class="counter">
                         <div class="counter_inner">
@@ -178,7 +180,7 @@
                             <div style="padding-top: 10px;"></div>
                             <button class="numButton" onclick="incrementCounter(this)">+</button>
                             <button class="numButton" onclick="decrementCounter(this)">-</button>
-                            <Br>
+                            <br>
                             <button class="numButton" onclick="removeCounter(this)">X</button>
                             <button class="numButton" onclick="resetCounter(this)">reset</button>
                         </div>
