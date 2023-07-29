@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>jspractice</title>
+    <title>Customization counter</title>
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200&display=swap');
@@ -146,15 +146,15 @@
         };
 
         // 엔터를 눌렀을 때 title값이 입력되는 함수
-        document.addEventListener("keyup", function(event) {
-            if(event.code === 'Enter') {
+        document.addEventListener("keyup", function(e){
+            if(e.code == 'Enter') {
                 console.log('엔터눌림');
-                if(titleInput.value == ""){
+                if(!titleInput.value){
                     alert('제목을 입력해주세요')
-                    return;
                 } else {
                     get_title();
                 }
+                e.preventDefault();
             };
         });
 
