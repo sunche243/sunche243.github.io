@@ -5,133 +5,24 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customization counter</title>
-    <style>
-        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200&display=swap');
-
-        *{
-            font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif !important;
-            margin: 0;
-            padding: 0;
-            text-decoration: none;
-        }
-
-        body{
-            display: flex;
-            justify-content: center;
-        }
-
-        .text{
-            width: 300px;
-            height: 30px;
-            font-size: 18px;
-            padding-left: 10px;
-            text-align: center;
-        }
-
-        .button{
-            width: 314px;
-            height: 40px;
-            padding: 4px;
-            font-size: 20px;
-        }
-
-        .counter{
-            width: 200px;
-            height: 200px;
-            background-color: white;
-            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
-            text-align: center;
-            margin-top: 30px;
-            margin-left: 20px;
-        }
-
-        #countersContainer{
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);;
-            position: absolute;
-            top: 50%;
-            margin-top: -230px;
-        }
-
-        .numButton{
-            border: none;
-            width: 30px;
-            height: 30px;
-            text-align: center;
-            border-radius: 5px;
-        }
-
-        .counter_wrapper {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .counterNumber {
-            margin-bottom: 10px;
-        }
-
-        .title_input{
-            text-align: center;
-            display: block;
-            width: 250px;
-            height: 100px;
-            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            margin-top: 100px;
-            z-index: 3;
-        }
-
-        .title{
-            font-size: 20px;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        input{
-            width: 70%;
-            border: none;
-            background-color: aqua;
-            text-align: center;
-            height: 30px;
-            font-size: 16px;
-            border-radius: 10px;
-            margin: 5px;
-        }
-
-        .make_button{
-            width: 70%;
-            border: none;
-            background-color: aqua;
-            text-align: center;
-            height: 30px;
-            font-size: 16px;
-            border-radius: 10px;
-            margin: 5px;
-            cursor: pointer;
-        }
-
-        .make_button:hover{
-            background-color: red;
-            color: white;
-        }
-
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/@sweetalert2/theme-dark@4/dark.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.js"></script>
+    <link href="style.css" rel="stylesheet">
 </head>
 <body>
-    <!-- 사용자에게 값을 입력받을 input 요소와 버튼을 추가 -->
-    <div class="title_input">
-        <p class="title">제목을 입력해주세요</p>
-        <input type="text" id="titleInput" placeholder="title">
-        <button class="make_button" onclick="get_title()">Counter 만들기</button>
+    <!-- 사용자에게 값을 입력받는 박스 -->
+    <div class="input_box">
+        <div class="input_inner">
+            <h1 class="input_h">제목을 입력해주세요</h1>
+            <form>
+                <input type="text" id="titleInput" placeholder="title을 입력해주세요">
+                <input type="submit" value="Counter 만들기" class="create_button" onclick="get_title()">
+            </form>
+        </div>
     </div>
 
-    <!-- 동적으로 생성된 counter들을 담을 div 요소 -->
-    <div id="countersContainer"></div>
+    <!-- 생성된 counter들을 담을 박스 -->
+    <div id="counter_area"></div>
 
     <script>
         
@@ -144,20 +35,6 @@
                 }
             }
         };
-
-        // 엔터를 눌렀을 때 title값이 입력되는 함수
-        document.addEventListener("keyup", function(e){
-            if(e.code == 'Enter') {
-                console.log('엔터눌림');
-                if(!titleInput.value){
-                    alert('제목을 입력해주세요')
-                } else {
-                    get_title();
-                }
-                e.preventDefault();
-            };
-        });
-
 
         // 타이틀을 한번에 인식하지 못하는 오류를 해결하기 위한 함수
         function get_title(){
@@ -173,25 +50,27 @@
             // counter HTML 생성
             const counterHtml = `
                     <div class="counter">
-                        <div class="counter_inner">
-                            <h1>${title}</h1>
-                            <div style="padding-top: 10px;"></div>
-                            <h1 class="counterNumber">${initialNumber}</h1>
-                            <div style="padding-top: 10px;"></div>
-                            <button class="numButton" onclick="incrementCounter(this)">+</button>
-                            <button class="numButton" onclick="decrementCounter(this)">-</button>
-                            <br>
-                            <button class="numButton" onclick="removeCounter(this)">X</button>
-                            <button class="numButton" onclick="resetCounter(this)">reset</button>
+                        <h1 class="title">${title}</h1>
+                        <h1 class="number">${initialNumber}</h1>
+                        <div class="buttons">
+                            <div>
+                                <button class="num_button" onclick="incrementCounter(this)">+</button>
+                                <button class="num_button" onclick="decrementCounter(this)">-</button>
+                            </div>
+                            <span></span>
+                            <div>
+                                <button class="delete_button" onclick="removeCounter(this)">삭제</button>
+                                <button class="reset_button" onclick="resetCounter(this)">초기화</button>
+                            </div>
                         </div>
                     </div>
             `;
 
             // counter를 담을 div 요소를 가져옵니다.
-            const countersContainer = document.getElementById("countersContainer");
+            const counter_area = document.getElementById("counter_area");
 
             // counter를 추가하고 화면에 표시합니다.
-            countersContainer.insertAdjacentHTML("beforeend", counterHtml);
+            counter_area.insertAdjacentHTML("beforeend", counterHtml);
 
             // 입력한 title input을 초기화합니다.
             document.getElementById("titleInput").value = "";
@@ -202,9 +81,9 @@
 
         // 특정 버튼을 눌렀을 때 해당 counter의 숫자를 증가시키는 함수
         function incrementCounter(button) {
-            const counterNumberElement = button.parentElement.querySelector(".counterNumber");
-            const currentNumber = parseInt(counterNumberElement.textContent);
-            counterNumberElement.textContent = currentNumber + 1;
+            const numberElement = button.parentElement.querySelector(".number");
+            const currentNumber = parseInt(numberElement.textContent);
+            numberElement.textContent = currentNumber + 1;
 
             // 숫자가 변경되면 Local Storage에 counter 데이터를 저장합니다.
             saveCountersToLocalStorage();
@@ -212,9 +91,9 @@
 
         // 특정 버튼을 눌렀을 때 해당 counter의 숫자를 감소시키는 함수
         function decrementCounter(button) {
-            const counterNumberElement = button.parentElement.querySelector(".counterNumber");
-            const currentNumber = parseInt(counterNumberElement.textContent);
-            counterNumberElement.textContent = currentNumber - 1;
+            const numberElement = button.parentElement.querySelector(".number");
+            const currentNumber = parseInt(numberElement.textContent);
+            numberElement.textContent = currentNumber - 1;
 
             // 숫자가 변경되면 Local Storage에 counter 데이터를 저장합니다.
             saveCountersToLocalStorage();
@@ -222,8 +101,8 @@
 
         // 특정 버튼을 눌렀을 때 해당 counter를 초기화하는 함수
         function resetCounter(button) {
-            const counterNumberElement = button.parentElement.querySelector(".counterNumber");
-            counterNumberElement.textContent = 0;
+            const numberElement = button.parentElement.querySelector(".number");
+            numberElement.textContent = 0;
 
             // 숫자가 초기화되면 Local Storage에 counter 데이터를 저장합니다.
             saveCountersToLocalStorage();
@@ -245,7 +124,7 @@
 
             for (const counter of counters) {
                 const title = counter.querySelector("h1").textContent;
-                const number = parseInt(counter.querySelector(".counterNumber").textContent);
+                const number = parseInt(counter.querySelector(".number").textContent);
                 countersData.push({ title, number });
             }
 

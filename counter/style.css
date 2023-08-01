@@ -1,0 +1,150 @@
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200&display=swap');
+
+        *{
+            font-family: Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif !important;
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+        }
+
+        html, body{
+            text-align: center;
+        }
+
+        h1{
+            font-size: calc(8px + 1vw);
+            font-weight: bold;
+        }
+
+        .input_box{
+            width: 30vw;
+            height: 12vw;
+            background-color: white;
+            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
+            border-radius: 15px;
+            margin-top: 8vh;
+            min-width: 300px;
+            min-height: 100px;
+            display: inline-block;
+        }
+
+        .input_inner{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            min-width: 300px;
+        }
+
+        .input_h{
+            padding-bottom: 2vh;
+            text-align: center;
+        }
+
+        #titleInput{
+            border-radius: 10px;
+            padding-left: 3px;
+            height: 4vh;
+            width: 20vw;
+            border: none;
+            background-color: rgb(228, 228, 228);
+            text-align: center;
+            margin-bottom: 1vh;
+        }
+
+        .create_button{
+            border: none;
+            background-color: #0d6efd;
+            color: #fff;
+            width: 20vw;
+            height: 4vh;
+            border-radius: 10px;
+        }
+
+        #counter_area{
+            margin-top: 10vh;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2vw;
+            text-align: center;
+            margin-left: 20vw;
+            margin-right: 20vw;
+        }
+
+        .counter{
+            min-width: 300px;
+            text-align: center;
+            width: auto;
+            background-color: white;
+            filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
+            border-radius: 20px;
+            padding: 20px;
+        }
+
+        @media screen and (max-width: 992px) {
+
+            #counter_area{
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .counter + .input_inner{
+                min-width: 150px;
+            }
+
+        }
+
+        @media screen and (max-width: 600px) {
+
+            #counter_area{
+                grid-template-columns: repeat(1, 1fr);
+            }
+
+            .counter + .input_inner{
+                min-width: 100px;
+            }
+
+        }
+
+        .title{
+            margin-bottom: 1vh;
+        }
+
+        .buttons{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .number{
+            margin-bottom: 1vh;
+            font-size: calc(12px + 1vw);
+            font-weight: bold;
+        }
+
+        .num_button{
+            background-color: #198754;
+            color: white;
+            width: 2vw;
+            height: 3vh;
+        }
+
+        .delete_button{
+            background-color: #dc3545;
+            color: #fff;
+            width: 3vw;
+            height: 3vh;
+        }
+
+        .reset_button{
+            background-color: #dc3545;
+            color: #fff;
+            width: 4vw;
+            height: 3vh;
+        }
+
+        button{
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
