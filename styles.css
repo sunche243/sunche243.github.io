@@ -4,11 +4,6 @@
     font-size: calc(4px + 10vw);
 }
 
-body html{
-    width: 100vw;
-    height: 100vh;
-}
-
 .smfont{
     font-size: calc(4px + 3vw);
 }
@@ -61,4 +56,13 @@ input{
 .dpd{
     display: flex;
     justify-content: space-between;
+}
+
+h1{
+    text-align: center;
+    font-size: calc(4px + 4vw);
+}
+
+#attem{
+    padding-top: 0;
 }
