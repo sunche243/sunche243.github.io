@@ -4,8 +4,126 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>counter</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        h1{
+            text-align: center;
+        }
+
+        h2{
+            text-align: center;
+            font-weight: 500;
+        }
+
+        p{
+            text-align: center;
+        }
+
+        .titleArea{
+            display: block;
+            padding: 100px 0px 50px 0px;
+        }
+
+        .title{
+            width: 300px;
+            text-align: center;
+        }
+
+
+        .inputArea{
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 30px;
+        }
+
+        .titleArea h1{
+            padding-bottom: 4px;
+        }
+
+        .counterArea{
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 0px 40px 0px 40px;
+        }
+
+        .counter{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 120px;
+            width: 300px;
+            background-color: gray;
+            border-radius: 8px;
+        }
+
+        .counterInner{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .counterInnerer{
+            text-align: center;
+        }
+
+        .counterTitle{
+            padding-bottom: 3px;
+        }
+
+        .number{
+            font-size: 24px;
+            font-weight: 600;
+            padding-bottom: 10px;
+        }
+
+        .buttonArea{
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .buttonArea input{
+            padding: 1px 5px 1px 5px;
+            font-size: 12px;
+        }
+    </style>
+    <script>
+
+    </script>
 </head>
 <body>
-    
+    <div class="titleArea">
+        <div class="title">
+            <h1>Counter</h1>
+            <p class="inputArea">
+                <input type="text" value="타이틀을 작성해 주세요.">
+                <input type="button" value="click me">
+            </p>
+        </div>
+    </div>
+    <div class="counterArea">
+        <div class="counter">
+            <div class="counterInner">
+                    <div class="counterInnerer">
+                    <h2 class="counterTitle">title</h2>
+                    <p class="number">0</p>
+                    <div class="buttonArea">
+                        <input value="+" type="button">
+                        <input value="-" type="button">
+                        <input value="삭제" type="button">
+                        <input value="초기화" type="button">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
