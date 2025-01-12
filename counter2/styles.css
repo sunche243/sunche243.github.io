@@ -10,6 +10,7 @@ h1{
 }
 
 h2{
+    font-size: 14px;
     text-align: center;
     font-weight: 500;
 }
@@ -23,6 +24,10 @@ p{
     margin: 80px 0px 120px 0px;
 }
 
+#titleButton{
+    cursor: pointer;
+}
+
 .titleArea h1{
     padding-bottom: 18px;
 }
@@ -31,7 +36,8 @@ p{
     width: 300px;
     text-align: center;
     margin: 0 auto;
-    background-color: gray;
+    background-color: white;
+    filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
     padding: 10px 20px 20px 20px;
     border-radius: 10px;
 }
@@ -59,7 +65,7 @@ p{
     border-radius: 20px;
 }
 
-.counterArea{
+#counterArea{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     place-items: center;
@@ -71,7 +77,8 @@ p{
     display: block;
     height: 110px;
     width: 200px;
-    background-color: gray;
+    background-color: white;
+    filter: drop-shadow(0 0 0.75rem rgba(154, 185, 225, 0.421));
     border-radius: 8px;
     margin: 0 auto;
 }
@@ -111,6 +118,7 @@ p{
     height: 20px;
     border-radius: 20px;
     color: white;
+    cursor: pointer;
 }
 
 .plusMinus{
@@ -134,7 +142,7 @@ p{
     }
 
     h2{
-        font-size: 18px;
+        font-size: 12px;
     }
 
     .titleArea{
@@ -161,7 +169,7 @@ p{
         border-radius: 14px;
     }
 
-    .counterArea{
+    #counterArea{
         grid-template-columns: 1fr 1fr;
     }
 }
@@ -172,7 +180,7 @@ p{
         margin: 50px 0px 60px 0px;
     }
 
-    .counterArea{
+    #counterArea{
         grid-template-columns: 1fr;
     }
 }

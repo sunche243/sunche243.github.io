@@ -6,101 +6,131 @@
     <title>counter</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="styles.css">
-    <script>
-        
-    </script>
 </head>
 <body>
     <div class="titleArea">
         <div class="title">
             <h1>Counter</h1>
             <p class="inputArea">
-                <input id="titleInput" type="text" value="타이틀을 작성해 주세요.">
-                <input id="titleButton" type="button" value="click me">
+                <input id="titleInput" type="text" value="타이틀을 작성해 주세요." onclick="clearInput()">
+                <input id="titleButton" type="button" value="생성" onclick="bring()">
             </p>
         </div>
     </div>
-    <div class="counterArea">
-        <!-- 카운터 시작 -->
-        <div class="counter">
-            <div class="counterInner">
-                    <div class="counterInnerer">
-                    <h2 class="counterTitle">title</h2>
-                    <p class="number">0</p>
-                    <div class="buttonArea">
-                        <input class="plusMinus" value="+" type="button">
-                        <input class="plusMinus" value="-" type="button">
-                        <input class="deleteReset"value="삭제" type="button">
-                        <input class="deleteReset" value="초기화" type="button">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- 카운터 끝 -->
-         <!-- 카운터 시작 -->
-        <div class="counter">
-            <div class="counterInner">
-                    <div class="counterInnerer">
-                    <h2 class="counterTitle">title</h2>
-                    <p class="number">0</p>
-                    <div class="buttonArea">
-                        <input class="plusMinus" value="+" type="button">
-                        <input class="plusMinus" value="-" type="button">
-                        <input class="deleteReset"value="삭제" type="button">
-                        <input class="deleteReset" value="초기화" type="button">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- 카운터 끝 -->
-         <!-- 카운터 시작 -->
-        <div class="counter">
-            <div class="counterInner">
-                    <div class="counterInnerer">
-                    <h2 class="counterTitle">title</h2>
-                    <p class="number">0</p>
-                    <div class="buttonArea">
-                        <input class="plusMinus" value="+" type="button">
-                        <input class="plusMinus" value="-" type="button">
-                        <input class="deleteReset"value="삭제" type="button">
-                        <input class="deleteReset" value="초기화" type="button">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- 카운터 끝 -->
-         <!-- 카운터 시작 -->
-        <div class="counter">
-            <div class="counterInner">
-                    <div class="counterInnerer">
-                    <h2 class="counterTitle">title</h2>
-                    <p class="number">0</p>
-                    <div class="buttonArea">
-                        <input class="plusMinus" value="+" type="button">
-                        <input class="plusMinus" value="-" type="button">
-                        <input class="deleteReset"value="삭제" type="button">
-                        <input class="deleteReset" value="초기화" type="button">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- 카운터 끝 -->
-         <!-- 카운터 시작 -->
-        <div class="counter">
-            <div class="counterInner">
-                    <div class="counterInnerer">
-                    <h2 class="counterTitle">title</h2>
-                    <p class="number">0</p>
-                    <div class="buttonArea">
-                        <input class="plusMinus" value="+" type="button">
-                        <input class="plusMinus" value="-" type="button">
-                        <input class="deleteReset"value="삭제" type="button">
-                        <input class="deleteReset" value="초기화" type="button">
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- 카운터 끝 -->
+    <div id="counterArea">
     </div>
+    <script>
+
+        var counterArea = document.querySelector("#counterArea");
+
+        var selectInput = document.querySelector('#titleInput');
+
+        window.onload = function() {
+            const storedCounters = JSON.parse(localStorage.getItem("counters"));
+            if (storedCounters && storedCounters.length > 0) {
+                for (const counterData of storedCounters) {
+                    bringFromStorage(counterData.title, counterData.number);
+                }
+            }
+        };
+
+        function clearInput(){
+
+            if(selectInput.value === '타이틀을 작성해 주세요.'){
+                selectInput.value = "";
+            };
+        };
+
+        function bring(){
+
+            var input = selectInput.value;
+
+            var counterHtml = `
+            <div class="counter">
+                <div class="counterInner">
+                    <div class="counterInnerer">
+                        <h2 class="counterTitle">` + input + `</h2>
+                        <p class="number">0</p>
+                        <div class="buttonArea">
+                            <input class="plusMinus" value="+" type="button" onclick="counterEdit(this)">
+                            <input class="plusMinus" value="-" type="button" onclick="counterEdit(this)">
+                            <input class="deleteReset" value="삭제" type="button" onclick="counterEdit(this)">
+                            <input class="deleteReset" value="초기화" type="button" onclick="counterEdit(this)">
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            counterArea.insertAdjacentHTML("afterbegin", counterHtml);
+
+            selectInput.value = "타이틀을 작성해 주세요.";
+
+            saveCountersToLocalStorage()
+
+        };
+
+        function counterEdit(button){
+
+            var counterDiv = button.closest('.counter');
+            
+            var counterNumber = counterDiv.querySelector(".number");
+
+            var counterNumberTrue = parseInt(counterNumber.textContent);
+            
+            var buttonValue = button.value;
+
+            console.log(buttonValue)
+
+            if(buttonValue === '+'){
+                counterNumberTrue += 1;
+                counterNumber.textContent = counterNumberTrue;
+            } else if(buttonValue === '-'){
+                counterNumberTrue -= 1;
+                counterNumber.textContent = counterNumberTrue;
+            } else if(buttonValue === '삭제'){
+                counterDiv.remove();
+            } else{
+                counterNumberTrue = 0;
+                counterNumber.innerHTML = counterNumberTrue;
+            };
+
+            saveCountersToLocalStorage()
+
+        };
+
+        function saveCountersToLocalStorage() {
+            const counters = document.querySelectorAll(".counter");
+            const countersData = [];
+
+            counters.forEach(counter => {
+                const title = counter.querySelector(".counterTitle").textContent;
+                const number = parseInt(counter.querySelector(".number").textContent);
+                countersData.push({ title, number });
+            });
+
+            localStorage.setItem("counters", JSON.stringify(countersData));  // 로컬스토리지에 저장
+        };
+
+        function bringFromStorage(title, number) {
+            var counterHtml = `
+            <div class="counter">
+                <div class="counterInner">
+                    <div class="counterInnerer">
+                        <h2 class="counterTitle">` + title + `</h2>
+                        <p class="number">` + number + `</p>
+                        <div class="buttonArea">
+                            <input class="plusMinus" value="+" type="button" onclick="counterEdit(this)">
+                            <input class="plusMinus" value="-" type="button" onclick="counterEdit(this)">
+                            <input class="deleteReset" value="삭제" type="button" onclick="counterEdit(this)">
+                            <input class="deleteReset" value="초기화" type="button" onclick="counterEdit(this)">
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+
+            counterArea.insertAdjacentHTML("beforeend", counterHtml);
+        };
+
+    </script>
 </body>
 </html>
