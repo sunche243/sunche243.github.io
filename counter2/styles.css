@@ -120,7 +120,6 @@ p{
     color: white;
     cursor: pointer;
     text-align: center;
-
 }
 
 .plusMinus{
@@ -131,6 +130,79 @@ p{
 .deleteReset{
     background-color: red;
     font-size: 10px;
+}
+
+.time{
+    color: gray;
+    font-size: 8px;
+    margin-top: 6px;
+    text-align: right;
+}
+
+#modalArea{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: none;
+}
+
+.modal{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 16px;
+}
+
+.modalInner{
+    width: 240px;
+}
+
+.modalInner h2{
+    font-size: 24px;
+}
+
+.modalInner h2 span{
+    color: red;
+}
+
+#modalTitle{
+    font-size: 30px;
+    margin: 20px 0px 26px 0px;
+}
+
+.modalButton{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    place-items: center;
+}
+
+.modalButton input{
+    width: 100px;
+    height: 30px;
+    border: none;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+}
+
+.modalYesButton{
+    background-color: green;
+}
+
+.modalNoButton{
+    background-color: red;
 }
 
 @media(max-width: 728px){

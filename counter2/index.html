@@ -8,12 +8,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 </head>
 <body>
+    <div id="modalArea" onclick="closeModal()">
+        <div class="modal">
+            <div class="modalInner">
+                <h2>정말 <span>삭제</span>하시겠습니까?</h2>
+                <p id="modalTitle">title</p>
+                <div class="modalButton">
+                    <input class="modalYesButton" value="네" type="button" onclick="realDelete(this)">
+                    <input class="modalNoButton" value="아니오" type="button" onclick="realDelete(this)">
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="titleArea">
         <div class="title">
             <h1>Counter</h1>
             <p class="inputArea">
                 <input id="titleInput" type="text" value="타이틀을 작성해 주세요." onclick="clearInput()">
-                <input id="titleButton" type="button" value="생성" onclick="bring()">
+                <input id="titleButton" type="button" value="생성하기" onclick="bring()">
             </p>
         </div>
     </div>
@@ -25,18 +37,38 @@
 
         var selectInput = document.querySelector('#titleInput');
 
+        var targetCounterDiv;
+
+        var modalOnOff = false;
+
         window.onload = function() {
             const storedCounters = JSON.parse(localStorage.getItem("counters"));
             if (storedCounters && storedCounters.length > 0) {
                 for (const counterData of storedCounters) {
-                    bringFromStorage(counterData.title, counterData.number);
+                    bringFromStorage(counterData.title, counterData.number, counterData.time);  // time도 함께 넘겨줌
                 }
             }
         };
+        
+        document.addEventListener("keyup", function(event) {
+            if(event.code == 'Enter') {
+                if(modalOnOff == false){
+                    bring();
+                } else{
+                    targetCounterDiv.remove();
+                    closeModal();
+                    saveCountersToLocalStorage();
+                };
+            };
+
+            if(event.code == 'Escape') {
+                closeModal();
+            };
+        });        
 
         function clearInput(){
 
-            if(selectInput.value === '타이틀을 작성해 주세요.'){
+            if(selectInput.value == '타이틀을 작성해 주세요.'){
                 selectInput.value = "";
             };
         };
@@ -45,53 +77,92 @@
 
             var input = selectInput.value;
 
-            var counterHtml = `
-            <div class="counter">
-                <div class="counterInner">
-                    <div class="counterInnerer">
-                        <h2 class="counterTitle">` + input + `</h2>
-                        <p class="number">0</p>
-                        <div class="buttonArea">
-                            <input class="plusMinus" value="+" type="button" onclick="counterEdit(this)">
-                            <input class="plusMinus" value="-" type="button" onclick="counterEdit(this)">
-                            <input class="deleteReset" value="삭제" type="button" onclick="counterEdit(this)">
-                            <input class="deleteReset" value="초기화" type="button" onclick="counterEdit(this)">
+            if(input == '타이틀을 작성해 주세요.'){
+                alert('타이틀을 작성해 주세요.');
+            }else{
+
+                var currentDate = new Date();
+                var year = (currentDate.getFullYear());
+                var month = String(currentDate.getMonth() + 1).padStart(2, '0');
+                var date = String(currentDate.getDate()).padStart(2, '0');
+                var hours = String(currentDate.getHours()).padStart(2, '0');
+                var minutes = String(currentDate.getMinutes()).padStart(2, '0');
+                var seconds = String(currentDate.getSeconds()).padStart(2, '0');
+                var time = "생성 시간 : " + year + "년&nbsp" + month + "월&nbsp" + date + "일&nbsp" + hours + ":" + minutes + ":" + seconds;
+
+                var counterHtml = `
+                <div class="counter">
+                    <div class="counterInner">
+                        <div class="counterInnerer">
+                            <h2 class="counterTitle">` + input + `</h2>
+                            <p class="number">0</p>
+                            <div class="buttonArea">
+                                <input class="plusMinus" value="+" type="button" onclick="counterEdit(this)">
+                                <input class="plusMinus" value="-" type="button" onclick="counterEdit(this)">
+                                <input class="deleteReset" value="삭제" type="button" onclick="counterEdit(this)">
+                                <input class="deleteReset" value="초기화" type="button" onclick="counterEdit(this)">
+                            </div>
+                            <p class="time">` + time + `</p>
                         </div>
                     </div>
-                </div>
-            </div>`;
+                </div>`;
 
-            counterArea.insertAdjacentHTML("afterbegin", counterHtml);
+                counterArea.insertAdjacentHTML("afterbegin", counterHtml);
 
-            selectInput.value = "타이틀을 작성해 주세요.";
+                selectInput.value = "타이틀을 작성해 주세요.";
 
-            saveCountersToLocalStorage()
+                saveCountersToLocalStorage();
+            };
 
         };
 
-        function counterEdit(button){
+        function openModal(){
+            var modalArea = document.querySelector('#modalArea');
+            var modalTitleDiv = targetCounterDiv.querySelector('.counterTitle');
+            var modalTitle = modalTitleDiv.textContent;
+            var modalTitleArea = document.querySelector('#modalTitle');
+            modalTitleArea.textContent = modalTitle;
+            modalArea.style.display = 'block';
+            modalOnOff = true;
+        };
 
-            var counterDiv = button.closest('.counter');
+        function closeModal(){
+            var modalArea = document.querySelector('#modalArea');
+            modalArea.style.display = 'none';
+            modalOnOff = false;
+        };
+
+        function realDelete(deleteButton){
+            var yesOrNo = deleteButton.value;
+            if(yesOrNo == '네'){
+                targetCounterDiv.remove();
+            };
+
+            closeModal();
+
+            saveCountersToLocalStorage();
+        };
+
+        function counterEdit(editButton){
+
+            var counterDiv = editButton.closest('.counter');
             
             var counterNumber = counterDiv.querySelector(".number");
 
             var counterNumberTrue = parseInt(counterNumber.textContent);
             
-            var buttonValue = button.value;
+            var buttonValue = editButton.value;
 
-            if(buttonValue === '+'){
+            if(buttonValue == '+'){
                 counterNumberTrue += 1;
                 counterNumber.textContent = counterNumberTrue;
-            } else if(buttonValue === '-'){
+            } else if(buttonValue == '-'){
                 counterNumberTrue -= 1;
                 counterNumber.textContent = counterNumberTrue;
-            } else if(buttonValue === '삭제'){
-                counterDiv.remove();
-            } else{
-                counterNumberTrue = 0;
-                counterNumber.innerHTML = counterNumberTrue;
-            };
-
+            } else if(buttonValue == '삭제'){
+                targetCounterDiv = counterDiv;
+                openModal();
+            }
             saveCountersToLocalStorage()
 
         };
@@ -103,13 +174,14 @@
             counters.forEach(counter => {
                 const title = counter.querySelector(".counterTitle").textContent;
                 const number = parseInt(counter.querySelector(".number").textContent);
-                countersData.push({ title, number });
+                const time = counter.querySelector(".time").textContent;
+                countersData.push({ title, number, time });
             });
 
-            localStorage.setItem("counters", JSON.stringify(countersData));  // 로컬스토리지에 저장
+            localStorage.setItem("counters", JSON.stringify(countersData));
         };
 
-        function bringFromStorage(title, number) {
+        function bringFromStorage(title, number, time) {
             var counterHtml = `
             <div class="counter">
                 <div class="counterInner">
@@ -122,12 +194,14 @@
                             <input class="deleteReset" value="삭제" type="button" onclick="counterEdit(this)">
                             <input class="deleteReset" value="초기화" type="button" onclick="counterEdit(this)">
                         </div>
+                        <p class="time">` + time + `</p>
                     </div>
                 </div>
             </div>`;
 
             counterArea.insertAdjacentHTML("beforeend", counterHtml);
         };
+
 
     </script>
 </body>
