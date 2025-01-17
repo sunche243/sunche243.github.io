@@ -162,6 +162,9 @@
             } else if(buttonValue == '삭제'){
                 targetCounterDiv = counterDiv;
                 openModal();
+            } else{
+                counterNumberTrue = 0;
+                counterNumber.innerHtml = counterNumberTrue;
             }
             saveCountersToLocalStorage()
 
