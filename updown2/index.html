@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>updown game</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        h1{
+            text-align: center;
+            margin-top: 80px;
+        }
+        
+        h2{
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .settingButton{
+            background-color: blue;
+            text-align: center;
+            border-radius: 16px;
+            color: white;
+            width: 120px;
+        }
+
+        .settingArea{
+            position: fixed;
+        }
+
+        .updownArea{
+            display: grid;
+            grid-template-columns: 2fr 1fr 2fr 1fr 2fr;
+            place-items: center;
+            margin: 50px 300px;
+        }
+
+        .updownArea p{
+            font-size: 50px;
+        }
+
+        input #answer{
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="settingArea">
+
+    </div>
+    <h1>updown game</h1>
+    <div class="settingButton">설정</div>
+    <h2><span id="attempt">n</span>번째 시도</h2>
+    <div class="updownArea">
+        <p id="min">0</p>
+        <p><</p>
+        <input type="number" max="100" min="0" id="answer">
+        <p><</p>
+        <p id="max">100</p>
+    </div>
+    <input type="button" value="제출하기" id="submit">
+    <script>
+
+    </script>
+</body>
+</html>

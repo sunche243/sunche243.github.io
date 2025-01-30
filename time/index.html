@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간 변환기</title>
+</head>
+<body>
+    <h1 style="text-align: center;">시간 변환기</h1>
+    <div style="display: block; text-align: center;">
+        <p>배수<span style="margin-left: 10px;"><input type="number" id="multiple" onchange="conversion()"></span></p>
+        <p><input type="number" id="hour" onchange="conversion()"><span style="margin-left: 5px;">시간</span><span style="margin-left: 10px;"><input type="number" id="minute" onchange="conversion()"></span><span style="margin-left: 5px;">분</span></p>
+        <p id="result"></p>
+    </div>
+
+    <script>
+
+        function conversion(){
+            let a = document.querySelector('#multiple');
+            let b = document.querySelector('#hour');
+            let c = document.querySelector('#minute');
+
+            let aNumber = Number(a.value) || 0;
+            let bNumber = Number(b.value) || 0;
+            let cNumber = Number(c.value) || 0;
+
+            let bMinute = bNumber * 60;
+
+            let resultTime = (bMinute + cNumber) * aNumber;
+            let resultNumber = resultTime / 60;
+            let resultHour = Math.trunc(resultNumber);
+            let resultMinute = (resultNumber - resultHour) * 60;
+
+            let resultArea = document.querySelector('#result');
+            resultArea.textContent = resultHour + '시간' + resultMinute + '분';
+        };
+
+    </script>
+</body>
+</html>
