@@ -9,8 +9,14 @@
     <h1 style="text-align: center;">시간 변환기</h1>
     <div style="display: block; text-align: center;">
         <p>배수<span style="margin-left: 10px;"><input type="number" id="multiple" onchange="conversion()"></span></p>
-        <p><input type="number" id="hour" onchange="conversion()"><span style="margin-left: 5px;">시간</span><span style="margin-left: 10px;"><input type="number" id="minute" onchange="conversion()"></span><span style="margin-left: 5px;">분</span></p>
+        <p>
+            <input type="number" id="hour" onchange="conversion()">
+            <span style="margin-left: 5px;">시간</span>
+            <span style="margin-left: 10px;"><input type="number" id="minute" onchange="conversion()"></span>
+            <span style="margin-left: 5px;">분</span>
+        </p>
         <p id="result"></p>
+        
     </div>
 
     <script>
