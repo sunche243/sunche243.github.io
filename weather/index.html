@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="kr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>weather</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+            text-decoration: none;
+            font-family: 'Pretendard', sans-serif;
+        }
+
+        .nav{
+            display: block;
+            flex-direction: column;
+            justify-content: center;
+            align-self: stretch;
+            width: 100%;
+            background-color: black;
+            top: 0;
+            padding: 12px 0;
+            color: white;
+            font-weight: 600;
+            line-height: 150%;
+            font-weight: 600;
+        }
+
+        .nav .Inner{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 64px;
+        }
+
+        #logo{
+            width: 39px;
+            height: 39px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .logoGnb{
+            display: flex;
+            align-items: flex-end;
+            gap: 25px;
+        }
+        
+        .gnb{
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .gnb a{
+            padding: 4px 8px;
+        }
+
+        .location{
+            display: block;
+            padding: 64px;
+
+        }
+
+        .locationButton{
+            padding: 8px 12px;
+            border: 12px gray;
+            background-color: blue;
+            border-radius: 36px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <div class="Inner">
+            <div class="logoGnb">
+                <img id="logo" src="logo.webp" alt="logo">
+                <div class="gnb">
+                    <a>오늘의 날씨</a>
+                    <a>이번주 날씨</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="location">
+        <div>
+            <span class="locationButton">서울시</span>
+        </div>
+    </div>
+</body>
+</html>
