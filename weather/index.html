@@ -61,16 +61,59 @@
 
         .location{
             display: block;
-            padding: 64px;
+            padding: 32px 64px;
 
         }
 
         .locationButton{
             padding: 8px 12px;
-            border: 12px gray;
-            background-color: blue;
+            border: 2px solid gray;
             border-radius: 36px;
+            margin: 0px 4px;
+            cursor: pointer;
         }
+
+        .picked{
+            background-color: #2C93DF;
+            border: 2px solid #2C93DF;
+            color: white;
+        }
+
+        .locationButton img{
+            vertical-align: middle;
+            width: 19px;
+            height: 19px;
+            margin-left: 4px;
+            margin-bottom: 3px;
+        }
+
+        .divider{
+            display: inline-block;
+            padding: 9px 0px;
+            width: 2px;
+            height: 19px;
+            background-color: gray;
+            vertical-align: middle;
+            margin: 0 8px;
+            border-radius: 4px;
+        }
+
+        .nowLocation{
+            padding: 0px 64px;
+        }
+
+        .now{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-top: 32px;
+        }
+
+        .temporature{
+            font-size: 60px;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -87,8 +130,20 @@
     </div>
     <div class="location">
         <div>
-            <span class="locationButton">서울시</span>
+            <a class="locationButton picked">묵정동</a>
+            <a class="locationButton">송죽동</a>
+            <a class="locationButton">장충동</a>
+            <a class="divider"></a>
+            <a class="locationButton">지역 설정<img src="editBlack.png"></a>
         </div>
     </div>
+    <div class="nowLocation">
+        <h1>서울시 중구 묵정동</h1>
+    </div>
+    <div class="now">
+        <div class="temporature">2.2°</div>
+        <!-- <p>흐림</p> -->
+    </div>
+
 </body>
 </html>
