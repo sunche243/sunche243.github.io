@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QR 주문 - 관리자</title>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
+      authDomain: "accounting-pub.firebaseapp.com",
+      projectId: "accounting-pub",
+      storageBucket: "accounting-pub.firebasestorage.app",
+      messagingSenderId: "363150778385",
+      appId: "1:363150778385:web:c5a1f75ee916bed070d1b0",
+      measurementId: "G-XHJFJP5PFT"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const ordersDiv = document.getElementById('orders');
+    const q = query(collection(db, "orders"), orderBy("timestamp", "desc"));
+    onSnapshot(q, (snapshot) => {
+      ordersDiv.innerHTML = '';
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        ordersDiv.innerHTML += `<p><strong>테이블 ${data.table}</strong>: ${data.items.join(', ')}<br><small>${data.timestamp}</small></p>`;
+      });
+    });
+  </script>
+</head>
+<body>
+  <h2>실시간 주문 목록</h2>
+  <div id="orders"></div>
+</body>
+</html>
