@@ -11,6 +11,7 @@
       border-radius: 8px;
       padding: 10px;
       margin-bottom: 15px;
+      background-color: white;
     }
     .completed {
       background-color: #d4edda;
@@ -43,23 +44,30 @@
       ordersDiv.innerHTML = '';
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
+        const orderId = docSnap.id;
         const div = document.createElement('div');
         div.className = 'order' + (data.completed ? ' completed' : '');
+        const completeText = data.completed ? '확인 취소' : '확인';
+
         div.innerHTML = `
           <p><strong>테이블 ${data.table}</strong> | 입금자: ${data.name}</p>
           <p>주문: ${data.items.join(', ')}</p>
           <small>${data.timestamp}</small><br>
-          <button class="complete-btn">${data.completed ? '완료됨' : '완료'}</button>
+          <button class="toggle-btn">${completeText}</button>
           <button class="delete-btn">삭제</button>
         `;
-        div.querySelector('.complete-btn').addEventListener('click', () => {
-          updateDoc(doc(db, 'orders', docSnap.id), { completed: true });
+
+        div.querySelector('.toggle-btn').addEventListener('click', async () => {
+          const newStatus = !data.completed;
+          await updateDoc(doc(db, 'orders', orderId), { completed: newStatus });
         });
-        div.querySelector('.delete-btn').addEventListener('click', () => {
+
+        div.querySelector('.delete-btn').addEventListener('click', async () => {
           if (confirm('정말로 삭제하시겠습니까?')) {
-            deleteDoc(doc(db, 'orders', docSnap.id));
+            await deleteDoc(doc(db, 'orders', orderId));
           }
         });
+
         ordersDiv.appendChild(div);
       });
     });
