@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>주문 완료</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 30px; }
+    .box {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      display: inline-block;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>주문이 완료되었습니다! 🎉</h2>
+  <div class="box">
+    <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
+    <p><strong>입금자명:</strong> <span id="payer">-</span></p>
+    <p><strong>주문한 항목:</strong> <span id="items">-</span></p>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    document.getElementById("tableNum").textContent = params.get("table") || "-";
+    document.getElementById("payer").textContent = params.get("name") || "-";
+    document.getElementById("items").textContent = params.get("items") || "-";
+  </script>
+</body>
+</html>

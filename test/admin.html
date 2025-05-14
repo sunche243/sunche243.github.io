@@ -1,38 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>QR 주문 - 관리자</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR 주문 관리</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .order {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+    .completed {
+      background-color: #d4edda;
+      border-color: #28a745;
+    }
+    button {
+      margin-right: 8px;
+      margin-top: 6px;
+    }
+  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+    import {
+      getFirestore, collection, query, orderBy, onSnapshot,
+      doc, updateDoc, deleteDoc
+    } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
       authDomain: "accounting-pub.firebaseapp.com",
-      projectId: "accounting-pub",
-      storageBucket: "accounting-pub.firebasestorage.app",
-      messagingSenderId: "363150778385",
-      appId: "1:363150778385:web:c5a1f75ee916bed070d1b0",
-      measurementId: "G-XHJFJP5PFT"
+      projectId: "accounting-pub"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const ordersDiv = document.getElementById("orders");
 
-    const ordersDiv = document.getElementById('orders');
     const q = query(collection(db, "orders"), orderBy("timestamp", "desc"));
     onSnapshot(q, (snapshot) => {
       ordersDiv.innerHTML = '';
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        ordersDiv.innerHTML += `<p><strong>테이블 ${data.table}</strong>: ${data.items.join(', ')}<br><small>${data.timestamp}</small></p>`;
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement('div');
+        div.className = 'order' + (data.completed ? ' completed' : '');
+        div.innerHTML = `
+          <p><strong>테이블 ${data.table}</strong> | 입금자: ${data.name}</p>
+          <p>주문: ${data.items.join(', ')}</p>
+          <small>${data.timestamp}</small><br>
+          <button class="complete-btn">${data.completed ? '완료됨' : '완료'}</button>
+          <button class="delete-btn">삭제</button>
+        `;
+        div.querySelector('.complete-btn').addEventListener('click', () => {
+          updateDoc(doc(db, 'orders', docSnap.id), { completed: true });
+        });
+        div.querySelector('.delete-btn').addEventListener('click', () => {
+          if (confirm('정말로 삭제하시겠습니까?')) {
+            deleteDoc(doc(db, 'orders', docSnap.id));
+          }
+        });
+        ordersDiv.appendChild(div);
       });
     });
   </script>
 </head>
 <body>
-  <h2>실시간 주문 목록</h2>
+  <h2>주문 목록</h2>
   <div id="orders"></div>
 </body>
 </html>

@@ -1,8 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>QR 주문 - 메뉴</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR 주문</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .section { margin-bottom: 20px; }
+    label { display: block; margin: 6px 0; }
+    input[type="text"] { width: 100%; padding: 8px; }
+    button { padding: 10px; width: 100%; font-size: 16px; }
+  </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
@@ -10,42 +18,46 @@
     const firebaseConfig = {
       apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
       authDomain: "accounting-pub.firebaseapp.com",
-      projectId: "accounting-pub",
-      storageBucket: "accounting-pub.firebasestorage.app",
-      messagingSenderId: "363150778385",
-      appId: "1:363150778385:web:c5a1f75ee916bed070d1b0",
-      measurementId: "G-XHJFJP5PFT"
+      projectId: "accounting-pub"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
     window.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const table = urlParams.get('table') || 'unknown';
-
+      const table = new URLSearchParams(window.location.search).get('table') || 'unknown';
       document.getElementById('orderForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const items = Array.from(document.querySelectorAll('input[name="menu"]:checked')).map(i => i.value);
-        if (items.length === 0) return alert('메뉴를 선택하세요');
+        const name = document.getElementById('payerName').value.trim();
+        const items = Array.from(document.querySelectorAll('input[name="menu"]:checked')).map(el => el.value);
+
+        if (!name || items.length === 0) {
+          alert("입금자명과 메뉴를 모두 입력하세요.");
+          return;
+        }
 
         await addDoc(collection(db, 'orders'), {
-          table,
-          items,
-          timestamp: new Date().toISOString()
+          table, name, items, timestamp: new Date().toISOString(), completed: false
         });
 
-        alert('주문이 완료되었습니다!');
+        const query = new URLSearchParams({ table, name, items: items.join(', ') }).toString();
+        window.location.href = `thankyou.html?${query}`;
       });
     });
   </script>
 </head>
 <body>
-  <h2>메뉴</h2>
+  <h2>QR 주문</h2>
   <form id="orderForm">
-    <label><input type="checkbox" name="menu" value="불고기덮밥"> 불고기덮밥</label><br>
-    <label><input type="checkbox" name="menu" value="제육덮밥"> 제육덮밥</label><br>
-    <label><input type="checkbox" name="menu" value="콜라"> 콜라</label><br><br>
+    <div class="section">
+      <label for="payerName">입금자명</label>
+      <input type="text" id="payerName" required />
+    </div>
+    <div class="section">
+      <label><input type="checkbox" name="menu" value="불고기덮밥" /> 불고기덮밥</label>
+      <label><input type="checkbox" name="menu" value="제육덮밥" /> 제육덮밥</label>
+      <label><input type="checkbox" name="menu" value="콜라" /> 콜라</label>
+    </div>
     <button type="submit">주문하기</button>
   </form>
 </body>
