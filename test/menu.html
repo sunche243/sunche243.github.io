@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR 주문</title>
+  <title>신병-회계학과 야간부스</title>
   <style>
     body { font-family: sans-serif; margin: 20px; }
     .section { margin-bottom: 20px; }
@@ -32,7 +32,7 @@
         const items = Array.from(document.querySelectorAll('input[name="menu"]:checked')).map(el => el.value);
 
         if (!name || items.length === 0) {
-          alert("입금자명과 메뉴를 모두 입력하세요.");
+          alert("입금자명과 메뉴를 모두 입력해 주세요.");
           return;
         }
 
@@ -47,10 +47,10 @@
   </script>
 </head>
 <body>
-  <h2>QR 주문</h2>
+  <h2>신병</h2>
   <form id="orderForm">
     <div class="section">
-      <label for="payerName">입금자명</label>
+      <label for="payerName" style="font-weight: bold;">입금자명</label>
       <input type="text" id="payerName" required />
     </div>
     <div class="section">
