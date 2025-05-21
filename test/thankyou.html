@@ -5,13 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>주문 완료</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 30px; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 30px;
+    }
     .box {
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 20px;
       display: inline-block;
       margin-top: 20px;
+    }
+    .price {
+      margin-top: 10px;
+      font-weight: bold;
+      color: #2c7a00;
+    }
+    #copyMsg {
+      margin-top: 8px;
+      color: green;
+      font-size: 0.9rem;
+      display: none;
+    }
+    button.copy-btn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 1rem;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -21,12 +42,47 @@
     <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
     <p><strong>입금자명:</strong> <span id="payer">-</span></p>
     <p><strong>주문한 항목:</strong> <span id="items">-</span></p>
+    <p class="price" id="totalPrice"></p>
+
+    <hr />
+    <p><strong>입금 계좌:</strong></p>
+    <p id="accountNumber">SC제일은행 123-456789-01-234 (홍길동)</p>
+    <button class="copy-btn" onclick="copyAccount()">계좌번호 복사</button>
+    <p id="copyMsg">계좌번호가 복사되었습니다!</p>
   </div>
+
   <script>
+    // 주문 정보 출력
     const params = new URLSearchParams(window.location.search);
-    document.getElementById("tableNum").textContent = params.get("table") || "-";
-    document.getElementById("payer").textContent = params.get("name") || "-";
-    document.getElementById("items").textContent = params.get("items") || "-";
+    const table = params.get("table") || "-";
+    const name = params.get("name") || "-";
+    const itemString = params.get("items") || "-";
+
+    document.getElementById("tableNum").textContent = table;
+    document.getElementById("payer").textContent = name;
+    document.getElementById("items").textContent = itemString;
+
+    // 금액 계산
+    const priceMap = {
+      "불고기덮밥": 7000,
+      "제육덮밥": 7000,
+      "콜라": 2000,
+      "사이다": 2000
+    };
+    const items = itemString.split(',').map(i => i.trim());
+    const total = items.reduce((sum, item) => sum + (priceMap[item] || 0), 0);
+    document.getElementById("totalPrice").textContent = `총 금액: ${total.toLocaleString()}원`;
+
+    // 계좌번호 복사 기능
+    function copyAccount() {
+      const text = "123-456789-01-234";
+      navigator.clipboard.writeText(text).then(() => {
+        document.getElementById("copyMsg").style.display = "block";
+        setTimeout(() => {
+          document.getElementById("copyMsg").style.display = "none";
+        }, 2000);
+      });
+    }
   </script>
 </body>
 </html>
