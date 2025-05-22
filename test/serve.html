@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>서빙 전용 화면</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    h2 { margin-bottom: 10px; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .item {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      background-color: white;
+    }
+    .item.serving { background-color: #fff3cd; border-color: #ffc107; }
+    .item.done { background-color: #d4edda; border-color: #28a745; }
+    button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .assign { background-color: #007bff; color: white; }
+    .complete { background-color: #28a745; color: white; }
+  </style>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import {
+      getFirestore, collection, query, where, onSnapshot,
+      updateDoc, doc
+    } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
+      authDomain: "accounting-pub.firebaseapp.com",
+      projectId: "accounting-pub"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let currentUser = localStorage.getItem("serverName") || "";
+    if (!currentUser) {
+      currentUser = prompt("당신의 이름을 입력해 주세요 (서빙 담당자)");
+      if (currentUser) localStorage.setItem("serverName", currentUser);
+      else location.reload();
+    }
+
+    const container = document.getElementById("orders");
+
+    const q = query(collection(db, "orders"), where("completed", "==", true));
+    onSnapshot(q, (snapshot) => {
+      container.innerHTML = "";
+
+      snapshot.forEach(docSnap => {
+        const data = docSnap.data();
+        const docId = docSnap.id;
+
+        if (!Array.isArray(data.items)) return;
+
+        data.items.forEach(item => {
+          for (let i = 0; i < item.count; i++) {
+            const div = document.createElement("div");
+            div.className = "item";
+
+            const status = data.status || "주문 완료";
+            const assigned = data.assignedTo || null;
+
+            if (status === "서빙 예정") div.classList.add("serving");
+            if (status === "서빙 완료") div.classList.add("done");
+
+            div.innerHTML = `
+              <p><strong>${item.name}</strong></p>
+              <p>테이블: ${data.table}</p>
+              <p>입금자: ${data.name}</p>
+              <p>상태: ${status}${assigned ? ` (${assigned})` : ""}</p>
+            `;
+
+            if (status === "주문 완료") {
+              const btn = document.createElement("button");
+              btn.textContent = "서빙 예정";
+              btn.className = "assign";
+              btn.onclick = () => {
+                updateDoc(doc(db, "orders", docId), {
+                  status: "서빙 예정",
+                  assignedTo: currentUser
+                });
+              };
+              div.appendChild(btn);
+            } else if (status === "서빙 예정" && assigned === currentUser) {
+              const btn = document.createElement("button");
+              btn.textContent = "서빙 완료";
+              btn.className = "complete";
+              btn.onclick = () => {
+                updateDoc(doc(db, "orders", docId), {
+                  status: "서빙 완료"
+                });
+              };
+              div.appendChild(btn);
+            }
+
+            if (status !== "서빙 완료") container.appendChild(div);
+          }
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <h2>서빙 대시보드</h2>
+  <div id="orders" class="grid"></div>
+</body>
+</html>

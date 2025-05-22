@@ -9,10 +9,25 @@
     .section { margin-bottom: 20px; }
     label { display: block; margin: 6px 0; }
     input[type="text"] { width: 100%; padding: 8px; }
-    input[type="number"] { width: 70px; padding: 4px; margin-left: 10px; }
-    button { padding: 10px; width: 100%; font-size: 16px; }
+    .counter {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 10px;
+    }
+    .counter button {
+      width: 30px;
+      height: 30px;
+      font-size: 16px;
+      margin: 0 5px;
+      cursor: pointer;
+    }
+    .counter span {
+      width: 30px;
+      text-align: center;
+      display: inline-block;
+    }
+    button.submit-btn { padding: 10px; width: 100%; font-size: 16px; }
 
-    /* Modal styles */
     .modal {
       position: fixed;
       top: 0;
@@ -65,6 +80,23 @@
 
       const table = new URLSearchParams(window.location.search).get('table') || 'unknown';
 
+      // 수량 증감 기능
+      document.querySelectorAll('.counter').forEach(counter => {
+        const minusBtn = counter.querySelector('.minus');
+        const plusBtn = counter.querySelector('.plus');
+        const countSpan = counter.querySelector('.count');
+
+        minusBtn.addEventListener('click', () => {
+          let val = parseInt(countSpan.textContent);
+          if (val > 0) countSpan.textContent = val - 1;
+        });
+
+        plusBtn.addEventListener('click', () => {
+          let val = parseInt(countSpan.textContent);
+          countSpan.textContent = val + 1;
+        });
+      });
+
       document.getElementById('orderForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -83,12 +115,11 @@
           return;
         }
 
-        const itemInputs = document.querySelectorAll('input[name="item-count"]');
-        const items = Array.from(itemInputs)
-          .map(input => ({
-            name: input.dataset.name,
-            count: parseInt(input.value)
-          }))
+        const items = Array.from(document.querySelectorAll('.counter'))
+          .map(el => {
+            const count = parseInt(el.querySelector('.count').textContent);
+            return { name: el.dataset.name, count };
+          })
           .filter(item => item.count > 0);
 
         if (items.length === 0) {
@@ -123,30 +154,54 @@
     <div class="section">
       <h3>🍽️ 메인 메뉴</h3>
       <label>닭발 + 참치마요 세트 (23,000원)
-        <input type="number" min="0" value="0" data-name="닭발 + 참치마요 세트" name="item-count" />
+        <span class="counter" data-name="닭발 + 참치마요 세트">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
       </label>
       <label>공화춘 + 간짬뽕 + 냉동 세트 (13,000원)
-        <input type="number" min="0" value="0" data-name="공화춘 + 간짬뽕 + 냉동 세트" name="item-count" />
+        <span class="counter" data-name="공화춘 + 간짬뽕 + 냉동 세트">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
       </label>
       <label>황금밥알 (15,000원)
-        <input type="number" min="0" value="0" data-name="황금밥알" name="item-count" />
+        <span class="counter" data-name="황금밥알">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
       </label>
     </div>
 
     <div class="section">
       <h3>🥢 사이드 메뉴</h3>
       <label>참치크래커 10개 (6,000원)
-        <input type="number" min="0" value="0" data-name="참치크래커 10개" name="item-count" />
+        <span class="counter" data-name="참치크래커 10개">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
       </label>
       <label>잔치국수 (8,000원)
-        <input type="number" min="0" value="0" data-name="잔치국수" name="item-count" />
+        <span class="counter" data-name="잔치국수">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
       </label>
       <label>황도 (5,000원)
-        <input type="number" min="0" value="0" data-name="황도" name="item-count" />
+        <span class="counter" data-name="황도">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
       </label>
     </div>
 
-    <button type="submit">주문 확인</button>
+    <button class="submit-btn" type="submit">주문 확인</button>
   </form>
 </body>
 </html>
