@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>서빙 전용 화면</title>
+  <title>서빙 대시보드</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
     h2 { margin-bottom: 10px; }
@@ -70,14 +70,13 @@
           const docId = docSnap.id;
 
           if (!Array.isArray(data.items)) return;
-
           const serveStatus = data.serveStatus || {};
 
           data.items.forEach((item, itemIndex) => {
-            for (let i = 0; i < item.count; i++) {
-              const uniqueId = `${item.name}_${itemIndex}_${i}`;
-              const itemStatus = serveStatus[uniqueId]?.status || "주문 완료";
-              const assignedTo = serveStatus[uniqueId]?.assignedTo || null;
+            for (let countIndex = 0; countIndex < item.count; countIndex++) {
+              const serveId = `${docId}_${itemIndex}_${countIndex}`;  // 고유 ID
+              const itemStatus = serveStatus[serveId]?.status || "주문 완료";
+              const assignedTo = serveStatus[serveId]?.assignedTo || null;
 
               const div = document.createElement("div");
               div.className = "item";
@@ -96,12 +95,11 @@
                 btn.textContent = "서빙 예정";
                 btn.className = "assign";
                 btn.onclick = async () => {
-                  const updatedStatus = {
-                    ...serveStatus,
-                    [uniqueId]: { status: "서빙 예정", assignedTo: currentUser }
-                  };
                   await updateDoc(doc(db, "orders", docId), {
-                    serveStatus: updatedStatus
+                    serveStatus: {
+                      ...serveStatus,
+                      [serveId]: { status: "서빙 예정", assignedTo: currentUser }
+                    }
                   });
                 };
                 div.appendChild(btn);
@@ -110,12 +108,11 @@
                 btn.textContent = "서빙 완료";
                 btn.className = "complete";
                 btn.onclick = async () => {
-                  const updatedStatus = {
-                    ...serveStatus,
-                    [uniqueId]: { status: "서빙 완료", assignedTo: currentUser }
-                  };
                   await updateDoc(doc(db, "orders", docId), {
-                    serveStatus: updatedStatus
+                    serveStatus: {
+                      ...serveStatus,
+                      [serveId]: { status: "서빙 완료", assignedTo: currentUser }
+                    }
                   });
                 };
                 div.appendChild(btn);
