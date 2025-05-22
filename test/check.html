@@ -78,14 +78,23 @@
         return { name: n.trim(), count: parseInt(c) };
       });
 
-      await addDoc(collection(db, 'orders'), {
-        table,
-        name,
-        items: parsedItems,
-        timestamp: new Date().toISOString(),
-        completed: false,
-        status: '주문 완료'
-      });
+      console.log("Saving to Firestore...", { table, name, parsedItems });
+
+      try {
+        await addDoc(collection(db, 'orders'), {
+          table,
+          name,
+          items: parsedItems,
+          timestamp: new Date().toISOString(),
+          completed: false,
+          status: '주문 완료'
+        });
+        console.log("✅ 주문 저장 성공");
+      } catch (e) {
+        console.error("❌ 주문 저장 실패:", e);
+        alert("파이어베이스 저장 중 오류가 발생했습니다. 콘솔 로그를 확인해주세요.");
+        return;
+      }
 
       const query = new URLSearchParams({ table, name, items: itemString }).toString();
       window.location.href = `thankyou.html?${query}`;
