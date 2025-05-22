@@ -70,6 +70,8 @@
   </div>
 
   <h2>메뉴 주문</h2>
+  <i id="tableInfo" style="font-size: 0.9rem; color: gray;"></i>
+
   <form id="orderForm">
     <div class="section">
       <label for="payerName"><strong>입금자명(테이블번호)</strong></label>
@@ -150,6 +152,7 @@
       });
 
       const table = new URLSearchParams(window.location.search).get('table') || 'unknown';
+      document.getElementById("tableInfo").textContent = `내 테이블 번호: ${table}`;
 
       document.querySelectorAll('.counter').forEach(counter => {
         const minusBtn = counter.querySelector('.minus');
