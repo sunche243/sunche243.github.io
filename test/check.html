@@ -38,21 +38,19 @@
       color: white;
     }
   </style>
-</head>
-<body>
-  <h2>주문 내용을 확인해 주세요</h2>
-  <div class="box">
-    <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
-    <p><strong>입금자명:</strong> <span id="payer">-</span></p>
-    <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
-  <div class="buttons">
-    <button class="back-btn" id="goBack">이전으로</button>
-    <button class="confirm-btn" id="goConfirm">주문 확정</button>
-  </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
+      authDomain: "accounting-pub.firebaseapp.com",
+      projectId: "accounting-pub"
+    };
 
-  <script>
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     const params = new URLSearchParams(window.location.search);
     const table = params.get("table") || "-";
     const name = params.get("name") || "-";
@@ -74,10 +72,37 @@
       window.location.href = `menu.html?${query}`;
     };
 
-    document.getElementById("goConfirm").onclick = () => {
+    document.getElementById("goConfirm").onclick = async () => {
+      const parsedItems = items.map(entry => {
+        const [n, c] = entry.split('*');
+        return { name: n.trim(), count: parseInt(c) };
+      });
+
+      await addDoc(collection(db, 'orders'), {
+        table,
+        name,
+        items: parsedItems,
+        timestamp: new Date().toISOString(),
+        completed: false,
+        status: '주문 완료'
+      });
+
       const query = new URLSearchParams({ table, name, items: itemString }).toString();
       window.location.href = `thankyou.html?${query}`;
     };
   </script>
+</head>
+<body>
+  <h2>주문 내용을 확인해 주세요</h2>
+  <div class="box">
+    <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
+    <p><strong>입금자명:</strong> <span id="payer">-</span></p>
+    <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
+  </div>
+
+  <div class="buttons">
+    <button class="back-btn" id="goBack">이전으로</button>
+    <button class="confirm-btn" id="goConfirm">주문 확정</button>
+  </div>
 </body>
 </html>
