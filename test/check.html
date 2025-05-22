@@ -79,3 +79,60 @@
       "잔치국수": 8000,
       "황도": 5000
     };
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const table = params.get("table") || "-";
+      const name = params.get("name") || "-";
+      const itemString = params.get("items") || "";
+
+      document.getElementById("tableNum").textContent = table;
+      document.getElementById("payer").textContent = name;
+
+      const items = itemString.split(',').map(i => i.trim());
+      let total = 0;
+      const listHtml = items.map(entry => {
+        const [n, c] = entry.split('*');
+        const itemName = n.trim();
+        const count = parseInt(c);
+        const price = priceMap[itemName] || 0;
+        total += price * count;
+        return `${itemName} ${count}개`;
+      }).join('<br>');
+
+      document.getElementById("items").innerHTML = listHtml;
+      document.getElementById("totalPrice").textContent = `총 금액: ${total.toLocaleString()}원`;
+
+      document.getElementById("goBack").onclick = () => {
+        const query = new URLSearchParams({ table, name, items: itemString }).toString();
+        window.location.href = `menu.html?${query}`;
+      };
+
+      document.getElementById("goConfirm").onclick = async () => {
+        const parsedItems = items.map(entry => {
+          const [n, c] = entry.split('*');
+          return { name: n.trim(), count: parseInt(c) };
+        });
+
+        try {
+          await addDoc(collection(db, 'orders'), {
+            table,
+            name,
+            items: parsedItems,
+            timestamp: new Date().toISOString(),
+            completed: false,
+            status: '주문 완료'
+          });
+        } catch (e) {
+          console.error("❌ 주문 저장 실패:", e);
+          alert("파이어베이스 저장 중 오류가 발생했습니다. 콘솔 로그를 확인해주세요.");
+          return;
+        }
+
+        const query = new URLSearchParams({ table, name, items: itemString }).toString();
+        window.location.href = `thankyou.html?${query}`;
+      };
+    });
+  </script>
+</body>
+</html>
