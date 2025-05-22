@@ -58,81 +58,6 @@
       cursor: pointer;
     }
   </style>
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
-      authDomain: "accounting-pub.firebaseapp.com",
-      projectId: "accounting-pub"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById("noticeModal").style.display = "flex";
-
-      document.getElementById("closeModal").addEventListener("click", () => {
-        document.getElementById("noticeModal").style.display = "none";
-      });
-
-      const table = new URLSearchParams(window.location.search).get('table') || 'unknown';
-
-      // 수량 증감 기능
-      document.querySelectorAll('.counter').forEach(counter => {
-        const minusBtn = counter.querySelector('.minus');
-        const plusBtn = counter.querySelector('.plus');
-        const countSpan = counter.querySelector('.count');
-
-        minusBtn.addEventListener('click', () => {
-          let val = parseInt(countSpan.textContent);
-          if (val > 0) countSpan.textContent = val - 1;
-        });
-
-        plusBtn.addEventListener('click', () => {
-          let val = parseInt(countSpan.textContent);
-          countSpan.textContent = val + 1;
-        });
-      });
-
-      document.getElementById('orderForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        let name = document.getElementById('payerName').value.trim();
-
-        const fixPattern = /^(.+)[\s_-](\d{1,3})$/;
-        const fullPattern = /^.+\(\d{1,3}\)$/;
-
-        if (fixPattern.test(name)) {
-          const [, base, num] = name.match(fixPattern);
-          name = `${base}(${num})`;
-        }
-
-        if (!fullPattern.test(name)) {
-          alert("입금자명은 '이름(테이블번호)' 형식으로 입력해 주세요. 예: 홍길동(3)");
-          return;
-        }
-
-        const items = Array.from(document.querySelectorAll('.counter'))
-          .map(el => {
-            const count = parseInt(el.querySelector('.count').textContent);
-            return { name: el.dataset.name, count };
-          })
-          .filter(item => item.count > 0);
-
-        if (items.length === 0) {
-          alert("메뉴 수량을 하나 이상 입력해 주세요.");
-          return;
-        }
-
-        const flatItems = items.map(i => `${i.name}*${i.count}`);
-        const query = new URLSearchParams({ table, name, items: flatItems.join(', ') }).toString();
-        window.location.href = `check.html?${query}`;
-      });
-    });
-  </script>
 </head>
 <body>
   <div id="noticeModal" class="modal" style="display:none">
@@ -203,5 +128,80 @@
 
     <button class="submit-btn" type="submit">주문 확인</button>
   </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
+      authDomain: "accounting-pub.firebaseapp.com",
+      projectId: "accounting-pub"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById("noticeModal").style.display = "flex";
+
+      document.getElementById("closeModal").addEventListener("click", () => {
+        document.getElementById("noticeModal").style.display = "none";
+      });
+
+      const table = new URLSearchParams(window.location.search).get('table') || 'unknown';
+
+      document.querySelectorAll('.counter').forEach(counter => {
+        const minusBtn = counter.querySelector('.minus');
+        const plusBtn = counter.querySelector('.plus');
+        const countSpan = counter.querySelector('.count');
+
+        minusBtn.addEventListener('click', () => {
+          let val = parseInt(countSpan.textContent);
+          if (val > 0) countSpan.textContent = val - 1;
+        });
+
+        plusBtn.addEventListener('click', () => {
+          let val = parseInt(countSpan.textContent);
+          countSpan.textContent = val + 1;
+        });
+      });
+
+      document.getElementById('orderForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        let name = document.getElementById('payerName').value.trim();
+
+        const fixPattern = /^(.+)[\s_-](\d{1,3})$/;
+        const fullPattern = /^.+\(\d{1,3}\)$/;
+
+        if (fixPattern.test(name)) {
+          const [, base, num] = name.match(fixPattern);
+          name = `${base}(${num})`;
+        }
+
+        if (!fullPattern.test(name)) {
+          alert("입금자명은 '이름(테이블번호)' 형식으로 입력해 주세요. 예: 홍길동(3)");
+          return;
+        }
+
+        const items = Array.from(document.querySelectorAll('.counter'))
+          .map(el => {
+            const count = parseInt(el.querySelector('.count').textContent);
+            return { name: el.dataset.name, count };
+          })
+          .filter(item => item.count > 0);
+
+        if (items.length === 0) {
+          alert("메뉴 수량을 하나 이상 입력해 주세요.");
+          return;
+        }
+
+        const flatItems = items.map(i => `${i.name}*${i.count}`);
+        const query = new URLSearchParams({ table, name, items: flatItems.join(', ') }).toString();
+        window.location.href = `check.html?${query}`;
+      });
+    });
+  </script>
 </body>
 </html>

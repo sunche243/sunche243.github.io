@@ -58,43 +58,44 @@
   </div>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const table = params.get("table") || "-";
-    let name = params.get("name") || "-";
-    const itemString = params.get("items") || "";
+    window.addEventListener("DOMContentLoaded", () => {
+      const params = new URLSearchParams(window.location.search);
+      const table = params.get("table") || "-";
+      let name = params.get("name") || "-";
+      const itemString = params.get("items") || "";
 
-    // 이름 유효성 검사
-    const namePattern = /^.+\([0-9]+\)$/;
-    if (!namePattern.test(name)) {
-      name += " ⚠️";
-    }
+      const namePattern = /^.+\([0-9]+\)$/;
+      if (!namePattern.test(name)) {
+        name += " ⚠️";
+      }
 
-    document.getElementById("tableNum").textContent = table;
-    document.getElementById("payer").textContent = name;
+      document.getElementById("tableNum").textContent = table;
+      document.getElementById("payer").textContent = name;
 
-    const priceMap = {
-      "닭발 + 참치마요 세트": 23000,
-      "공화춘 + 간짬뽕 + 냉동 세트": 13000,
-      "황금밥알": 15000,
-      "참치크래커 10개": 6000,
-      "잔치국수": 8000,
-      "황도": 5000
-    };
+      const priceMap = {
+        "닭발 + 참치마요 세트": 23000,
+        "공화춘 + 간짬뽕 + 냉동 세트": 13000,
+        "황금밥알": 15000,
+        "참치크래커 10개": 6000,
+        "잔치국수": 8000,
+        "황도": 5000
+      };
 
-    const items = itemString.split(',').map(i => i.trim());
-    let total = 0;
-    let itemListHtml = "";
+      const items = itemString.split(',').map(i => i.trim());
+      let total = 0;
+      let itemListHtml = "";
 
-    items.forEach(entry => {
-      const [name, countStr] = entry.split('*');
-      const count = parseInt(countStr) || 1;
-      const price = priceMap[name.trim()] || 0;
-      total += price * count;
-      itemListHtml += `${name.trim()} ${count}개<br>`;
+      items.forEach(entry => {
+        const [name, countStr] = entry.split('*');
+        const count = parseInt(countStr) || 1;
+        const price = priceMap[name.trim()] || 0;
+        total += price * count;
+        itemListHtml += `${name.trim()} ${count}개<br>`;
+      });
+
+      document.getElementById("items").innerHTML = itemListHtml;
+      document.getElementById("totalPrice").textContent = `총 금액: ${total.toLocaleString()}원`;
     });
-
-    document.getElementById("items").innerHTML = itemListHtml;
-    document.getElementById("totalPrice").textContent = `총 금액: ${total.toLocaleString()}원`;
 
     function copyAccount() {
       const text = "SC제일은행 10820272218 (박찬준)";

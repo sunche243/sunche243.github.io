@@ -54,6 +54,11 @@
         transition: background-color 0.2s ease;
     }
   </style>
+</head>
+<body>
+  <h2>주문 목록</h2>
+  <div class="grid" id="orders"></div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import {
@@ -95,7 +100,6 @@
         const data = docSnap.data();
         const id = docSnap.id;
 
-        // 이름 형식 검사 (이름(번호))
         const name = namePattern.test(data.name) ? data.name : data.name + " ⚠️";
 
         const total = data.items.reduce((sum, item) => {
@@ -108,7 +112,6 @@
         const btnText = data.completed ? "확인 취소" : "확인";
 
         const itemList = data.items.map(item => `${item.name} ${item.count}개`).join('<br>');
-
         const formattedDate = new Date(data.timestamp).toLocaleString("ko-KR");
 
         div.innerHTML = `
@@ -136,9 +139,5 @@
       });
     });
   </script>
-</head>
-<body>
-  <h2>주문 목록</h2>
-  <div class="grid" id="orders"></div>
 </body>
 </html>
