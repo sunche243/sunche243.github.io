@@ -39,7 +39,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
     import {
       getFirestore, collection, query, where, onSnapshot,
-      updateDoc, doc
+      updateDoc, doc, arrayRemove, arrayUnion
     } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -71,49 +71,56 @@
 
           if (!Array.isArray(data.items)) return;
 
-          data.items.forEach(item => {
-            for (let i = 0; i < item.count; i++) {
-              const div = document.createElement("div");
-              div.className = "item";
+          data.items.forEach((item, index) => {
+            const serveId = `${item.name}_${index}`;
+            const statusList = data.serveStatus || {}; // 상태 저장용 객체
+            const status = statusList[serveId]?.status || "주문 완료";
+            const assigned = statusList[serveId]?.assignedTo || null;
 
-              const status = data.status || "주문 완료";
-              const assigned = data.assignedTo || null;
+            const div = document.createElement("div");
+            div.className = "item";
 
-              if (status === "서빙 예정") div.classList.add("serving");
-              if (status === "서빙 완료") div.classList.add("done");
+            if (status === "서빙 예정") div.classList.add("serving");
+            if (status === "서빙 완료") div.classList.add("done");
 
-              div.innerHTML = `
-                <p><strong>${item.name}</strong></p>
-                <p>테이블: ${data.table}</p>
-                <p>입금자: ${data.name}</p>
-                <p>상태: ${status}${assigned ? ` (${assigned})` : ""}</p>
-              `;
+            div.innerHTML = `
+              <p><strong>${item.name}</strong></p>
+              <p>테이블: ${data.table}</p>
+              <p>입금자: ${data.name}</p>
+              <p>상태: ${status}${assigned ? ` (${assigned})` : ""}</p>
+            `;
 
-              if (status === "주문 완료") {
-                const btn = document.createElement("button");
-                btn.textContent = "서빙 예정";
-                btn.className = "assign";
-                btn.onclick = () => {
-                  updateDoc(doc(db, "orders", docId), {
-                    status: "서빙 예정",
-                    assignedTo: currentUser
-                  });
+            if (status === "주문 완료") {
+              const btn = document.createElement("button");
+              btn.textContent = "서빙 예정";
+              btn.className = "assign";
+              btn.onclick = async () => {
+                const newStatus = {
+                  ...statusList,
+                  [serveId]: { status: "서빙 예정", assignedTo: currentUser }
                 };
-                div.appendChild(btn);
-              } else if (status === "서빙 예정" && assigned === currentUser) {
-                const btn = document.createElement("button");
-                btn.textContent = "서빙 완료";
-                btn.className = "complete";
-                btn.onclick = () => {
-                  updateDoc(doc(db, "orders", docId), {
-                    status: "서빙 완료"
-                  });
+                await updateDoc(doc(db, "orders", docId), {
+                  serveStatus: newStatus
+                });
+              };
+              div.appendChild(btn);
+            } else if (status === "서빙 예정" && assigned === currentUser) {
+              const btn = document.createElement("button");
+              btn.textContent = "서빙 완료";
+              btn.className = "complete";
+              btn.onclick = async () => {
+                const newStatus = {
+                  ...statusList,
+                  [serveId]: { status: "서빙 완료", assignedTo: currentUser }
                 };
-                div.appendChild(btn);
-              }
-
-              if (status !== "서빙 완료") container.appendChild(div);
+                await updateDoc(doc(db, "orders", docId), {
+                  serveStatus: newStatus
+                });
+              };
+              div.appendChild(btn);
             }
+
+            if (status !== "서빙 완료") container.appendChild(div);
           });
         });
       });
