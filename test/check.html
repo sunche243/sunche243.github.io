@@ -37,6 +37,11 @@
       background-color: #28a745;
       color: white;
     }
+    .price {
+      font-weight: bold;
+      margin-top: 10px;
+      color: #2c7a00;
+    }
   </style>
 </head>
 <body>
@@ -45,6 +50,7 @@
     <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
     <p><strong>입금자명:</strong> <span id="payer">-</span></p>
     <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
+    <p class="price" id="totalPrice"></p>
   </div>
 
   <div class="buttons">
@@ -65,56 +71,11 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    window.addEventListener("DOMContentLoaded", () => {
-      const params = new URLSearchParams(window.location.search);
-      const table = params.get("table") || "-";
-      const name = params.get("name") || "-";
-      const itemString = params.get("items") || "";
-
-      document.getElementById("tableNum").textContent = table;
-      document.getElementById("payer").textContent = name;
-
-      const items = itemString.split(',').map(i => i.trim());
-      const listHtml = items.map(entry => {
-        const [n, c] = entry.split('*');
-        return `${n.trim()} ${c}개`;
-      }).join('<br>');
-
-      document.getElementById("items").innerHTML = listHtml;
-
-      document.getElementById("goBack").onclick = () => {
-        const query = new URLSearchParams({ table, name, items: itemString }).toString();
-        window.location.href = `menu.html?${query}`;
-      };
-
-      document.getElementById("goConfirm").onclick = async () => {
-        const parsedItems = items.map(entry => {
-          const [n, c] = entry.split('*');
-          return { name: n.trim(), count: parseInt(c) };
-        });
-
-        console.log("Saving to Firestore...", { table, name, parsedItems });
-
-        try {
-          await addDoc(collection(db, 'orders'), {
-            table,
-            name,
-            items: parsedItems,
-            timestamp: new Date().toISOString(),
-            completed: false,
-            status: '주문 완료'
-          });
-          console.log("✅ 주문 저장 성공");
-        } catch (e) {
-          console.error("❌ 주문 저장 실패:", e);
-          alert("파이어베이스 저장 중 오류가 발생했습니다. 콘솔 로그를 확인해주세요.");
-          return;
-        }
-
-        const query = new URLSearchParams({ table, name, items: itemString }).toString();
-        window.location.href = `thankyou.html?${query}`;
-      };
-    });
-  </script>
-</body>
-</html>
+    const priceMap = {
+      "닭발 + 참치마요 세트": 23000,
+      "공화춘 + 간짬뽕 + 냉동 세트": 13000,
+      "황금밥알": 15000,
+      "참치크래커 10개": 6000,
+      "잔치국수": 8000,
+      "황도": 5000
+    };
