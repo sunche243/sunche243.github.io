@@ -3,17 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>신병-회계학과 야간부스</title>
+  <title>메뉴 주문</title>
   <style>
     body { font-family: sans-serif; margin: 20px; }
     .section { margin-bottom: 20px; }
     label { display: block; margin: 6px 0; }
     input[type="text"] { width: 100%; padding: 8px; }
+    input[type="number"] { width: 70px; padding: 4px; margin-left: 10px; }
     button { padding: 10px; width: 100%; font-size: 16px; }
+
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 400px;
+      text-align: center;
+    }
+    .modal-content button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      border: none;
+      background-color: #28a745;
+      color: white;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
@@ -25,40 +57,96 @@
     const db = getFirestore(app);
 
     window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById("noticeModal").style.display = "flex";
+
+      document.getElementById("closeModal").addEventListener("click", () => {
+        document.getElementById("noticeModal").style.display = "none";
+      });
+
       const table = new URLSearchParams(window.location.search).get('table') || 'unknown';
+
       document.getElementById('orderForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const name = document.getElementById('payerName').value.trim();
-        const items = Array.from(document.querySelectorAll('input[name="menu"]:checked')).map(el => el.value);
 
-        if (!name || items.length === 0) {
-          alert("입금자명과 메뉴를 모두 입력해 주세요.");
+        let name = document.getElementById('payerName').value.trim();
+
+        const fixPattern = /^(.+)[\s_-](\d{1,3})$/;
+        const fullPattern = /^.+\(\d{1,3}\)$/;
+
+        if (fixPattern.test(name)) {
+          const [, base, num] = name.match(fixPattern);
+          name = `${base}(${num})`;
+        }
+
+        if (!fullPattern.test(name)) {
+          alert("입금자명은 '이름(테이블번호)' 형식으로 입력해 주세요. 예: 홍길동(3)");
           return;
         }
 
-        await addDoc(collection(db, 'orders'), {
-          table, name, items, timestamp: new Date().toISOString(), completed: false
-        });
+        const itemInputs = document.querySelectorAll('input[name="item-count"]');
+        const items = Array.from(itemInputs)
+          .map(input => ({
+            name: input.dataset.name,
+            count: parseInt(input.value)
+          }))
+          .filter(item => item.count > 0);
 
-        const query = new URLSearchParams({ table, name, items: items.join(', ') }).toString();
-        window.location.href = `thankyou.html?${query}`;
+        if (items.length === 0) {
+          alert("메뉴 수량을 하나 이상 입력해 주세요.");
+          return;
+        }
+
+        const flatItems = items.map(i => `${i.name}*${i.count}`);
+        const query = new URLSearchParams({ table, name, items: flatItems.join(', ') }).toString();
+        window.location.href = `check.html?${query}`;
       });
     });
   </script>
 </head>
 <body>
-  <h2>신병</h2>
+  <div id="noticeModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <p>첫 주문시에는 최소 메인메뉴 1개 + 사이드메뉴 1개를 주문해주셔야 합니다.<br><br>
+      입금자명 혹은 테이블 번호를 잘못 기입하거나, 메뉴를 잘못 선택하여 주문한 경우<br>
+      <strong>취소 및 환불이 어려우니</strong> 이를 염두에 두시고 주문해 주시길 바랍니다.</p>
+      <button id="closeModal">확인</button>
+    </div>
+  </div>
+
+  <h2>메뉴 주문</h2>
   <form id="orderForm">
     <div class="section">
-      <label for="payerName" style="font-weight: bold;">입금자명</label>
-      <input type="text" id="payerName" required />
+      <label for="payerName"><strong>입금자명(테이블번호)</strong></label>
+      <input type="text" id="payerName" required placeholder="예: 홍길동(3)" />
     </div>
+
     <div class="section">
-      <label><input type="checkbox" name="menu" value="불고기덮밥" /> 불고기덮밥</label>
-      <label><input type="checkbox" name="menu" value="제육덮밥" /> 제육덮밥</label>
-      <label><input type="checkbox" name="menu" value="콜라" /> 콜라</label>
+      <h3>🍽️ 메인 메뉴</h3>
+      <label>닭발 + 참치마요 세트 (23,000원)
+        <input type="number" min="0" value="0" data-name="닭발 + 참치마요 세트" name="item-count" />
+      </label>
+      <label>공화춘 + 간짬뽕 + 냉동 세트 (13,000원)
+        <input type="number" min="0" value="0" data-name="공화춘 + 간짬뽕 + 냉동 세트" name="item-count" />
+      </label>
+      <label>황금밥알 (15,000원)
+        <input type="number" min="0" value="0" data-name="황금밥알" name="item-count" />
+      </label>
     </div>
-    <button type="submit">주문하기</button>
+
+    <div class="section">
+      <h3>🥢 사이드 메뉴</h3>
+      <label>참치크래커 10개 (6,000원)
+        <input type="number" min="0" value="0" data-name="참치크래커 10개" name="item-count" />
+      </label>
+      <label>잔치국수 (8,000원)
+        <input type="number" min="0" value="0" data-name="잔치국수" name="item-count" />
+      </label>
+      <label>황도 (5,000원)
+        <input type="number" min="0" value="0" data-name="황도" name="item-count" />
+      </label>
+    </div>
+
+    <button type="submit">주문 확인</button>
   </form>
 </body>
 </html>

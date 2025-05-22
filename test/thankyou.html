@@ -16,6 +16,8 @@
       padding: 20px;
       display: inline-block;
       margin-top: 20px;
+      max-width: 400px;
+      width: 100%;
     }
     .price {
       margin-top: 10px;
@@ -29,14 +31,14 @@
       display: none;
     }
     button.copy-btn {
-        margin-right: 8px;
-        margin-top: 6px;
-        padding: 6px 12px;
-        background-color: rgb(70, 180, 224);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: #46b4e0;
+      color: white;
+      border: none;
+      border-radius: 6px;
     }
   </style>
 </head>
@@ -45,7 +47,7 @@
   <div class="box">
     <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
     <p><strong>입금자명:</strong> <span id="payer">-</span></p>
-    <p><strong>주문한 항목:</strong> <span id="items">-</span></p>
+    <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
     <p class="price" id="totalPrice"></p>
 
     <hr />
@@ -56,30 +58,46 @@
   </div>
 
   <script>
-    // 주문 정보 출력
     const params = new URLSearchParams(window.location.search);
     const table = params.get("table") || "-";
-    const name = params.get("name") || "-";
-    const itemString = params.get("items") || "-";
+    let name = params.get("name") || "-";
+    const itemString = params.get("items") || "";
+
+    // 이름 유효성 검사
+    const namePattern = /^.+\([0-9]+\)$/;
+    if (!namePattern.test(name)) {
+      name += " ⚠️";
+    }
 
     document.getElementById("tableNum").textContent = table;
     document.getElementById("payer").textContent = name;
-    document.getElementById("items").textContent = itemString;
 
-    // 금액 계산
     const priceMap = {
-      "불고기덮밥": 7000,
-      "제육덮밥": 7000,
-      "콜라": 2000,
-      "사이다": 2000
+      "닭발 + 참치마요 세트": 23000,
+      "공화춘 + 간짬뽕 + 냉동 세트": 13000,
+      "황금밥알": 15000,
+      "참치크래커 10개": 6000,
+      "잔치국수": 8000,
+      "황도": 5000
     };
+
     const items = itemString.split(',').map(i => i.trim());
-    const total = items.reduce((sum, item) => sum + (priceMap[item] || 0), 0);
+    let total = 0;
+    let itemListHtml = "";
+
+    items.forEach(entry => {
+      const [name, countStr] = entry.split('*');
+      const count = parseInt(countStr) || 1;
+      const price = priceMap[name.trim()] || 0;
+      total += price * count;
+      itemListHtml += `${name.trim()} ${count}개<br>`;
+    });
+
+    document.getElementById("items").innerHTML = itemListHtml;
     document.getElementById("totalPrice").textContent = `총 금액: ${total.toLocaleString()}원`;
 
-    // 계좌번호 복사 기능
     function copyAccount() {
-      const text = "10820272218";
+      const text = "SC제일은행 10820272218 (박찬준)";
       navigator.clipboard.writeText(text).then(() => {
         document.getElementById("copyMsg").style.display = "block";
         setTimeout(() => {

@@ -9,35 +9,29 @@
         font-family: sans-serif;
         padding: 20px;
     }
-
     .grid {
         display: grid;
         grid-template-columns: 1fr;
         gap: 16px;
     }
-
     @media (min-width: 600px) {
         .grid {
             grid-template-columns: 1fr 1fr;
         }
     }
-
     .order {
         border: 1px solid #ccc;
         border-radius: 8px;
         padding: 12px;
         background-color: white;
     }
-
     .order.completed {
         background-color: #d4edda;
         border-color: #28a745;
     }
-
     .order p {
         margin: 4px 0;
     }
-
     .toggle-btn{
         margin-right: 8px;
         margin-top: 6px;
@@ -48,7 +42,6 @@
         border-radius: 6px;
         cursor: pointer;
     }
-
     .delete-btn{
         margin-right: 8px;
         margin-top: 6px;
@@ -60,7 +53,6 @@
         cursor: pointer;
         transition: background-color 0.2s ease;
     }
-
   </style>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
@@ -82,17 +74,20 @@
     };
 
     const priceMap = {
-      "불고기덮밥": 7000,
-      "제육덮밥": 7000,
-      "콜라": 2000,
-      "사이다": 2000
+      "닭발 + 참치마요 세트": 23000,
+      "공화춘 + 간짬뽕 + 냉동 세트": 13000,
+      "황금밥알": 15000,
+      "참치크래커 10개": 6000,
+      "잔치국수": 8000,
+      "황도": 5000
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
     const ordersDiv = document.getElementById("orders");
     const q = query(collection(db, "orders"), orderBy("timestamp", "desc"));
+
+    const namePattern = /^.+\([0-9]+\)$/;
 
     onSnapshot(q, (snapshot) => {
       ordersDiv.innerHTML = '';
@@ -100,30 +95,37 @@
         const data = docSnap.data();
         const id = docSnap.id;
 
-        const total = data.items.reduce((sum, item) => sum + (priceMap[item] || 0), 0);
+        // 이름 형식 검사 (이름(번호))
+        const name = namePattern.test(data.name) ? data.name : data.name + " ⚠️";
+
+        const total = data.items.reduce((sum, item) => {
+          const price = priceMap[item.name] || 0;
+          return sum + price * item.count;
+        }, 0);
 
         const div = document.createElement("div");
         div.className = "order" + (data.completed ? " completed" : "");
-
         const btnText = data.completed ? "확인 취소" : "확인";
 
+        const itemList = data.items.map(item => `${item.name} ${item.count}개`).join('<br>');
+
+        const formattedDate = new Date(data.timestamp).toLocaleString("ko-KR");
+
         div.innerHTML = `
-          <p><strong>테이블 ${data.table}</strong> | 입금자: ${data.name}</p>
-          <p>주문: ${data.items.join(", ")}</p>
+          <p><strong>테이블 ${data.table}</strong> | 입금자: ${name}</p>
+          <p>주문:<br>${itemList}</p>
           <p><strong>총 금액: ${total.toLocaleString()}원</strong></p>
-          <small>${data.timestamp}</small><br>
+          <small>${formattedDate}</small><br>
           <button class="toggle-btn">${btnText}</button>
           <button class="delete-btn">삭제</button>
         `;
 
-        // 완료 버튼 토글
         div.querySelector(".toggle-btn").addEventListener("click", async () => {
           await updateDoc(doc(db, "orders", id), {
             completed: !data.completed,
           });
         });
 
-        // 삭제 버튼
         div.querySelector(".delete-btn").addEventListener("click", async () => {
           if (confirm("정말로 삭제하시겠습니까?")) {
             await deleteDoc(doc(db, "orders", id));

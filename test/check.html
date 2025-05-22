@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>주문 확인</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 30px;
+      text-align: center;
+    }
+    .box {
+      display: inline-block;
+      text-align: left;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 400px;
+      width: 100%;
+    }
+    .buttons {
+      margin-top: 20px;
+    }
+    .buttons button {
+      margin: 0 10px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+    }
+    .back-btn {
+      background-color: #ccc;
+    }
+    .confirm-btn {
+      background-color: #28a745;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>주문 내용을 확인해 주세요</h2>
+  <div class="box">
+    <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
+    <p><strong>입금자명:</strong> <span id="payer">-</span></p>
+    <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
+  </div>
+
+  <div class="buttons">
+    <button class="back-btn" id="goBack">이전으로</button>
+    <button class="confirm-btn" id="goConfirm">주문 확정</button>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const table = params.get("table") || "-";
+    const name = params.get("name") || "-";
+    const itemString = params.get("items") || "";
+
+    document.getElementById("tableNum").textContent = table;
+    document.getElementById("payer").textContent = name;
+
+    const items = itemString.split(',').map(i => i.trim());
+    const listHtml = items.map(entry => {
+      const [n, c] = entry.split('*');
+      return `${n.trim()} ${c}개`;
+    }).join('<br>');
+
+    document.getElementById("items").innerHTML = listHtml;
+
+    document.getElementById("goBack").onclick = () => {
+      const query = new URLSearchParams({ table, name, items: itemString }).toString();
+      window.location.href = `menu.html?${query}`;
+    };
+
+    document.getElementById("goConfirm").onclick = () => {
+      const query = new URLSearchParams({ table, name, items: itemString }).toString();
+      window.location.href = `thankyou.html?${query}`;
+    };
+  </script>
+</body>
+</html>
