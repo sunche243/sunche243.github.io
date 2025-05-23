@@ -26,7 +26,7 @@
       text-align: center;
       display: inline-block;
     }
-    button.submit-btn { padding: 10px; width: 100%; font-size: 16px; }
+    button.submit-btn { padding: 10px; width: 100%; font-size: 16px; border-radius: 8px; border: none; background-color: #28A745; color: white; cursor: pointer;}
 
     .modal {
       position: fixed;
@@ -80,13 +80,6 @@
 
     <div class="section">
       <h3>🍽️ 메인 메뉴</h3>
-      <label>닭발 + 참치마요 세트 (23,000원)
-        <span class="counter" data-name="닭발 + 참치마요 세트">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </span>
-      </label>
       <label>공화춘 + 간짬뽕 + 냉동 세트 (13,000원)
         <span class="counter" data-name="공화춘 + 간짬뽕 + 냉동 세트">
           <button type="button" class="minus">-</button>
@@ -94,8 +87,15 @@
           <button type="button" class="plus">+</button>
         </span>
       </label>
-      <label>황금밥알 (15,000원)
-        <span class="counter" data-name="황금밥알">
+      <label>화생방 닭발 세트(닭발 + 주먹밥) (23,000원)
+        <span class="counter" data-name="화생방 닭발 세트(닭발 + 주먹밥)">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
+      </label>
+      <label>전역 후에도 생각나는 엄마표 볶음밥 (15,000원)
+        <span class="counter" data-name="볶음밥">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
@@ -105,22 +105,29 @@
 
     <div class="section">
       <h3>🥢 사이드 메뉴</h3>
-      <label>참치크래커 10개 (6,000원)
-        <span class="counter" data-name="참치크래커 10개">
+      <label>주먹밥은 못참치 (7,000원)
+        <span class="counter" data-name="주먹밥은 못참치">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
       </label>
-      <label>잔치국수 (8,000원)
-        <span class="counter" data-name="잔치국수">
+      <label>선임 몰래 먹는 크래커 (6,000원)
+        <span class="counter" data-name="선임 몰래 먹는 크래커">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
       </label>
-      <label>황도 (5,000원)
-        <span class="counter" data-name="황도">
+      <label>복숭아 한덩이 몰고가세요~ (5,000원)
+        <span class="counter" data-name="복숭아 한덩이 몰고가세요~">
+          <button type="button" class="minus">-</button>
+          <span class="count">0</span>
+          <button type="button" class="plus">+</button>
+        </span>
+      </label>
+      <label>절대 들켜선 안돼.. 나만의 비밀국수 (8,000원)
+        <span class="counter" data-name="절대 들켜선 안돼.. 나만의 비밀국수">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
