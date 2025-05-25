@@ -2,21 +2,22 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>메뉴 주문</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; box-sizing: border-box; max-width: 100%; overflow-x: hidden; }
+    body { font-family: sans-serif; margin: 20px; }
     .section { margin-bottom: 20px; }
-    .menu-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 6px 0;
+    label { display: block; margin: 6px 0; }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      margin: 0;
     }
-    input[type="text"] { width: 100%; padding: 8px; }
     .counter {
       display: inline-flex;
       align-items: center;
+      margin-left: 10px;
     }
     .counter button {
       width: 30px;
@@ -40,6 +41,7 @@
       color: white;
       cursor: pointer;
     }
+
     .modal {
       position: fixed;
       top: 0;
