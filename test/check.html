@@ -2,13 +2,16 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>주문 확인</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 30px;
       text-align: center;
+      box-sizing: border-box;
+      max-width: 100%;
+      overflow-x: hidden;
     }
     .box {
       display: inline-block;
@@ -41,6 +44,12 @@
       font-weight: bold;
       margin-top: 10px;
       color: #2c7a00;
+    }
+    @media (max-width: 480px) {
+      .buttons button {
+        padding: 8px 14px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>

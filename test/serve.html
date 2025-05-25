@@ -2,11 +2,19 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>서빙 대시보드</title>
   <style>
-    body { font-family: sans-serif; padding: 20px; }
-    h2 { margin-bottom: 10px; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      box-sizing: border-box;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -18,8 +26,14 @@
       padding: 12px;
       background-color: white;
     }
-    .item.serving { background-color: #fff3cd; border-color: #ffc107; }
-    .item.done { background-color: #d4edda; border-color: #28a745; }
+    .item.serving {
+      background-color: #fff3cd;
+      border-color: #ffc107;
+    }
+    .item.done {
+      background-color: #d4edda;
+      border-color: #28a745;
+    }
     button {
       margin-top: 10px;
       padding: 6px 12px;
@@ -27,8 +41,20 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    .assign { background-color: #007bff; color: white; }
-    .complete { background-color: #28a745; color: white; }
+    .assign {
+      background-color: #007bff;
+      color: white;
+    }
+    .complete {
+      background-color: #28a745;
+      color: white;
+    }
+    @media (max-width: 480px) {
+      button {
+        font-size: 14px;
+        padding: 6px 10px;
+      }
+    }
   </style>
 </head>
 <body>

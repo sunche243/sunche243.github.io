@@ -2,12 +2,15 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>QR 주문 관리</title>
   <style>
     body {
         font-family: sans-serif;
         padding: 20px;
+        box-sizing: border-box;
+        max-width: 100%;
+        overflow-x: hidden;
     }
     .grid {
         display: grid;
@@ -52,6 +55,12 @@
         border-radius: 6px;
         cursor: pointer;
         transition: background-color 0.2s ease;
+    }
+    @media (max-width: 480px) {
+      .toggle-btn, .delete-btn {
+        padding: 6px 10px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>

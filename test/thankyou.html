@@ -2,13 +2,16 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>주문 완료</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
       padding: 30px;
+      box-sizing: border-box;
+      max-width: 100%;
+      overflow-x: hidden;
     }
     .box {
       border: 1px solid #ccc;
@@ -39,6 +42,15 @@
       color: white;
       border: none;
       border-radius: 6px;
+    }
+    @media (max-width: 480px) {
+      .box {
+        padding: 16px;
+      }
+      button.copy-btn {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
     }
   </style>
 </head>
