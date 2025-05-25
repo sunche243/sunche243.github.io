@@ -7,41 +7,29 @@
   <style>
     body { font-family: sans-serif; margin: 20px; }
     .section { margin-bottom: 20px; }
-    input[type="text"] {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      box-sizing: border-box;
-    }
-
-    .menu-item {
-      margin-bottom: 20px;
-    }
-
+    .menu-item { margin-bottom: 16px; }
+    input[type="text"] { width: 100%; padding: 8px; box-sizing: border-box; margin-bottom: 10px; }
     .counter {
       display: flex;
-      justify-content: flex-start;
       align-items: center;
-      margin-top: 10px;
+      gap: 10px;
+      margin-top: 8px;
     }
-
     .counter button {
-      width: 40px;
-      height: 20px;
+      width: 30px;
+      height: 30px;
       font-size: 16px;
-      cursor: pointer;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      background: none;
-      color: #28A745;
+      background-color: white;
+      color: #28a745;
+      cursor: pointer;
     }
-
     .counter span {
       width: 30px;
-      text-align: left;
+      text-align: center;
       display: inline-block;
-      margin: 0 8px;
     }
-
     button.submit-btn {
       padding: 10px;
       width: 100%;
@@ -52,17 +40,18 @@
       color: white;
       cursor: pointer;
     }
-
-    .show-menu-btn {
-      padding: 8px 12px;
-      font-size: 0.95rem;
-      background-color: #f5f5f5;
-      border: 1px solid #ccc;
+    .menu-btn {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
       border-radius: 6px;
       cursor: pointer;
+      font-size: 0.9rem;
     }
-
-    .menu-modal {
+    .modal {
       position: fixed;
       top: 0;
       left: 0;
@@ -70,44 +59,35 @@
       height: 100vh;
       background: rgba(0, 0, 0, 0.6);
       display: flex;
-      align-items: center;
       justify-content: center;
-      z-index: 9999;
+      align-items: center;
+      z-index: 1000;
     }
-
-    .menu-modal-content {
+    .modal-content {
       background: white;
       padding: 20px;
-      border-radius: 12px;
+      border-radius: 10px;
+      max-width: 90%;
+      max-height: 90%;
       text-align: center;
+      overflow: auto;
     }
-
-    .menu-modal-content button {
-      margin-top: 15px;
+    .modal-content img {
+      width: 100%;
+      height: auto;
+    }
+    .modal-content button {
+      margin-top: 12px;
       padding: 8px 16px;
       border: none;
       background-color: #28a745;
       color: white;
       border-radius: 6px;
-      font-size: 0.9rem;
       cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div id="noticeModal" class="modal" style="display:none">
-    <div class="modal-content">
-      <p>첫 주문시에는 최소 메인메뉴 1개 + 사이드메뉴 1개를 주문해주셔야 합니다.<br><br>
-      입금자명 혹은 테이블 번호를 잘못 기입하거나, 메뉴를 잘못 선택하여 주문한 경우<br>
-      <strong>취소 및 환불이 어려우니</strong> 이를 염두에 두시고 주문해 주시길 바랍니다.</p>
-      <button id="closeModal">확인</button>
-    </div>
-  </div>
-  <ins class="kakao_ad_area" style="display:none;"
-    data-ad-unit = "DAN-Pl9de2Hwu3eOBLAP"
-    data-ad-width = "320"
-    data-ad-height = "100"></ins>
-  <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
   <h2>메뉴 주문</h2>
   <i id="tableInfo" style="font-size: 0.9rem; color: gray;"></i>
 
@@ -115,142 +95,137 @@
     <div class="section">
       <label for="payerName"><strong>입금자명(테이블번호)</strong></label>
       <input type="text" id="payerName" required placeholder="예: 홍길동(3) 또는 홍길동 3" />
-      <div style="margin-top: 10px;">
-        <button type="button" id="showMenuBtn" class="show-menu-btn">📋 메뉴판 보기</button>
-      </div>
+      <button type="button" id="menuViewBtn" class="menu-btn">📋 메뉴판 보기</button>
     </div>
 
-    <div class="section">
-      <h3>🍽️ 메인 메뉴</h3>
-      <div class="menu-item">
-        공화춘 + 간짬뽕 + 냉동 세트 (13,000원)
-        <div class="counter" data-name="공화춘 + 간짬뽕 + 냉동 세트">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </div>
-      </div>
-      <div class="menu-item">
-        화생방 닭발 세트(닭발 + 주먹밥) (23,000원)
-        <div class="counter" data-name="화생방 닭발 세트(닭발 + 주먹밥)">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </div>
-      </div>
-      <div class="menu-item">
-        전역 후에도 생각나는 엄마표 볶음밥 (15,000원)
-        <div class="counter" data-name="전역 후에도 생각나는 엄마표 볶음밥">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <h3>🥢 사이드 메뉴</h3>
-      <div class="menu-item">
-        주먹밥은 못참치 (7,000원)
-        <div class="counter" data-name="주먹밥은 못참치">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </div>
-      </div>
-      <div class="menu-item">
-        선임 몰래 먹는 크래커 (6,000원)
-        <div class="counter" data-name="선임 몰래 먹는 크래커">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </div>
-      </div>
-      <div class="menu-item">
-        복숭아 한덩이 몰고가세요~ (5,000원)
-        <div class="counter" data-name="복숭아 한덩이 몰고가세요~">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </div>
-      </div>
-      <div class="menu-item">
-        절대 들켜선 안돼.. 나만의 비밀국수 (8,000원)
-        <div class="counter" data-name="절대 들켜선 안돼.. 나만의 비밀국수">
-          <button type="button" class="minus">-</button>
-          <span class="count">0</span>
-          <button type="button" class="plus">+</button>
-        </div>
-      </div>
+    <div class="section" id="menuSection">
+      <!-- 메뉴 아이템 영역 -->
     </div>
 
     <button class="submit-btn" type="submit">주문 확인</button>
   </form>
 
-  <div id="menuModal" class="menu-modal" style="display: none;">
-    <div class="menu-modal-content">
-      <img src="menu.png" alt="메뉴판" style="width: 100%; max-width: 350px;" />
+  <div id="noticeModal" class="modal">
+    <div class="modal-content">
+      <p>첫 주문시에는 최소 메인메뉴 1개 + 사이드메뉴 1개를 주문해주셔야 합니다.<br><br>
+      입금자명 혹은 테이블 번호를 잘못 기입하거나, 메뉴를 잘못 선택하여 주문한 경우<br>
+      <strong>취소 및 환불이 어려우니</strong> 이를 염두에 두시고 주문해 주시길 바랍니다.</p>
+      <button id="closeModal">확인</button>
+    </div>
+  </div>
+
+  <div id="menuModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <img src="menu.png" alt="메뉴판" />
       <button id="closeMenuModal">닫기</button>
     </div>
   </div>
 
   <script type="module">
-    document.getElementById("showMenuBtn").addEventListener("click", () => {
-      document.getElementById("menuModal").style.display = "flex";
-    });
-    document.getElementById("closeMenuModal").addEventListener("click", () => {
-      document.getElementById("menuModal").style.display = "none";
-    });
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
-    const table = new URLSearchParams(window.location.search).get("table") || "unknown";
-    document.getElementById("tableInfo").textContent = `내 테이블 번호: ${table}`;
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
+      authDomain: "accounting-pub.firebaseapp.com",
+      projectId: "accounting-pub"
+    };
 
-    document.querySelectorAll(".counter").forEach(counter => {
-      const minusBtn = counter.querySelector(".minus");
-      const plusBtn = counter.querySelector(".plus");
-      const countSpan = counter.querySelector(".count");
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-      minusBtn.addEventListener("click", () => {
-        let val = parseInt(countSpan.textContent);
-        if (val > 0) countSpan.textContent = val - 1;
+    const menuItems = [
+      { name: "화생방 닭발 세트(닭발 + 주먹밥)", price: 23000 },
+      { name: "전역 후에도 생각나는 엄마표 볶음밥", price: 15000 },
+      { name: "공화춘 + 간짬뽕 + 냉동 세트", price: 13000 },
+      { name: "절대 들켜선 안돼.. 나만의 비밀국수", price: 8000 },
+      { name: "선임 몰래 먹는 크래커", price: 6000 },
+      { name: "복숭아 한덩이 몰고가세요~", price: 5000 },
+      { name: "주먹밥은 못참치", price: 7000 }
+    ];
+
+    window.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("noticeModal").style.display = "flex";
+
+      document.getElementById("closeModal").onclick = () => {
+        document.getElementById("noticeModal").style.display = "none";
+      };
+
+      const table = new URLSearchParams(window.location.search).get("table") || "unknown";
+      document.getElementById("tableInfo").textContent = `내 테이블 번호: ${table}`;
+
+      const section = document.getElementById("menuSection");
+      menuItems.forEach(item => {
+        const div = document.createElement("div");
+        div.className = "menu-item";
+        div.innerHTML = `
+          <strong>${item.name} (${item.price.toLocaleString()}원)</strong>
+          <div class="counter" data-name="${item.name}">
+            <button type="button" class="minus">-</button>
+            <span class="count">0</span>
+            <button type="button" class="plus">+</button>
+          </div>
+        `;
+        section.appendChild(div);
       });
-      plusBtn.addEventListener("click", () => {
-        let val = parseInt(countSpan.textContent);
-        countSpan.textContent = val + 1;
+
+      document.querySelectorAll(".counter").forEach(counter => {
+        const minus = counter.querySelector(".minus");
+        const plus = counter.querySelector(".plus");
+        const count = counter.querySelector(".count");
+
+        minus.onclick = () => {
+          let val = parseInt(count.textContent);
+          if (val > 0) count.textContent = val - 1;
+        };
+
+        plus.onclick = () => {
+          let val = parseInt(count.textContent);
+          count.textContent = val + 1;
+        };
       });
-    });
 
-    document.getElementById("orderForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      let name = document.getElementById("payerName").value.trim();
-      const fixPattern = /^(.+)[\s_-](\d{1,3})$/;
-      const fullPattern = /^.+\(\d{1,3}\)$/;
+      document.getElementById("orderForm").onsubmit = (e) => {
+        e.preventDefault();
 
-      if (fixPattern.test(name)) {
-        const [, base, num] = name.match(fixPattern);
-        name = `${base}(${num})`;
-      }
+        let name = document.getElementById("payerName").value.trim();
+        const fixPattern = /^(.+)[\s_-](\d{1,3})$/;
+        const fullPattern = /^.+\(\d{1,3}\)$/;
 
-      if (!fullPattern.test(name)) {
-        alert("입금자명은 '이름(테이블번호)' 형식으로 입력해 주세요. 예: 홍길동(3)");
-        return;
-      }
+        if (fixPattern.test(name)) {
+          const [, base, num] = name.match(fixPattern);
+          name = `${base}(${num})`;
+        }
 
-      const items = Array.from(document.querySelectorAll(".counter"))
-        .map(el => {
-          const count = parseInt(el.querySelector(".count").textContent);
-          return { name: el.dataset.name, count };
-        })
-        .filter(item => item.count > 0);
+        if (!fullPattern.test(name)) {
+          alert("입금자명은 '이름(테이블번호)' 형식으로 입력해 주세요. 예: 홍길동(3)");
+          return;
+        }
 
-      if (items.length === 0) {
-        alert("메뉴 수량을 하나 이상 입력해 주세요.");
-        return;
-      }
+        const items = Array.from(document.querySelectorAll(".counter"))
+          .map(el => {
+            const count = parseInt(el.querySelector(".count").textContent);
+            return { name: el.dataset.name, count };
+          })
+          .filter(i => i.count > 0);
 
-      const flatItems = items.map(i => `${i.name}*${i.count}`);
-      const query = new URLSearchParams({ table, name, items: flatItems.join(", ") }).toString();
-      window.location.href = `check.html?${query}`;
+        if (items.length === 0) {
+          alert("메뉴 수량을 하나 이상 입력해 주세요.");
+          return;
+        }
+
+        const flat = items.map(i => `${i.name}*${i.count}`);
+        const query = new URLSearchParams({ table, name, items: flat.join(", ") }).toString();
+        window.location.href = `check.html?${query}`;
+      };
+
+      document.getElementById("menuViewBtn").onclick = () => {
+        document.getElementById("menuModal").style.display = "flex";
+      };
+
+      document.getElementById("closeMenuModal").onclick = () => {
+        document.getElementById("menuModal").style.display = "none";
+      };
     });
   </script>
 </body>
