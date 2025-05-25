@@ -5,28 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>메뉴 주문</title>
   <style>
-    body {
-      font-family: sans-serif;
-      margin: 20px;
-      box-sizing: border-box;
-      max-width: 100%;
-      overflow-x: hidden;
-    }
-    .section {
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
+    body { font-family: sans-serif; margin: 20px; box-sizing: border-box; max-width: 100%; overflow-x: hidden; }
+    .section { margin-bottom: 20px; }
+    .menu-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin: 6px 0;
     }
-    input[type="text"] {
-      width: 100%;
-      padding: 8px;
-    }
+    input[type="text"] { width: 100%; padding: 8px; }
     .counter {
       display: inline-flex;
       align-items: center;
-      margin-left: 10px;
     }
     .counter button {
       width: 30px;
@@ -50,7 +40,6 @@
       color: white;
       cursor: pointer;
     }
-
     .modal {
       position: fixed;
       top: 0;
@@ -80,14 +69,6 @@
       font-size: 1rem;
       cursor: pointer;
     }
-    @media (max-width: 480px) {
-      .counter span {
-        width: 24px;
-      }
-      button.submit-btn {
-        font-size: 14px;
-      }
-    }
   </style>
 </head>
 <body>
@@ -100,10 +81,11 @@
     </div>
   </div>
   <ins class="kakao_ad_area" style="display:none;"
-data-ad-unit = "DAN-Pl9de2Hwu3eOBLAP"
-data-ad-width = "320"
-data-ad-height = "100"></ins>
-<script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+    data-ad-unit = "DAN-Pl9de2Hwu3eOBLAP"
+    data-ad-width = "320"
+    data-ad-height = "100"></ins>
+  <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
+
   <h2>메뉴 주문</h2>
   <i id="tableInfo" style="font-size: 0.9rem; color: gray;"></i>
 
@@ -115,59 +97,66 @@ data-ad-height = "100"></ins>
 
     <div class="section">
       <h3>🍽️ 메인 메뉴</h3>
-      <label>공화춘 + 간짬뽕 + 냉동 세트 (13,000원)
+      <div class="menu-item">
+        <span>공화춘 + 간짬뽕 + 냉동 세트 (13,000원)</span>
         <span class="counter" data-name="공화춘 + 간짬뽕 + 냉동 세트">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
-      </label>
-      <label>화생방 닭발 세트(닭발 + 주먹밥) (23,000원)
+      </div>
+      <div class="menu-item">
+        <span>화생방 닭발 세트(닭발 + 주먹밥) (23,000원)</span>
         <span class="counter" data-name="화생방 닭발 세트(닭발 + 주먹밥)">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
-      </label>
-      <label>전역 후에도 생각나는 엄마표 볶음밥 (15,000원)
+      </div>
+      <div class="menu-item">
+        <span>전역 후에도 생각나는 엄마표 볶음밥 (15,000원)</span>
         <span class="counter" data-name="전역 후에도 생각나는 엄마표 볶음밥">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
-      </label>
+      </div>
     </div>
 
     <div class="section">
       <h3>🥢 사이드 메뉴</h3>
-      <label>주먹밥은 못참치 (7,000원)
+      <div class="menu-item">
+        <span>주먹밥은 못참치 (7,000원)</span>
         <span class="counter" data-name="주먹밥은 못참치">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
-      </label>
-      <label>선임 몰래 먹는 크래커 (6,000원)
+      </div>
+      <div class="menu-item">
+        <span>선임 몰래 먹는 크래커 (6,000원)</span>
         <span class="counter" data-name="선임 몰래 먹는 크래커">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
-      </label>
-      <label>복숭아 한덩이 몰고가세요~ (5,000원)
+      </div>
+      <div class="menu-item">
+        <span>복숭아 한덩이 몰고가세요~ (5,000원)</span>
         <span class="counter" data-name="복숭아 한덩이 몰고가세요~">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
-      </label>
-      <label>절대 들켜선 안돼.. 나만의 비밀국수 (8,000원)
+      </div>
+      <div class="menu-item">
+        <span>절대 들켜선 안돼.. 나만의 비밀국수 (8,000원)</span>
         <span class="counter" data-name="절대 들켜선 안돼.. 나만의 비밀국수">
           <button type="button" class="minus">-</button>
           <span class="count">0</span>
           <button type="button" class="plus">+</button>
         </span>
-      </label>
+      </div>
     </div>
 
     <button class="submit-btn" type="submit">주문 확인</button>
