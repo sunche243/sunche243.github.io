@@ -7,7 +7,12 @@
   <style>
     body { font-family: sans-serif; margin: 20px; }
     .section { margin-bottom: 20px; }
-    input[type="text"] { width: 100%; padding: 8px; margin-bottom: 10px; }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
 
     .menu-item {
       margin-bottom: 20px;
@@ -15,7 +20,7 @@
 
     .counter {
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       margin-top: 10px;
     }
@@ -25,15 +30,16 @@
       height: 20px;
       font-size: 16px;
       cursor: pointer;
-      border: none;
+      border: 1px solid #ccc;
       background: none;
       color: #28A745;
     }
 
     .counter span {
       width: 30px;
-      text-align: center;
+      text-align: left;
       display: inline-block;
+      margin: 0 8px;
     }
 
     button.submit-btn {
@@ -89,6 +95,19 @@
   </style>
 </head>
 <body>
+  <div id="noticeModal" class="modal" style="display:none">
+    <div class="modal-content">
+      <p>첫 주문시에는 최소 메인메뉴 1개 + 사이드메뉴 1개를 주문해주셔야 합니다.<br><br>
+      입금자명 혹은 테이블 번호를 잘못 기입하거나, 메뉴를 잘못 선택하여 주문한 경우<br>
+      <strong>취소 및 환불이 어려우니</strong> 이를 염두에 두시고 주문해 주시길 바랍니다.</p>
+      <button id="closeModal">확인</button>
+    </div>
+  </div>
+  <ins class="kakao_ad_area" style="display:none;"
+    data-ad-unit = "DAN-Pl9de2Hwu3eOBLAP"
+    data-ad-width = "320"
+    data-ad-height = "100"></ins>
+  <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
   <h2>메뉴 주문</h2>
   <i id="tableInfo" style="font-size: 0.9rem; color: gray;"></i>
 
