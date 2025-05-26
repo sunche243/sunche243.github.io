@@ -88,6 +88,11 @@
   </style>
 </head>
 <body>
+    <ins class="kakao_ad_area" style="display:none;"
+data-ad-unit = "DAN-wtbpyb5InffeA6t2"
+data-ad-width = "320"
+data-ad-height = "100"></ins>
+<script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
   <h2>메뉴 주문</h2>
   <i id="tableInfo" style="font-size: 0.9rem; color: gray;"></i>
 
@@ -98,8 +103,14 @@
       <button type="button" id="menuViewBtn" class="menu-btn">📋 메뉴판 보기</button>
     </div>
 
-    <div class="section" id="menuSection">
-      <!-- 메뉴 아이템 영역 -->
+    <div class="section">
+      <h3>🍽 메인 메뉴</h3>
+      <div id="mainMenuSection"></div>
+    </div>
+
+    <div class="section">
+      <h3>🥗 사이드 메뉴</h3>
+      <div id="sideMenuSection"></div>
     </div>
 
     <button class="submit-btn" type="submit">주문 확인</button>
@@ -136,13 +147,13 @@
     const db = getFirestore(app);
 
     const menuItems = [
-      { name: "화생방 닭발 세트(닭발 + 주먹밥)", price: 23000 },
-      { name: "전역 후에도 생각나는 엄마표 볶음밥", price: 15000 },
-      { name: "프리미엄 뽀글이(공화춘 + 간짬뽕 + 냉동)", price: 13000 },
-      { name: "절대 들켜선 안돼.. 나만의 비밀국수", price: 8000 },
-      { name: "선임 몰래 먹는 크래커", price: 6000 },
-      { name: "복숭아 한덩이 몰고가세요~", price: 5000 },
-      { name: "주먹밥은 못참치", price: 7000 }
+      { name: "화생방 닭발 세트(닭발 + 주먹밥)", price: 23000, type: "main" },
+      { name: "전역 후에도 생각나는 엄마표 볶음밥", price: 15000, type: "main" },
+      { name: "프리미엄 뽀글이(공화춘 + 간짬뽕 + 냉동)", price: 13000, type: "main" },
+      { name: "절대 들켜선 안돼.. 나만의 비밀국수", price: 8000, type: "side" },
+      { name: "선임 몰래 먹는 크래커", price: 6000, type: "side" },
+      { name: "복숭아 한덩이 몰고가세요~", price: 5000, type: "side" },
+      { name: "주먹밥은 못참치", price: 7000, type: "side" }
     ];
 
     window.addEventListener("DOMContentLoaded", () => {
@@ -154,7 +165,9 @@
       const table = new URLSearchParams(window.location.search).get("table") || "unknown";
       document.getElementById("tableInfo").textContent = `내 테이블 번호: ${table}`;
 
-      const section = document.getElementById("menuSection");
+      const mainSection = document.getElementById("mainMenuSection");
+      const sideSection = document.getElementById("sideMenuSection");
+
       menuItems.forEach(item => {
         const div = document.createElement("div");
         div.className = "menu-item";
@@ -166,7 +179,8 @@
             <button type="button" class="plus">+</button>
           </div>
         `;
-        section.appendChild(div);
+        if (item.type === "main") mainSection.appendChild(div);
+        else sideSection.appendChild(div);
       });
 
       document.querySelectorAll(".counter").forEach(counter => {
@@ -209,9 +223,8 @@
           })
           .filter(i => i.count > 0);
 
-        const totalCount = items.reduce((sum, item) => sum + item.count, 0);
-        if (totalCount < 1) {
-          alert("메뉴를 한 개 이상 선택해 주세요.");
+        if (items.length === 0) {
+          alert("메뉴 수량을 하나 이상 입력해 주세요.");
           return;
         }
 
