@@ -85,6 +85,21 @@
         else location.reload();
       }
 
+      // 허용된 사용자 이름 목록
+    // 허용된 사용자 이름 목록
+    const allowedUsers = [
+        "구광민", "김가연", "김민수", "김유찬", "김준겸", "김표수",
+        "박건우", "박상민", "박재환", "박현서",
+        "민수영", "육정민", "이지윤", "이현서",
+        "장은우", "정지우", "한지오", "허영", "홍정우"
+    ];
+
+    if (!allowedUsers.includes(currentUser)) {
+        alert("접근 권한이 없습니다. 관리자에게 문의하세요.");
+        document.body.innerHTML = "<h2 style='color: red; text-align: center;'>접근이 차단되었습니다.</h2>";
+        return;
+    }
+
       const container = document.getElementById("orders");
 
       const q = query(collection(db, "orders"), where("completed", "==", true));
