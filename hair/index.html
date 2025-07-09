@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>미용실 리뷰 촬영</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 2em; }
+    #videoPreview, #canvas, #downloadBtn, #reviewBtn { display: none; margin-top: 1em; }
+    video { width: 100%; max-width: 400px; border: 1px solid #ccc; }
+    canvas { display: none; }
+    button, input[type="file"] { padding: 1em; font-size: 1em; }
+  </style>
+</head>
+<body>
+  <h1>지금의 머리가 가장 아름다운 머리입니다.</h1>
+  <h2>아래의 버튼을 눌러 지금의 머리를 남겨보세요.</h2>
+  <div id="androidFlow">
+    <input type="file" accept="image/*" capture="environment" id="androidInput">
+  </div>
+
+  <div id="iosFlow">
+    <video id="videoPreview" autoplay playsinline></video>
+    <button id="captureBtn">사진 찍기</button>
+    <canvas id="canvas"></canvas>
+    <button id="downloadBtn">사진 저장하기</button>
+  </div>
+
+  <button id="reviewBtn">👉 리뷰 쓰러가기</button>
+
+  <script>
+    function isIOS() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function isAndroid() {
+      return /Android/i.test(navigator.userAgent);
+    }
+
+    const androidFlow = document.getElementById("androidFlow");
+    const iosFlow = document.getElementById("iosFlow");
+    const video = document.getElementById("videoPreview");
+    const canvas = document.getElementById("canvas");
+    const captureBtn = document.getElementById("captureBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
+    const reviewBtn = document.getElementById("reviewBtn");
+
+    if (isIOS()) {
+      androidFlow.style.display = "none";
+      iosFlow.style.display = "block";
+      video.style.display = "block";
+
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          video.srcObject = stream;
+        })
+        .catch(err => {
+          alert("카메라 접근에 실패했습니다.");
+        });
+
+      captureBtn.onclick = () => {
+        const ctx = canvas.getContext("2d");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        canvas.style.display = "block";
+        downloadBtn.style.display = "inline-block";
+      };
+
+      downloadBtn.onclick = () => {
+        const link = document.createElement('a');
+        link.download = 'review_photo.jpg';
+        link.href = canvas.toDataURL('image/jpeg');
+        link.click();
+        reviewBtn.style.display = "inline-block";
+      };
+
+    } else if (isAndroid()) {
+      androidFlow.style.display = "block";
+      iosFlow.style.display = "none";
+
+      const androidInput = document.getElementById("androidInput");
+      androidInput.onchange = () => {
+        if (androidInput.files.length > 0) {
+          alert("사진이 업로드 되었습니다. 이제 리뷰를 작성해주세요!");
+          reviewBtn.style.display = "inline-block";
+        }
+      };
+
+    } else {
+      alert("이 기기는 지원되지 않거나 감지할 수 없습니다.");
+    }
+
+    reviewBtn.onclick = () => {
+      // 여기에 리뷰 링크 삽입
+      window.open("https://m.place.naver.com/hairshop/매장ID/review", "_blank");
+    };
+  </script>
+</body>
+</html>
