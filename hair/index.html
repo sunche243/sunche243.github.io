@@ -1,31 +1,83 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>미용실 리뷰 촬영</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>사진 촬영 및 리뷰 유도</title>
   <style>
-    body { font-family: sans-serif; text-align: center; padding: 2em; }
-    #videoPreview, #canvas, #downloadBtn, #reviewBtn { display: none; margin-top: 1em; }
-    video { width: 100%; max-width: 400px; border: 1px solid #ccc; }
-    canvas { display: none; }
-    button, input[type="file"] { padding: 1em; font-size: 1em; }
+    body {
+      margin: 0;
+      padding: 2em;
+      font-family: sans-serif;
+      background: white;
+      color: black;
+      text-align: center;
+    }
+
+    #videoPreview, #canvas, #downloadBtn, #retakeBtn, #reviewBtn {
+      margin-top: 1em;
+      display: none;
+    }
+
+    video {
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid #ccc;
+    }
+
+    canvas {
+      display: none;
+      width: 100%;
+      max-width: 400px;
+      border: 1px solid #ccc;
+    }
+
+    button, input[type="file"] {
+      padding: 1em;
+      font-size: 1em;
+      margin: 0.5em;
+    }
+
+    #finalScreen {
+      position: fixed;
+      inset: 0;
+      background: black;
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #finalBtn {
+      background: white;
+      color: black;
+      padding: 1em 2em;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.2em;
+    }
   </style>
 </head>
 <body>
-  <h1>지금의 머리가 가장 아름다운 머리입니다.</h1>
-  <h2>아래의 버튼을 눌러 지금의 머리를 남겨보세요.</h2>
+  <h1>사진을 찍어주세요 📸</h1>
+
+  <!-- Android 흐름 -->
   <div id="androidFlow">
     <input type="file" accept="image/*" capture="environment" id="androidInput">
   </div>
 
+  <!-- iOS 흐름 -->
   <div id="iosFlow">
     <video id="videoPreview" autoplay playsinline></video>
     <button id="captureBtn">사진 찍기</button>
+    <button id="retakeBtn">다시 찍기</button>
     <canvas id="canvas"></canvas>
     <button id="downloadBtn">사진 저장하기</button>
   </div>
 
-  <button id="reviewBtn">👉 리뷰 쓰러가기</button>
+  <!-- 검은 배경에서 버튼만 남기기 -->
+  <div id="finalScreen">
+    <button id="finalBtn">이 버튼을 눌러주세요</button>
+  </div>
 
   <script>
     function isIOS() {
@@ -41,59 +93,96 @@
     const video = document.getElementById("videoPreview");
     const canvas = document.getElementById("canvas");
     const captureBtn = document.getElementById("captureBtn");
+    const retakeBtn = document.getElementById("retakeBtn");
     const downloadBtn = document.getElementById("downloadBtn");
-    const reviewBtn = document.getElementById("reviewBtn");
+    const androidInput = document.getElementById("androidInput");
+    const finalScreen = document.getElementById("finalScreen");
+    const finalBtn = document.getElementById("finalBtn");
+
+    let stream = null;
 
     if (isIOS()) {
       androidFlow.style.display = "none";
       iosFlow.style.display = "block";
-      video.style.display = "block";
 
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          video.srcObject = stream;
-        })
-        .catch(err => {
-          alert("카메라 접근에 실패했습니다.");
-        });
+      startCamera();
 
       captureBtn.onclick = () => {
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+          video.onloadedmetadata = () => {
+            captureImage();
+          };
+        } else {
+          captureImage();
+        }
+      };
+
+      function captureImage() {
         const ctx = canvas.getContext("2d");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         ctx.drawImage(video, 0, 0);
+        video.style.display = "none";
         canvas.style.display = "block";
+        captureBtn.style.display = "none";
+        retakeBtn.style.display = "inline-block";
         downloadBtn.style.display = "inline-block";
+        stopCamera();
+      }
+
+      retakeBtn.onclick = () => {
+        canvas.style.display = "none";
+        video.style.display = "block";
+        captureBtn.style.display = "inline-block";
+        retakeBtn.style.display = "none";
+        downloadBtn.style.display = "none";
+        startCamera();
       };
 
       downloadBtn.onclick = () => {
-        const link = document.createElement('a');
-        link.download = 'review_photo.jpg';
-        link.href = canvas.toDataURL('image/jpeg');
+        const link = document.createElement("a");
+        link.download = "photo.jpg";
+        link.href = canvas.toDataURL("image/jpeg");
         link.click();
-        reviewBtn.style.display = "inline-block";
+        showFinalScreen();
       };
+    }
 
-    } else if (isAndroid()) {
+    if (isAndroid()) {
       androidFlow.style.display = "block";
       iosFlow.style.display = "none";
 
-      const androidInput = document.getElementById("androidInput");
       androidInput.onchange = () => {
         if (androidInput.files.length > 0) {
-          alert("사진이 업로드 되었습니다. 이제 리뷰를 작성해주세요!");
-          reviewBtn.style.display = "inline-block";
+          showFinalScreen();
         }
       };
-
-    } else {
-      alert("이 기기는 지원되지 않거나 감지할 수 없습니다.");
     }
 
-    reviewBtn.onclick = () => {
-      // 여기에 리뷰 링크 삽입
-      window.open("https://m.place.naver.com/my/checkin", "_blank");
-    };
+    function showFinalScreen() {
+      document.body.style.background = "black";
+      androidFlow.style.display = "none";
+      iosFlow.style.display = "none";
+      finalScreen.style.display = "flex";
+    }
+
+    function startCamera() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(s => {
+          stream = s;
+          video.srcObject = s;
+          video.play();
+        })
+        .catch(err => {
+          alert("카메라 접근 실패: 권한을 허용해주세요.");
+        });
+    }
+
+    function stopCamera() {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    }
   </script>
 </body>
 </html>
