@@ -2,20 +2,243 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>이름, 전화번호 복사기</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>엑셀 연락처 · 복사 & 메시지 보내기 (합본)</title>
+
+  <!-- SheetJS (XLSX) CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #ffffff; --fg: #111827; --muted: #6b7280; --border: #e5e7eb;
+      --primary: #2563eb; --green: #10b981; --danger:#ef4444;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif; background: var(--bg); color: var(--fg); }
+    h1 { margin: 0 0 8px; font-size: 20px; }
+    .desc { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+
+    .bar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 16px; }
+    .file { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--border); padding: 10px 12px; border-radius: 10px; background: #fafafa; }
+    input[type="file"] { border: none; }
+    .hint { color: var(--muted); font-size: 13px; }
+
+    table { width: 100%; border-collapse: collapse; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    thead th { background: #f8fafc; position: sticky; top: 0; z-index: 1; text-align: left; font-weight: 700; font-size: 14px; padding: 12px; border-bottom: 1px solid var(--border); }
+    tbody td { padding: 12px; border-top: 1px solid var(--border); font-size: 14px; word-break: break-all; }
+    tbody tr:hover { background: #fafafa; }
+
+    .btn { appearance: none; border: 1px solid var(--border); background: #fff; padding: 8px 12px; border-radius: 10px; font-size: 13px; cursor: pointer; }
+    .btn.copy { border-color: var(--primary); color: var(--primary); }
+    .btn.sms  { border-color: var(--green); color: var(--green); }
+
+    .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background: #111827; color:#fff; padding: 10px 14px; border-radius: 10px; font-size: 13px; opacity: 0; pointer-events:none; transition: opacity .25s ease, transform .25s ease; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+    @media (max-width: 640px){ thead th, tbody td{ padding:10px; font-size:13px } .btn{ padding:7px 10px; font-size:12px } }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>엑셀 업로드 (이름 & 전화번호 복사)</h1>
+  <h1>엑셀 연락처 불러오기</h1>
+  <p class="desc">파일을 업로드하면 이름/전화번호를 표로 보여주며, 복사 및 “메시지 보내기(인사말 자동복사 + 메시지앱 열기)”가 가능합니다.</p>
 
-    <input type="file" id="excelFile" accept=".xlsx, .xls" />
-    <div id="tableContainer"></div>
+  <div class="bar">
+    <label class="file">
+      <strong>파일 선택</strong>
+      <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" />
+    </label>
+    <span class="hint">※ 첫 시트만 읽습니다. 이름/전화번호 열 인덱스는 코드 상단 상수로 조정하세요.</span>
   </div>
 
-  <!-- SheetJS 라이브러리 CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="script.js"></script>
+  <div id="tableContainer" aria-live="polite"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    // 🔧 열 인덱스 설정 (0부터 시작)
+    const NAME_COLUMN_INDEX = 1;   // 예: B열
+    const PHONE_COLUMN_INDEX = 2;  // 예: C열
+
+    // 파일 읽기
+    document.getElementById('excelFile').addEventListener('change', function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        displayTable(json);
+      };
+      reader.readAsArrayBuffer(file);
+    });
+
+    // 테이블 렌더
+    function displayTable(data) {
+      if (!Array.isArray(data) || data.length === 0) {
+        notify('데이터가 없습니다.');
+        return;
+      }
+      const container = document.getElementById('tableContainer');
+      container.innerHTML = '';
+
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      const tbody = document.createElement('tbody');
+
+      const headerRow = document.createElement('tr');
+      ['이름', '이름 복사', '전화번호', '전화번호 복사', '메시지 보내기'].forEach(text => {
+        const th = document.createElement('th');
+        th.textContent = text;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+
+      // 0행은 헤더로 가정하고 1행부터
+      for (let i = 1; i < data.length; i++) {
+        const row = data[i] || [];
+        const name  = row[NAME_COLUMN_INDEX]  ?? '';
+        const phone = row[PHONE_COLUMN_INDEX] ?? '';
+
+        const tr = document.createElement('tr');
+
+        // 이름
+        const nameTd = document.createElement('td');
+        nameTd.textContent = toText(name);
+        tr.appendChild(nameTd);
+
+        // 이름 복사
+        const nameCopyTd = document.createElement('td');
+        const nameBtn = document.createElement('button');
+        nameBtn.className = 'btn copy';
+        nameBtn.type = 'button';
+        nameBtn.textContent = '복사';
+        nameBtn.addEventListener('click', () => copyToClipboard(String(name)));
+        nameCopyTd.appendChild(nameBtn);
+        tr.appendChild(nameCopyTd);
+
+        // 전화번호
+        const phoneTd = document.createElement('td');
+        phoneTd.textContent = toText(phone);
+        tr.appendChild(phoneTd);
+
+        // 전화번호 복사
+        const phoneCopyTd = document.createElement('td');
+        const phoneBtn = document.createElement('button');
+        phoneBtn.className = 'btn copy';
+        phoneBtn.type = 'button';
+        phoneBtn.textContent = '복사';
+        phoneBtn.addEventListener('click', () => copyToClipboard(String(phone)));
+        phoneCopyTd.appendChild(phoneBtn);
+        tr.appendChild(phoneCopyTd);
+
+        // 메시지 보내기 (인사말 복사 + 메시지앱 열기)
+        const smsTd = document.createElement('td');
+        const smsBtn = document.createElement('button');
+        smsBtn.className = 'btn sms';
+        smsBtn.type = 'button';
+        smsBtn.textContent = '메시지';
+        smsBtn.addEventListener('click', () => sendMessage(String(name), String(phone)));
+        smsTd.appendChild(smsBtn);
+        tr.appendChild(smsTd);
+
+        tbody.appendChild(tr);
+      }
+
+      table.appendChild(thead);
+      table.appendChild(tbody);
+      container.appendChild(table);
+    }
+
+    // 유틸
+    function toText(v){ return (v === null || v === undefined) ? '' : String(v); }
+
+    function copyToClipboard(text) {
+      const value = String(text ?? '');
+      if (!value) { notify('복사할 내용이 없습니다.'); return; }
+      navigator.clipboard.writeText(value)
+        .then(() => notify('복사되었습니다.'))
+        .catch(() => notify('복사에 실패했습니다.', true));
+    }
+
+    // 전화번호 정리: 맨 앞의 +는 보존, 나머지는 숫자만
+    function normalizePhone(raw) {
+      if (!raw) return '';
+      const s = String(raw).trim();
+      const plus = s.startsWith('+');
+      const digits = s.replace(/\D/g, '');
+      return (plus ? '+' : '') + digits;
+    }
+
+    // 디바이스 판별
+    function getPlatform() {
+      const ua = navigator.userAgent || '';
+      return {
+        isAndroid: /Android/i.test(ua),
+        isIOS: /iPhone|iPad|iPod/i.test(ua),
+        isMac: /Macintosh|Mac OS X/i.test(ua),
+      };
+    }
+
+    /**
+     * 메시지 버튼 동작:
+     * 1) "안녕하세요 {이름}님" 클립보드 복사
+     * 2) sms: 링크로 메시지 앱 열기
+     *    - Android: sms:number?body=메시지  (본문 자동 채움 시도)
+     *    - iOS/macOS: sms:number            (본문 자동 채움 제한 → 붙여넣기)
+     */
+    function sendMessage(name, rawPhone) {
+      const displayName = (name && name.trim()) ? name.trim() : '';
+      const message = displayName ? `안녕하세요 ${displayName}님` : `안녕하세요`;
+      const number = normalizePhone(rawPhone);
+
+      if (!number) {
+        notify('전화번호가 없습니다.', true);
+        return;
+      }
+
+      // 1) 우선 인사말 복사
+      navigator.clipboard.writeText(message).then(() => {
+        notify('인사말이 복사되었습니다. 메시지 앱을 엽니다...');
+      }).catch(() => {
+        // 복사 실패해도 앱은 열어준다
+        notify('클립보드 복사에 실패했습니다. 메시지 앱을 엽니다...', true);
+      }).finally(() => {
+        // 2) 메시지 앱 열기
+        const { isAndroid, isIOS, isMac } = getPlatform();
+        let smsUrl = '';
+
+        if (isAndroid) {
+          // 안드로이드 대부분은 body 지원(기기/앱에 따라 다를 수 있음)
+          smsUrl = `sms:${encodeURIComponent(number)}?body=${encodeURIComponent(message)}`;
+        } else if (isIOS || isMac) {
+          // iOS/macOS는 보안정책으로 body 자동입력 제한 → 번호만 열기
+          smsUrl = `sms:${encodeURIComponent(number)}`;
+        } else {
+          // 기타 환경: 설치/연동 여부에 따라 미동작 가능
+          smsUrl = `sms:${encodeURIComponent(number)}`;
+        }
+
+        try {
+          window.location.href = smsUrl;
+        } catch (e) {
+          console.error('메시지 앱 열기 실패:', e);
+          notify('이 기기에서 메시지 앱을 열 수 없습니다.', true);
+        }
+      });
+    }
+
+    // 토스트
+    let toastTimer = null;
+    function notify(msg, isError=false){
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.style.background = isError ? 'var(--danger)' : '#111827';
+      el.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 1600);
+    }
+  </script>
 </body>
 </html>
