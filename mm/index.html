@@ -54,8 +54,8 @@
 
   <script>
     // 🔧 열 인덱스 설정 (0부터 시작)
-    const NAME_COLUMN_INDEX = 1;   // 예: B열
-    const PHONE_COLUMN_INDEX = 2;  // 예: C열
+    const NAME_COLUMN_INDEX = 0;   // 예: B열
+    const PHONE_COLUMN_INDEX = 1;  // 예: C열
 
     // 파일 읽기
     document.getElementById('excelFile').addEventListener('change', function (e) {
@@ -189,60 +189,48 @@
      *    - iOS/macOS: sms:number            (본문 자동 채움 제한 → 붙여넣기)
      */
     function sendMessage(name, rawPhone) {
-      const displayName = (name && name.trim()) ? name.trim() : '';
-      const message = displayName ? `${displayName} 선배님 안녕하세요, 회계학과 제41대 학생회 지음으로서 인사드립니다!
-따뜻했던 만남과 추억을 돌아보며, 다시 한 번 서로의 인연을 이어갈 수 있는 자리를 마련했습니다.
+  const message = `안녕하세요 미나에요 :)
+다름이 아니고 제가 이직을 하게 되었지만, 따로 한분 한분 전화를 드리지 못해 문자로 연락 남기게 되었어요ㅠㅠ
+궁금하신 부분 연락주세요~ 📞
+제가 일하는 샵 위치 같이 보내드릴게요
+예약은 똑같이 네이버로 해주시면 됩니당
+기다리고 있을게용🤍
 
-이번 자리는 교수님, 동문 선배님들, 그리고 재학생이 함께 어우러져 지난 한 해를 돌아보고 서로에게 감사의 마음을 전하며, 새로운 한 해를 힘차게 맞이하기 위한 시간으로 준비하였습니다. 
+매장 네이버지도 링크 : https://naver.me/FhfqFKUh`;
 
-선배님께서 참석해 주신다면 재학생들에게는 큰 울림과 격려가 될 것이며 선배님들께서도 서로의 시간을 나누며 뜻깊은 하루를 보내실 수 있으리라 생각하여, 이렇게 초청드립니다!
-바쁘시더라도 꼭 함께해 주시면 감사하겠습니다.
+  const number = normalizePhone(rawPhone);
 
-✨ 일시: 2025년 11월 6일(목) 저녁 6시
-✨ 장소: 서울 더 리버사이드 호텔
-✨ 드레스코드 : 세미정장
-✨ 참가비 : 65000원
+  if (!number) {
+    notify('전화번호가 없습니다.', true);
+    return;
+  }
 
-📍신청폼 : https://forms.gle/sPuT587uRJYE71yq7
-📍계좌 : SC제일 10820272218
-` : `안녕하세요`;
-      const number = normalizePhone(rawPhone);
+  // 1) 우선 메시지 복사
+  navigator.clipboard.writeText(message).then(() => {
+    notify('메시지가 복사되었습니다. 메시지 앱을 엽니다...');
+  }).catch(() => {
+    notify('클립보드 복사에 실패했습니다. 메시지 앱을 엽니다...', true);
+  }).finally(() => {
+    // 2) 메시지 앱 열기
+    const { isAndroid, isIOS, isMac } = getPlatform();
+    let smsUrl = '';
 
-      if (!number) {
-        notify('전화번호가 없습니다.', true);
-        return;
-      }
-
-      // 1) 우선 인사말 복사
-      navigator.clipboard.writeText(message).then(() => {
-        notify('인사말이 복사되었습니다. 메시지 앱을 엽니다...');
-      }).catch(() => {
-        // 복사 실패해도 앱은 열어준다
-        notify('클립보드 복사에 실패했습니다. 메시지 앱을 엽니다...', true);
-      }).finally(() => {
-        // 2) 메시지 앱 열기
-        const { isAndroid, isIOS, isMac } = getPlatform();
-        let smsUrl = '';
-
-        if (isAndroid) {
-          // 안드로이드 대부분은 body 지원(기기/앱에 따라 다를 수 있음)
-          smsUrl = `sms:${encodeURIComponent(number)}?body=${encodeURIComponent(message)}`;
-        } else if (isIOS || isMac) {
-          // iOS/macOS는 보안정책으로 body 자동입력 제한 → 번호만 열기
-          smsUrl = `sms:${encodeURIComponent(number)}`;
-        } else {
-          // 기타 환경: 설치/연동 여부에 따라 미동작 가능
-          smsUrl = `sms:${encodeURIComponent(number)}`;
-        }
-
-        try {
-          window.location.href = smsUrl;
-        } catch (e) {
-          console.error('메시지 앱 열기 실패:', e);
-          notify('이 기기에서 메시지 앱을 열 수 없습니다.', true);
-        }
-      });
+    if (isAndroid) {
+      smsUrl = `sms:${encodeURIComponent(number)}?body=${encodeURIComponent(message)}`;
+    } else if (isIOS || isMac) {
+      smsUrl = `sms:${encodeURIComponent(number)}`;
+    } else {
+      smsUrl = `sms:${encodeURIComponent(number)}`;
     }
+
+    try {
+      window.location.href = smsUrl;
+    } catch (e) {
+      console.error('메시지 앱 열기 실패:', e);
+      notify('이 기기에서 메시지 앱을 열 수 없습니다.', true);
+    }
+  });
+}
 
     // 토스트
     let toastTimer = null;
