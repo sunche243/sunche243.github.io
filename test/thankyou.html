@@ -4,129 +4,30 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>주문 완료</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 30px 16px;
-      margin: 0;
-      max-width: 100%;
-      overflow-x: hidden;
-    }
-    .box {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      padding: 20px;
-      display: inline-block;
-      margin-top: 20px;
-      max-width: 400px;
-      width: 100%;
-    }
-    .price {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #2c7a00;
-    }
-    #copyMsg {
-      margin-top: 8px;
-      color: green;
-      font-size: 0.9rem;
-      display: none;
-    }
-    button.copy-btn {
-      margin-top: 10px;
-      padding: 8px 16px;
-      font-size: 1rem;
-      cursor: pointer;
-      background-color: #46b4e0;
-      color: white;
-      border: none;
-      border-radius: 6px;
-    }
-    @media (max-width: 480px) {
-      .box {
-        padding: 16px;
-      }
-      button.copy-btn {
-        font-size: 14px;
-        padding: 6px 12px;
-      }
-    }
-  </style>
+
+  <link rel="stylesheet" href="./css/style.css">
 </head>
+
 <body>
-    <ins class="kakao_ad_area" style="display:none;"
-    data-ad-unit = "DAN-wtbpyb5InffeA6t2"
-    data-ad-width = "320"
-    data-ad-height = "100"></ins>
-    <script type="text/javascript" src="//t1.daumcdn.net/kas/static/ba.min.js" async></script>
-  <h2>주문이 완료되었어요! 🎉</h2>
-  <div class="box">
-    <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
-    <p><strong>입금자명:</strong> <span id="payer">-</span></p>
-    <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
-    <p class="price" id="totalPrice"></p>
 
-    <hr />
-    <p><strong>입금 계좌:</strong></p>
-    <p id="accountNumber">SC제일은행 10820272218 (박찬준)</p>
-    <button class="copy-btn" onclick="copyAccount()">계좌번호 복사</button>
-    <p id="copyMsg">계좌번호가 복사되었습니다!</p>
-  </div>
+<h2>주문이 완료되었어요! 🎉</h2>
 
-  <script>
-    window.addEventListener("DOMContentLoaded", () => {
-      const params = new URLSearchParams(window.location.search);
-      const table = params.get("table") || "-";
-      let name = params.get("name") || "-";
-      const itemString = params.get("items") || "";
+<div class="box">
+  <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
+  <p><strong>입금자명:</strong> <span id="payer">-</span></p>
+  <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
+  <p class="price" id="totalPrice"></p>
 
-      const namePattern = /^.+\([0-9]+\)$/;
-      if (!namePattern.test(name)) {
-        name += " ⚠️";
-      }
+  <hr />
 
-      document.getElementById("tableNum").textContent = table;
-      document.getElementById("payer").textContent = name;
+  <p><strong>입금 계좌:</strong></p>
+  <p id="accountNumber">SC제일은행 10820272218 (박찬준)</p>
 
-      const priceMap = {
-        "화생방 닭발 세트(닭발 + 주먹밥)": 23000,
-        "프리미엄 뽀글이(공화춘 + 간짬뽕 + 냉동)": 13000,
-        "전역 후에도 생각나는 엄마표 볶음밥": 15000,
-        "선임 몰래 먹는 크래커": 6000,
-        "절대 들켜선 안돼.. 나만의 비밀국수": 8000,
-        "복숭아 한덩이 몰고가세요~": 5000,
-        "주먹밥은 못참치": 7000
-      };
+  <button class="copy-btn" id="copyBtn">계좌번호 복사</button>
+  <p id="copyMsg" style="display:none;">계좌번호가 복사되었습니다!</p>
+</div>
 
-      const items = itemString.split(',').map(i => i.trim());
-      let total = 0;
-      let itemListHtml = "";
+<script type="module" src="./js/thankyou.js"></script>
 
-      items.forEach(entry => {
-        const [name, countStr] = entry.split('*');
-        const count = parseInt(countStr) || 1;
-        const price = priceMap[name.trim()] || 0;
-        total += price * count;
-        itemListHtml += `${name.trim()} ${count}개<br>`;
-      });
-
-      document.getElementById("items").innerHTML = itemListHtml;
-      document.getElementById("totalPrice").textContent = `총 금액: ${total.toLocaleString()}원`;
-    });
-
-    function copyAccount() {
-      const text = "SC제일은행 10820272218 (박찬준)";
-      navigator.clipboard.writeText(text).then(() => {
-        document.getElementById("copyMsg").style.display = "block";
-        setTimeout(() => {
-          document.getElementById("copyMsg").style.display = "none";
-        }, 2000);
-      });
-    }
-  </script>
 </body>
 </html>

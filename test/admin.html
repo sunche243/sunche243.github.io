@@ -2,152 +2,18 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>QR 주문 관리</title>
-  <style>
-    body {
-        font-family: sans-serif;
-        padding: 20px;
-        box-sizing: border-box;
-        max-width: 100%;
-        overflow-x: hidden;
-    }
-    .grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-    @media (min-width: 600px) {
-        .grid {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-    .order {
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 12px;
-        background-color: white;
-    }
-    .order.completed {
-        background-color: #d4edda;
-        border-color: #28a745;
-    }
-    .order p {
-        margin: 4px 0;
-    }
-    .toggle-btn{
-        margin-right: 8px;
-        margin-top: 6px;
-        padding: 6px 12px;
-        background-color: rgb(70, 180, 224);
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-    .delete-btn{
-        margin-right: 8px;
-        margin-top: 6px;
-        padding: 6px 12px;
-        background-color: white;
-        color: black;
-        border: 1px solid gray;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-    @media (max-width: 480px) {
-      .toggle-btn, .delete-btn {
-        padding: 6px 10px;
-        font-size: 14px;
-      }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>관리자 페이지</title>
+
+  <link rel="stylesheet" href="./css/style.css">
 </head>
+
 <body>
-  <h2>주문 목록</h2>
-  <div class="grid" id="orders"></div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      query,
-      orderBy,
-      onSnapshot,
-      doc,
-      updateDoc,
-      deleteDoc
-    } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+<h2>주문 관리 (관리자)</h2>
+<div id="orders"></div>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyC4p0c57uJHLj2un5W2Mr5Us0U8zw-4WzU",
-      authDomain: "accounting-pub.firebaseapp.com",
-      projectId: "accounting-pub"
-    };
+<script type="module" src="./js/admin.js"></script>
 
-    const priceMap = {
-      "화생방 닭발 세트(닭발 + 주먹밥)": 23000,
-      "프리미엄 뽀글이(공화춘 + 간짬뽕 + 냉동)": 13000,
-      "전역 후에도 생각나는 엄마표 볶음밥": 15000,
-      "선임 몰래 먹는 크래커": 6000,
-      "절대 들켜선 안돼.. 나만의 비밀국수": 8000,
-      "복숭아 한덩이 몰고가세요~": 5000,
-      "주먹밥은 못참치": 7000
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const ordersDiv = document.getElementById("orders");
-    const q = query(collection(db, "orders"), orderBy("timestamp", "desc"));
-
-    const namePattern = /^.+\([0-9]+\)$/;
-
-    onSnapshot(q, (snapshot) => {
-      ordersDiv.innerHTML = '';
-      snapshot.forEach(docSnap => {
-        const data = docSnap.data();
-        const id = docSnap.id;
-
-        const name = namePattern.test(data.name) ? data.name : data.name + " ⚠️";
-
-        const total = data.items.reduce((sum, item) => {
-          const price = priceMap[item.name] || 0;
-          return sum + price * item.count;
-        }, 0);
-
-        const div = document.createElement("div");
-        div.className = "order" + (data.completed ? " completed" : "");
-        const btnText = data.completed ? "확인 취소" : "확인";
-
-        const itemList = data.items.map(item => `${item.name} ${item.count}개`).join('<br>');
-        const formattedDate = new Date(data.timestamp).toLocaleString("ko-KR");
-
-        div.innerHTML = `
-          <p><strong>테이블 ${data.table}</strong> | 입금자: ${name}</p>
-          <p>주문:<br>${itemList}</p>
-          <p><strong>총 금액: ${total.toLocaleString()}원</strong></p>
-          <small>${formattedDate}</small><br>
-          <button class="toggle-btn">${btnText}</button>
-          <button class="delete-btn">삭제</button>
-        `;
-
-        div.querySelector(".toggle-btn").addEventListener("click", async () => {
-          await updateDoc(doc(db, "orders", id), {
-            completed: !data.completed,
-          });
-        });
-
-        div.querySelector(".delete-btn").addEventListener("click", async () => {
-          if (confirm("정말로 삭제하시겠습니까?")) {
-            await deleteDoc(doc(db, "orders", id));
-          }
-        });
-
-        ordersDiv.appendChild(div);
-      });
-    });
-  </script>
 </body>
 </html>
