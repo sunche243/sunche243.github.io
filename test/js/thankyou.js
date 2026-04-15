@@ -14,27 +14,52 @@ window.addEventListener("DOMContentLoaded", () => {
   const name = params.get("name") || "-";
   const itemString = params.get("items") || "";
 
-  document.getElementById("tableNum").textContent = table;
-  document.getElementById("payer").textContent = name;
-  document.getElementById("accountNumber").textContent = appConfig.accountText;
+  const tableNumEl = document.getElementById("tableNum");
+  const payerEl = document.getElementById("payer");
+  const itemsEl = document.getElementById("items");
+  const totalPriceEl = document.getElementById("totalPrice");
+  const accountNumberEl = document.getElementById("accountNumber");
+  const copyBtn = document.getElementById("copyBtn");
+  const copyMsg = document.getElementById("copyMsg");
+
+  tableNumEl.textContent = table;
+  payerEl.textContent = name;
+  accountNumberEl.textContent = appConfig.accountText;
 
   const items = parseItems(itemString);
   const total = calculateOrderTotal(items, priceMap);
 
-  const html = items
-    .map((item) => `${item.name} ${item.count}개`)
-    .join("<br>");
+  itemsEl.innerHTML = "";
 
-  document.getElementById("items").innerHTML = html;
-  document.getElementById("totalPrice").textContent = `총 금액: ${formatPrice(total)}`;
+  if (items.length === 0) {
+    itemsEl.textContent = "주문한 메뉴가 없어요.";
+  } else {
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "check-item-row";
 
-  document.getElementById("copyBtn").onclick = () => {
+      const left = document.createElement("span");
+      left.className = "check-item-name";
+      left.textContent = item.name;
+
+      const right = document.createElement("strong");
+      right.className = "check-item-count";
+      right.textContent = `${item.count}개`;
+
+      row.appendChild(left);
+      row.appendChild(right);
+      itemsEl.appendChild(row);
+    });
+  }
+
+  totalPriceEl.textContent = formatPrice(total);
+
+  copyBtn.onclick = () => {
     navigator.clipboard.writeText(appConfig.accountText).then(() => {
-      const msg = document.getElementById("copyMsg");
-      msg.style.display = "block";
+      copyMsg.style.display = "block";
 
       setTimeout(() => {
-        msg.style.display = "none";
+        copyMsg.style.display = "none";
       }, 2000);
     });
   };

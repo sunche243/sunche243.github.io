@@ -33,6 +33,28 @@
     </div>
   </div>
 
+  <div class="stats-summary-grid">
+    <div class="stats-card">
+      <div class="stats-label">평균 서빙 완료 시간</div>
+      <div class="stats-value" id="averageServeTime">-</div>
+    </div>
+
+    <div class="stats-card">
+      <div class="stats-label">서빙 완료 항목 수</div>
+      <div class="stats-value" id="completedServeCount">0개</div>
+    </div>
+
+    <div class="stats-card">
+      <div class="stats-label">가장 빠른 서빙</div>
+      <div class="stats-value" id="fastestServeTime">-</div>
+    </div>
+
+    <div class="stats-card">
+      <div class="stats-label">가장 느린 서빙</div>
+      <div class="stats-value" id="slowestServeTime">-</div>
+    </div>
+  </div>
+
   <div class="stats-highlight-grid">
     <div class="stats-card">
       <div class="stats-label">가장 많이 팔린 메뉴</div>
@@ -43,6 +65,11 @@
       <div class="stats-label">가장 매출이 높은 메뉴</div>
       <div class="stats-value stats-highlight" id="topSalesMenu">-</div>
     </div>
+  </div>
+
+  <div class="stats-section">
+    <h3>시간대별 주문 수</h3>
+    <div id="hourlyOrderStats" class="stats-list"></div>
   </div>
 
   <div class="stats-section">

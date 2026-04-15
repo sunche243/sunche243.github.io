@@ -465,3 +465,173 @@ button:disabled {
   cursor: not-allowed;
   opacity: 0.7;
 }
+
+body.check-page {
+  text-align: center;
+}
+
+body.check-page h2 {
+  text-align: center;
+}
+
+.order.deleted {
+  opacity: 0.6;
+  background-color: #f8f9fa;
+}
+
+.admin-summary-grid {
+  margin-bottom: 20px;
+}
+
+.menu-total-box {
+  margin: 20px 0;
+  padding: 14px 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.menu-total-label {
+  display: block;
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.menu-total-value {
+  font-size: 22px;
+  color: #2c7a00;
+}
+
+.menu-summary-box {
+  margin: 20px 0;
+  padding: 14px 16px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: white;
+}
+
+.menu-summary-title {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.menu-summary-empty {
+  color: #888;
+  font-size: 14px;
+}
+
+.menu-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menu-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.menu-summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.reset-menu-btn {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #ccc;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .menu-summary-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.check-summary-block {
+  margin-bottom: 16px;
+}
+
+.check-summary-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 6px;
+}
+
+.check-summary-value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.check-item-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.check-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+.check-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.check-item-name {
+  flex: 1;
+}
+
+.check-item-count {
+  white-space: nowrap;
+}
+
+.check-summary-total {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+}
+
+.check-summary-total strong {
+  color: #2c7a00;
+}
+
+.thankyou-account-box {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #ddd;
+  text-align: center;
+}
+
+.thankyou-account-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.thankyou-account-number {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}

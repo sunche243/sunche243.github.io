@@ -4,30 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>주문 완료</title>
-
   <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body class="thankyou-page">
 
-<h2>주문이 완료되었어요! 🎉</h2>
+  <h2>주문이 완료되었어요! 🎉</h2>
 
-<div class="box">
-  <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
-  <p><strong>입금자명:</strong> <span id="payer">-</span></p>
-  <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
-  <p class="price" id="totalPrice"></p>
+  <div class="box">
+    <div class="check-summary-block">
+      <div class="check-summary-label">테이블 번호</div>
+      <div class="check-summary-value" id="tableNum">-</div>
+    </div>
 
-  <hr />
+    <div class="check-summary-block">
+      <div class="check-summary-label">입금자명</div>
+      <div class="check-summary-value" id="payer">-</div>
+    </div>
 
-  <p><strong>입금 계좌:</strong></p>
-  <p id="accountNumber">SC제일은행 10820272218 (박찬준)</p>
+    <div class="check-summary-block">
+      <div class="check-summary-label">주문한 항목</div>
+      <div id="items" class="check-item-list">-</div>
+    </div>
 
-  <button class="copy-btn" id="copyBtn">계좌번호 복사</button>
-  <p id="copyMsg" style="display:none;">계좌번호가 복사되었습니다!</p>
-</div>
+    <div class="check-summary-total">
+      <span>총 금액</span>
+      <strong id="totalPrice">0원</strong>
+    </div>
 
-<script type="module" src="./js/thankyou.js"></script>
+    <div class="thankyou-account-box">
+      <div class="thankyou-account-label">입금 계좌</div>
+      <div class="thankyou-account-number" id="accountNumber">-</div>
+      <button class="copy-btn" id="copyBtn" type="button">계좌번호 복사</button>
+      <p id="copyMsg" style="display:none;">계좌번호가 복사되었습니다!</p>
+    </div>
+  </div>
+
+  <script type="module" src="./js/thankyou.js"></script>
 
 </body>
 </html>

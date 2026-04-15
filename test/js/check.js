@@ -29,12 +29,30 @@ window.addEventListener("DOMContentLoaded", () => {
   const items = parseItems(itemString);
   const total = calculateOrderTotal(items, priceMap);
 
-  const listHtml = items
-    .map((item) => `${item.name} ${item.count}개`)
-    .join("<br>");
+  itemsEl.innerHTML = "";
 
-  itemsEl.innerHTML = listHtml;
-  totalPriceEl.textContent = `총 금액: ${formatPrice(total)}`;
+  if (items.length === 0) {
+    itemsEl.textContent = "선택한 메뉴가 없어요.";
+  } else {
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "check-item-row";
+
+      const left = document.createElement("span");
+      left.className = "check-item-name";
+      left.textContent = item.name;
+
+      const right = document.createElement("strong");
+      right.className = "check-item-count";
+      right.textContent = `${item.count}개`;
+
+      row.appendChild(left);
+      row.appendChild(right);
+      itemsEl.appendChild(row);
+    });
+  }
+
+  totalPriceEl.textContent = formatPrice(total);
 
   goBackBtn.onclick = () => {
     if (goConfirmBtn.disabled) return;

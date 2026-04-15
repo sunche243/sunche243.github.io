@@ -1,5 +1,5 @@
-import { menuItems } from "./menuData.js";
-import { validateName, buildQueryString } from "./utils.js";
+import { menuItems, priceMap } from "./menuData.js";
+import { validateName, buildQueryString, formatPrice } from "./utils.js";
 import { appConfig } from "./appConfig.js";
 
 function renderMenus(mainSection, sideSection) {
@@ -24,6 +24,57 @@ function renderMenus(mainSection, sideSection) {
   });
 }
 
+function getSelectedItems() {
+  return Array.from(document.querySelectorAll(".counter"))
+    .map((el) => ({
+      name: el.dataset.name,
+      count: parseInt(el.querySelector(".count").textContent, 10) || 0
+    }))
+    .filter((item) => item.count > 0);
+}
+
+function calculateEstimatedTotal() {
+  const selectedItems = getSelectedItems();
+
+  return selectedItems.reduce((sum, item) => {
+    return sum + (priceMap[item.name] || 0) * item.count;
+  }, 0);
+}
+
+function updateEstimatedTotal() {
+  const estimatedTotalPriceEl = document.getElementById("estimatedTotalPrice");
+  const total = calculateEstimatedTotal();
+  estimatedTotalPriceEl.textContent = formatPrice(total);
+}
+
+function updateSelectedMenuSummary() {
+  const summaryEl = document.getElementById("selectedMenuSummary");
+  const selectedItems = getSelectedItems();
+
+  if (selectedItems.length === 0) {
+    summaryEl.className = "menu-summary-empty";
+    summaryEl.textContent = "아직 선택한 메뉴가 없어요.";
+    return;
+  }
+
+  summaryEl.className = "menu-summary-list";
+  summaryEl.innerHTML = selectedItems
+    .map((item) => `<div class="menu-summary-row"><span>${item.name}</span><strong>${item.count}개</strong></div>`)
+    .join("");
+}
+
+function refreshMenuPreview() {
+  updateEstimatedTotal();
+  updateSelectedMenuSummary();
+}
+
+function resetAllCounters() {
+  document.querySelectorAll(".counter .count").forEach((countEl) => {
+    countEl.textContent = "0";
+  });
+  refreshMenuPreview();
+}
+
 function bindCounterEvents() {
   document.querySelectorAll(".counter").forEach((counter) => {
     const minus = counter.querySelector(".minus");
@@ -34,23 +85,16 @@ function bindCounterEvents() {
       const current = parseInt(count.textContent, 10) || 0;
       if (current > 0) {
         count.textContent = current - 1;
+        refreshMenuPreview();
       }
     };
 
     plus.onclick = () => {
       const current = parseInt(count.textContent, 10) || 0;
       count.textContent = current + 1;
+      refreshMenuPreview();
     };
   });
-}
-
-function getSelectedItems() {
-  return Array.from(document.querySelectorAll(".counter"))
-    .map((el) => ({
-      name: el.dataset.name,
-      count: parseInt(el.querySelector(".count").textContent, 10) || 0
-    }))
-    .filter((item) => item.count > 0);
 }
 
 function validateTableMatch(inputName, scannedTable) {
@@ -87,6 +131,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const menuModal = document.getElementById("menuModal");
   const menuViewBtn = document.getElementById("menuViewBtn");
   const closeMenuModal = document.getElementById("closeMenuModal");
+  const resetMenuBtn = document.getElementById("resetMenuBtn");
   const orderForm = document.getElementById("orderForm");
   const payerNameInput = document.getElementById("payerName");
   const tableInfo = document.getElementById("tableInfo");
@@ -116,6 +161,24 @@ window.addEventListener("DOMContentLoaded", () => {
 
   renderMenus(mainSection, sideSection);
   bindCounterEvents();
+  refreshMenuPreview();
+
+  if (resetMenuBtn) {
+    resetMenuBtn.onclick = () => {
+      const selectedItems = getSelectedItems();
+
+      if (selectedItems.length === 0) {
+        return;
+      }
+
+      const confirmed = confirm("선택한 메뉴를 모두 초기화할까요?");
+      if (!confirmed) {
+        return;
+      }
+
+      resetAllCounters();
+    };
+  }
 
   orderForm.onsubmit = (e) => {
     e.preventDefault();

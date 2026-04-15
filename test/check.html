@@ -4,31 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>주문 확인</title>
-
   <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body class="check-page">
 
-<h2>주문 내용을 확인해 주세요</h2>
+  <h2>주문 내용을 확인해 주세요</h2>
 
-<div class="box">
-  <p><strong>테이블 번호:</strong> <span id="tableNum">-</span></p>
-  <p><strong>입금자명:</strong> <span id="payer">-</span></p>
-  <p><strong>주문한 항목:</strong><br><span id="items">-</span></p>
-  <p class="price" id="totalPrice"></p>
-</div>
+  <div class="box">
+    <div class="check-summary-block">
+      <div class="check-summary-label">테이블 번호</div>
+      <div class="check-summary-value" id="tableNum">-</div>
+    </div>
 
-<div class="buttons">
-  <button class="back-btn" id="goBack">이전으로</button>
-  <button class="confirm-btn" id="goConfirm">주문 확정</button>
-</div>
+    <div class="check-summary-block">
+      <div class="check-summary-label">입금자명</div>
+      <div class="check-summary-value" id="payer">-</div>
+    </div>
 
-<div class="spinner" id="spinner">
-  <div class="spinner-border"></div>
-</div>
+    <div class="check-summary-block">
+      <div class="check-summary-label">주문한 항목</div>
+      <div id="items" class="check-item-list">-</div>
+    </div>
 
-<script type="module" src="./js/check.js"></script>
+    <div class="check-summary-total">
+      <span>총 금액</span>
+      <strong id="totalPrice">0원</strong>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button class="back-btn" id="goBack" type="button">이전으로</button>
+    <button class="confirm-btn" id="goConfirm" type="button">주문 확정</button>
+  </div>
+
+  <div class="spinner" id="spinner">
+    <div class="spinner-border"></div>
+  </div>
+
+  <script type="module" src="./js/check.js"></script>
 
 </body>
 </html>

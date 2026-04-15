@@ -4,6 +4,7 @@ import {
   collection,
   query,
   where,
+  orderBy,
   onSnapshot,
   updateDoc,
   doc
@@ -38,20 +39,23 @@ function matchesFilter(itemData, filterValue) {
   return true;
 }
 
-async function assignServe(orderId, serveId) {
+async function assignServe(orderId, serveId, serveEntry = {}) {
   await updateDoc(doc(db, "orders", orderId), {
     [`serveStatus.${serveId}`]: {
       status: "서빙 예정",
-      assignedTo: currentUser
+      assignedTo: currentUser,
+      assignedAt: serveEntry.assignedAt || Date.now()
     }
   });
 }
 
-async function completeServe(orderId, serveId) {
+async function completeServe(orderId, serveId, serveEntry = {}) {
   await updateDoc(doc(db, "orders", orderId), {
     [`serveStatus.${serveId}`]: {
       status: "서빙 완료",
-      assignedTo: currentUser
+      assignedTo: currentUser,
+      assignedAt: serveEntry.assignedAt || Date.now(),
+      completedAt: Date.now()
     }
   });
 }
@@ -74,7 +78,8 @@ function renderServeItems() {
       orderName,
       item,
       itemStatus,
-      assignedTo
+      assignedTo,
+      serveEntry
     } = itemData;
 
     if (itemStatus === "서빙 완료") return;
@@ -97,7 +102,7 @@ function renderServeItems() {
       btn.textContent = "서빙 예정";
       btn.className = "assign";
       btn.onclick = async () => {
-        await assignServe(orderId, serveId);
+        await assignServe(orderId, serveId, serveEntry);
       };
       div.appendChild(btn);
     } else if (itemStatus === "서빙 예정" && assignedTo === currentUser) {
@@ -105,7 +110,7 @@ function renderServeItems() {
       btn.textContent = "서빙 완료";
       btn.className = "complete";
       btn.onclick = async () => {
-        await completeServe(orderId, serveId);
+        await completeServe(orderId, serveId, serveEntry);
       };
       div.appendChild(btn);
     }
@@ -136,7 +141,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const q = query(
     collection(db, "orders"),
-    where("completed", "==", true)
+    where("completed", "==", true),
+    orderBy("timestamp", "desc")
   );
 
   onSnapshot(q, (snapshot) => {
@@ -146,6 +152,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const data = docSnap.data();
       const orderId = docSnap.id;
 
+      if (data.deleted) return;
       if (!Array.isArray(data.items)) return;
 
       const serveStatus = data.serveStatus || {};
@@ -153,8 +160,9 @@ window.addEventListener("DOMContentLoaded", () => {
       data.items.forEach((item, itemIndex) => {
         for (let countIndex = 0; countIndex < item.count; countIndex++) {
           const serveId = `${orderId}_${itemIndex}_${countIndex}`;
-          const itemStatus = serveStatus[serveId]?.status || "주문 완료";
-          const assignedTo = serveStatus[serveId]?.assignedTo || null;
+          const serveEntry = serveStatus[serveId] || {};
+          const itemStatus = serveEntry.status || "주문 완료";
+          const assignedTo = serveEntry.assignedTo || null;
 
           allServeItems.push({
             orderId,
@@ -163,7 +171,8 @@ window.addEventListener("DOMContentLoaded", () => {
             orderName: data.name,
             item,
             itemStatus,
-            assignedTo
+            assignedTo,
+            serveEntry
           });
         }
       });
