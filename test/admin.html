@@ -4,13 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>관리자 페이지</title>
-
   <link rel="stylesheet" href="./css/style.css">
 </head>
-<h2>주문 관리 (관리자)</h2>
-<div id="orders" class="grid"></div>
+<body>
 
-<script type="module" src="./js/admin.js"></script>
+  <h2>주문 관리</h2>
 
+  <div class="admin-toolbar">
+    <input type="text" id="searchInput" placeholder="테이블 번호, 입금자명, 메뉴명 검색" />
+    <select id="statusFilter">
+      <option value="all">전체</option>
+      <option value="completed">확인 완료</option>
+      <option value="pending">미확인</option>
+    </select>
+  </div>
+
+  <div id="orders" class="grid"></div>
+
+  <script type="module" src="./js/admin.js"></script>
 </body>
 </html>

@@ -3,16 +3,25 @@ import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.1/fi
 
 let isSubmitting = false;
 
-export async function saveOrder({ table, name, items }) {
-  if (isSubmitting) return;
+export async function saveOrder(orderData) {
+  if (isSubmitting) {
+    throw new Error("already-submitting");
+  }
+
   isSubmitting = true;
 
-  await addDoc(collection(db, "orders"), {
-    table,
-    name,
-    items,
-    timestamp: Date.now(),
-    completed: false,
-    status: "주문 완료"
-  });
+  try {
+    const docRef = await addDoc(collection(db, "orders"), {
+      table: orderData.table,
+      name: orderData.name,
+      items: orderData.items,
+      timestamp: Date.now(),
+      completed: false,
+      status: "주문 완료"
+    });
+
+    return docRef;
+  } finally {
+    isSubmitting = false;
+  }
 }

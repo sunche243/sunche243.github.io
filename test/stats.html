@@ -4,30 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>통계 페이지</title>
-
   <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<body>
+<body class="stats-page">
 
-<h2>📊 주문 통계</h2>
+  <h2>주문 통계</h2>
 
-<div class="section">
-  <h3>총 매출</h3>
-  <p id="totalSales">0원</p>
-</div>
+  <div class="stats-summary-grid">
+    <div class="stats-card">
+      <div class="stats-label">총 매출</div>
+      <div class="stats-value" id="totalSales">0원</div>
+    </div>
 
-<div class="section">
-  <h3>총 판매 수량</h3>
-  <p id="totalCount">0개</p>
-</div>
+    <div class="stats-card">
+      <div class="stats-label">총 판매 수량</div>
+      <div class="stats-value" id="totalCount">0개</div>
+    </div>
 
-<div class="section">
-  <h3>메뉴별 판매량</h3>
-  <div id="menuStats"></div>
-</div>
+    <div class="stats-card">
+      <div class="stats-label">총 주문 수</div>
+      <div class="stats-value" id="totalOrders">0건</div>
+    </div>
 
-<script type="module" src="./js/stats.js"></script>
+    <div class="stats-card">
+      <div class="stats-label">평균 주문 금액</div>
+      <div class="stats-value" id="averageSales">0원</div>
+    </div>
+  </div>
+
+  <div class="stats-highlight-grid">
+    <div class="stats-card">
+      <div class="stats-label">가장 많이 팔린 메뉴</div>
+      <div class="stats-value stats-highlight" id="bestMenu">-</div>
+    </div>
+
+    <div class="stats-card">
+      <div class="stats-label">가장 매출이 높은 메뉴</div>
+      <div class="stats-value stats-highlight" id="topSalesMenu">-</div>
+    </div>
+  </div>
+
+  <div class="stats-section">
+    <h3>메뉴별 판매량</h3>
+    <div id="menuCountStats" class="stats-list"></div>
+  </div>
+
+  <div class="stats-section">
+    <h3>메뉴별 매출</h3>
+    <div id="menuSalesStats" class="stats-list"></div>
+  </div>
+
+  <script type="module" src="./js/stats.js"></script>
 
 </body>
 </html>

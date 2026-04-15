@@ -1,6 +1,10 @@
 import { db } from "./common.js";
 import { priceMap } from "./menuData.js";
 import {
+  formatDate,
+  calculateOrderTotal
+} from "./utils.js";
+import {
   collection,
   query,
   orderBy,
@@ -11,31 +15,49 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
 const ordersDiv = document.getElementById("orders");
+const searchInput = document.getElementById("searchInput");
+const statusFilter = document.getElementById("statusFilter");
 
-const q = query(
-  collection(db, "orders"),
-  orderBy("timestamp", "desc")
-);
+let allOrders = [];
 
-onSnapshot(q, (snapshot) => {
+function matchesSearch(order, keyword) {
+  if (!keyword) return true;
+
+  const lowerKeyword = keyword.toLowerCase();
+  const menuText = (order.items || []).map((item) => item.name).join(" ").toLowerCase();
+  const tableText = String(order.table || "").toLowerCase();
+  const nameText = String(order.name || "").toLowerCase();
+
+  return (
+    tableText.includes(lowerKeyword) ||
+    nameText.includes(lowerKeyword) ||
+    menuText.includes(lowerKeyword)
+  );
+}
+
+function matchesStatus(order, filterValue) {
+  if (filterValue === "all") return true;
+  if (filterValue === "completed") return order.completed === true;
+  if (filterValue === "pending") return order.completed !== true;
+  return true;
+}
+
+function renderOrders() {
+  const keyword = searchInput.value.trim();
+  const filterValue = statusFilter.value;
+
   ordersDiv.innerHTML = "";
 
-  snapshot.forEach((docSnap) => {
-    const data = docSnap.data();
-    const id = docSnap.id;
+  const filtered = allOrders.filter((order) => {
+    return matchesSearch(order.data, keyword) && matchesStatus(order.data, filterValue);
+  });
 
-    const total = (data.items || []).reduce((sum, item) => {
-      return sum + (priceMap[item.name] || 0) * item.count;
-    }, 0);
-
+  filtered.forEach(({ id, data }) => {
+    const total = calculateOrderTotal(data.items || [], priceMap);
     const itemList = (data.items || [])
       .map((item) => `${item.name} ${item.count}개`)
       .join("<br>");
-
-    const formattedDate = data.timestamp
-      ? new Date(data.timestamp).toLocaleString("ko-KR")
-      : "";
-
+    const formattedDate = formatDate(data.timestamp);
     const btnText = data.completed ? "확인취소" : "확인";
 
     const div = document.createElement("div");
@@ -64,4 +86,21 @@ onSnapshot(q, (snapshot) => {
 
     ordersDiv.appendChild(div);
   });
+}
+
+const q = query(
+  collection(db, "orders"),
+  orderBy("timestamp", "desc")
+);
+
+onSnapshot(q, (snapshot) => {
+  allOrders = snapshot.docs.map((docSnap) => ({
+    id: docSnap.id,
+    data: docSnap.data()
+  }));
+
+  renderOrders();
 });
+
+searchInput.addEventListener("input", renderOrders);
+statusFilter.addEventListener("change", renderOrders);

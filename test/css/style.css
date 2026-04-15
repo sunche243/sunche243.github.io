@@ -304,3 +304,164 @@ body.thankyou-page h2 {
     padding: 6px 12px;
   }
 }
+
+.stats-page {
+  padding: 20px 16px;
+}
+
+.stats-summary-grid,
+.stats-highlight-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stats-highlight-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.stats-card {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 16px;
+  background-color: white;
+}
+
+.stats-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.stats-value {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.stats-highlight {
+  color: #28a745;
+}
+
+.stats-section {
+  margin-bottom: 24px;
+}
+
+.stats-list {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: white;
+  overflow: hidden;
+}
+
+.stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.stats-row:last-child {
+  border-bottom: none;
+}
+
+.stats-row-name {
+  flex: 1;
+  padding-right: 12px;
+}
+
+.stats-row-value {
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .stats-summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-highlight-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-summary-grid,
+  .stats-highlight-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-value {
+    font-size: 20px;
+  }
+}
+
+.admin-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.admin-toolbar input,
+.admin-toolbar select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.admin-toolbar input {
+  flex: 1;
+}
+
+.admin-toolbar select {
+  min-width: 140px;
+}
+
+@media (max-width: 480px) {
+  .admin-toolbar {
+    flex-direction: column;
+  }
+
+  .admin-toolbar select {
+    width: 100%;
+  }
+}
+
+.admin-toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.admin-toolbar input,
+.admin-toolbar select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.admin-toolbar input {
+  flex: 1;
+}
+
+.admin-toolbar select {
+  min-width: 140px;
+}
+
+@media (max-width: 480px) {
+  .admin-toolbar {
+    flex-direction: column;
+  }
+
+  .admin-toolbar select {
+    width: 100%;
+  }
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}

@@ -7,6 +7,7 @@ export const menuItems = [
   { name: "주먹밥은 못참치", price: 7000, type: "side" }
 ];
 
-export const priceMap = Object.fromEntries(
-  menuItems.map(item => [item.name, item.price])
-);
+export const priceMap = menuItems.reduce((acc, item) => {
+  acc[item.name] = item.price;
+  return acc;
+}, {});
