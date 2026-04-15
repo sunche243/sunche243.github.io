@@ -3,7 +3,6 @@ import { parseItems } from "./utils.js";
 import { priceMap } from "./menuData.js";
 
 window.addEventListener("DOMContentLoaded", () => {
-
   const params = new URLSearchParams(window.location.search);
 
   const table = params.get("table") || "-";
@@ -32,7 +31,6 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   document.getElementById("goConfirm").onclick = async () => {
-
     const spinner = document.getElementById("spinner");
     const btn = document.getElementById("goConfirm");
 
@@ -55,5 +53,4 @@ window.addEventListener("DOMContentLoaded", () => {
     const query = new URLSearchParams({ table, name, items: itemString }).toString();
     window.location.href = `thankyou.html?${query}`;
   };
-
 });

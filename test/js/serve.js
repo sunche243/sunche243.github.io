@@ -1,11 +1,8 @@
-// js/serve.js
-
 import { db } from "./common.js";
 import {
   collection,
   query,
   where,
-  orderBy,
   onSnapshot,
   updateDoc,
   doc
@@ -16,8 +13,8 @@ const allowedNames = [
   "박건우", "박상민", "박재환", "박찬준", "박현서",
   "민수영", "육정민", "이지윤", "이현서", "장은우",
   "정지우", "한지오", "허영", "홍정우",
-  "김민지", "김영인", "김유찬", "김은석", "김주아", "김표수",
-  "최민웅", "박상진", "신태민", "정유현", "육정민", "이주형",
+  "김민지", "김영인", "김은석", "김주아",
+  "최민웅", "박상진", "신태민", "정유현", "이주형",
   "이현수", "장민", "정성혁", "정채원", "지현서", "허성빈"
 ];
 
@@ -45,23 +42,22 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const q = query(
     collection(db, "orders"),
-    where("completed", "==", true),
-    orderBy("timestamp", "desc")
+    where("completed", "==", true)
   );
 
   onSnapshot(q, (snapshot) => {
     container.innerHTML = "";
 
-    snapshot.forEach(docSnap => {
+    snapshot.forEach((docSnap) => {
       const data = docSnap.data();
       const docId = docSnap.id;
 
       if (!Array.isArray(data.items)) return;
+
       const serveStatus = data.serveStatus || {};
 
       data.items.forEach((item, itemIndex) => {
         for (let countIndex = 0; countIndex < item.count; countIndex++) {
-
           const serveId = `${docId}_${itemIndex}_${countIndex}`;
           const itemStatus = serveStatus[serveId]?.status || "주문 완료";
           const assignedTo = serveStatus[serveId]?.assignedTo || null;
@@ -94,9 +90,7 @@ window.addEventListener("DOMContentLoaded", () => {
             };
 
             div.appendChild(btn);
-          }
-
-          else if (itemStatus === "서빙 예정" && assignedTo === currentUser) {
+          } else if (itemStatus === "서빙 예정" && assignedTo === currentUser) {
             const btn = document.createElement("button");
             btn.textContent = "서빙 완료";
             btn.className = "complete";

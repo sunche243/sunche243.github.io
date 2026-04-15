@@ -2,22 +2,36 @@ import { menuItems } from "./menuData.js";
 import { validateName } from "./utils.js";
 
 window.addEventListener("DOMContentLoaded", () => {
+  const noticeModal = document.getElementById("noticeModal");
+  const closeModal = document.getElementById("closeModal");
+  const menuModal = document.getElementById("menuModal");
+  const menuViewBtn = document.getElementById("menuViewBtn");
+  const closeMenuModal = document.getElementById("closeMenuModal");
+  const orderForm = document.getElementById("orderForm");
+  const payerNameInput = document.getElementById("payerName");
+  const tableInfo = document.getElementById("tableInfo");
+  const mainSection = document.getElementById("mainMenuSection");
+  const sideSection = document.getElementById("sideMenuSection");
 
-  document.getElementById("noticeModal").style.display = "flex";
-  document.getElementById("closeModal").onclick = () => {
-    document.getElementById("noticeModal").style.display = "none";
-  };
+  if (noticeModal) {
+    noticeModal.style.display = "flex";
+  }
 
-  const table = new URLSearchParams(location.search).get("table") || "unknown";
-  document.getElementById("tableInfo").textContent = `내 테이블 번호: ${table}`;
+  if (closeModal) {
+    closeModal.onclick = () => {
+      noticeModal.style.display = "none";
+    };
+  }
 
-  const main = document.getElementById("mainMenuSection");
-  const side = document.getElementById("sideMenuSection");
+  const table = new URLSearchParams(window.location.search).get("table") || "unknown";
 
-  menuItems.forEach(item => {
+  if (tableInfo) {
+    tableInfo.textContent = `내 테이블 번호: ${table}`;
+  }
+
+  menuItems.forEach((item) => {
     const div = document.createElement("div");
     div.className = "menu-item";
-
     div.innerHTML = `
       <strong>${item.name} (${item.price.toLocaleString()}원)</strong>
       <div class="counter" data-name="${item.name}">
@@ -27,56 +41,95 @@ window.addEventListener("DOMContentLoaded", () => {
       </div>
     `;
 
-    item.type === "main" ? main.appendChild(div) : side.appendChild(div);
+    if (item.type === "main") {
+      mainSection.appendChild(div);
+    } else {
+      sideSection.appendChild(div);
+    }
   });
 
-  document.querySelectorAll(".counter").forEach(counter => {
+  document.querySelectorAll(".counter").forEach((counter) => {
     const minus = counter.querySelector(".minus");
     const plus = counter.querySelector(".plus");
     const count = counter.querySelector(".count");
 
     minus.onclick = () => {
-      let v = parseInt(count.textContent);
-      if (v > 0) count.textContent = v - 1;
+      const current = parseInt(count.textContent, 10) || 0;
+      if (current > 0) {
+        count.textContent = current - 1;
+      }
     };
 
     plus.onclick = () => {
-      count.textContent = parseInt(count.textContent) + 1;
+      const current = parseInt(count.textContent, 10) || 0;
+      count.textContent = current + 1;
     };
   });
 
-  document.getElementById("orderForm").onsubmit = (e) => {
+  orderForm.onsubmit = (e) => {
     e.preventDefault();
 
-    let name = validateName(document.getElementById("payerName").value.trim());
+    let name = payerNameInput.value.trim();
+    name = validateName(name);
 
     if (!name) {
-      alert("입금자명 형식 오류");
+      alert("입금자명은 '이름(테이블번호)' 형식으로 입력해 주세요. 예: 홍길동(3)");
       return;
     }
 
-    const items = [...document.querySelectorAll(".counter")]
-      .map(el => ({
+    const tableMatch = name.match(/\((\d{1,3})\)$/);
+    if (!tableMatch) {
+      alert("입금자명에서 테이블 번호를 확인할 수 없습니다.");
+      return;
+    }
+
+    const inputTable = parseInt(tableMatch[1], 10);
+
+    if (inputTable < 1 || inputTable > 96) {
+      alert("테이블 번호는 1번부터 96번까지만 가능합니다.");
+      return;
+    }
+
+    if (table !== "unknown" && String(inputTable) !== String(table)) {
+      const proceed = confirm(
+        `입력하신 테이블번호(${inputTable})와 스캔된 테이블번호(${table})가 다릅니다.\n정확한 테이블 번호를 입력하셨는지 확인해 주세요.\n\n계속 진행하시겠습니까?`
+      );
+      if (!proceed) {
+        return;
+      }
+    }
+
+    const items = Array.from(document.querySelectorAll(".counter"))
+      .map((el) => ({
         name: el.dataset.name,
-        count: parseInt(el.querySelector(".count").textContent)
+        count: parseInt(el.querySelector(".count").textContent, 10) || 0
       }))
-      .filter(i => i.count > 0);
+      .filter((item) => item.count > 0);
 
     if (items.length === 0) {
-      alert("메뉴를 선택해 주세요.");
+      alert("메뉴를 한 개 이상 선택해 주세요.");
       return;
     }
 
-    const flat = items.map(i => `${i.name}*${i.count}`);
-    location.href = `check.html?table=${table}&name=${name}&items=${flat}`;
+    const flat = items.map((item) => `${item.name}*${item.count}`).join(", ");
+    const query = new URLSearchParams({
+      table,
+      name,
+      items: flat
+    }).toString();
+
+    window.location.href = `check.html?${query}`;
   };
 
-  document.getElementById("menuViewBtn").onclick = () => {
-    document.getElementById("menuModal").style.display = "flex";
-  };
+  if (menuViewBtn) {
+    menuViewBtn.onclick = () => {
+      menuModal.style.display = "flex";
+    };
+  }
 
-  document.getElementById("closeMenuModal").onclick = () => {
-    document.getElementById("menuModal").style.display = "none";
-  };
-
+  if (closeMenuModal) {
+    closeMenuModal.onclick = () => {
+      menuModal.style.display = "none";
+    };
+  }
 });
