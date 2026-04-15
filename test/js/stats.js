@@ -1,5 +1,4 @@
 import { db } from "./common.js";
-import { menuItems, priceMap } from "./menuData.js";
 import {
   formatPrice,
   formatCount,
@@ -21,35 +20,12 @@ const hourlyOrderStatsEl = document.getElementById("hourlyOrderStats");
 const menuCountStatsEl = document.getElementById("menuCountStats");
 const menuSalesStatsEl = document.getElementById("menuSalesStats");
 
-function createEmptyMenuMap() {
-  const map = {};
-  menuItems.forEach((item) => {
-    map[item.name] = 0;
-  });
-  return map;
-}
-
 function createHourlyMap() {
   const map = {};
   for (let hour = 0; hour < 24; hour += 1) {
-    const key = `${String(hour).padStart(2, "0")}시`;
-    map[key] = 0;
+    map[`${String(hour).padStart(2, "0")}시`] = 0;
   }
   return map;
-}
-
-function formatMinutes(ms) {
-  if (!ms || ms < 0) return "-";
-
-  const totalSeconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-
-  if (minutes === 0) {
-    return `${seconds}초`;
-  }
-
-  return `${minutes}분 ${seconds}초`;
 }
 
 function renderStatsList(container, dataMap, formatter) {
@@ -109,14 +85,28 @@ function findTopEntry(dataMap, formatter) {
   return `${name} (${formatter(value)})`;
 }
 
+function formatMinutes(ms) {
+  if (!ms || ms < 0) return "-";
+
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  if (minutes === 0) {
+    return `${seconds}초`;
+  }
+
+  return `${minutes}분 ${seconds}초`;
+}
+
 onSnapshot(collection(db, "orders"), (snapshot) => {
   let totalSales = 0;
   let totalCount = 0;
   let totalOrders = 0;
 
   const hourlyOrderMap = createHourlyMap();
-  const menuCountMap = createEmptyMenuMap();
-  const menuSalesMap = createEmptyMenuMap();
+  const menuCountMap = {};
+  const menuSalesMap = {};
   const serveDurations = [];
 
   snapshot.forEach((docSnap) => {
@@ -126,7 +116,7 @@ onSnapshot(collection(db, "orders"), (snapshot) => {
     if (!Array.isArray(data.items) || data.items.length === 0) return;
 
     totalOrders += 1;
-    totalSales += calculateOrderTotal(data.items, priceMap);
+    totalSales += calculateOrderTotal(data.items);
 
     if (data.timestamp) {
       const hour = new Date(data.timestamp).getHours();
@@ -139,8 +129,7 @@ onSnapshot(collection(db, "orders"), (snapshot) => {
     data.items.forEach((item) => {
       const itemName = item.name;
       const itemCount = Number(item.count) || 0;
-      const itemPrice = priceMap[itemName] || 0;
-      const itemSales = itemPrice * itemCount;
+      const itemSales = (Number(item.price) || 0) * itemCount;
 
       totalCount += itemCount;
 

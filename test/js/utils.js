@@ -1,11 +1,30 @@
 export function parseItems(itemString) {
   if (!itemString) return [];
 
-  return itemString.split(",").map((i) => {
-    const [name, count] = i.split("*");
+  const trimmed = itemString.trim();
+
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => ({
+          name: String(item.name || "").trim(),
+          count: parseInt(item.count, 10) || 0,
+          price: Number(item.price) || 0
+        }));
+      }
+    } catch (error) {
+      console.error("items JSON 파싱 실패:", error);
+    }
+  }
+
+  return trimmed.split(",").map((item) => {
+    const [name, count] = item.split("*");
+
     return {
-      name: name.trim(),
-      count: parseInt(count, 10) || 0
+      name: (name || "").trim(),
+      count: parseInt(count, 10) || 0,
+      price: 0
     };
   });
 }
@@ -19,7 +38,9 @@ export function validateName(name) {
     name = `${base}(${num})`;
   }
 
-  if (!fullPattern.test(name)) return null;
+  if (!fullPattern.test(name)) {
+    return null;
+  }
 
   return name;
 }
@@ -45,8 +66,8 @@ export function buildQueryString(data) {
   return new URLSearchParams(data).toString();
 }
 
-export function calculateOrderTotal(items, priceMap) {
+export function calculateOrderTotal(items) {
   return (items || []).reduce((sum, item) => {
-    return sum + (priceMap[item.name] || 0) * item.count;
+    return sum + (Number(item.price) || 0) * (Number(item.count) || 0);
   }, 0);
 }

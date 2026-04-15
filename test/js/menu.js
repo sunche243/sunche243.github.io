@@ -1,18 +1,35 @@
-import { menuItems, priceMap } from "./menuData.js";
+import { db } from "./common.js";
 import { validateName, buildQueryString, formatPrice } from "./utils.js";
 import { appConfig } from "./appConfig.js";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
-function renderMenus(mainSection, sideSection) {
-  menuItems.forEach((item) => {
+let currentMenus = [];
+
+function renderMenus(mainSection, sideSection, menus) {
+  mainSection.innerHTML = "";
+  sideSection.innerHTML = "";
+
+  menus.forEach((item) => {
+    if (item.visible === false) return;
+
     const div = document.createElement("div");
     div.className = "menu-item";
 
+    const soldOutText = item.soldOut ? " (매진)" : "";
+
     div.innerHTML = `
-      <strong>${item.name} (${item.price.toLocaleString()}원)</strong>
-      <div class="counter" data-name="${item.name}">
-        <button type="button" class="minus">-</button>
+      <strong>${item.name} (${Number(item.price).toLocaleString()}원)${soldOutText}</strong>
+      <div class="counter" data-name="${item.name}" data-price="${item.price}" data-sold-out="${item.soldOut ? "true" : "false"}">
+        <button type="button" class="minus" ${item.soldOut ? "disabled" : ""}>-</button>
         <span class="count">0</span>
-        <button type="button" class="plus">+</button>
+        <button type="button" class="plus" ${item.soldOut ? "disabled" : ""}>+</button>
       </div>
     `;
 
@@ -28,7 +45,8 @@ function getSelectedItems() {
   return Array.from(document.querySelectorAll(".counter"))
     .map((el) => ({
       name: el.dataset.name,
-      count: parseInt(el.querySelector(".count").textContent, 10) || 0
+      count: parseInt(el.querySelector(".count").textContent, 10) || 0,
+      price: Number(el.dataset.price) || 0
     }))
     .filter((item) => item.count > 0);
 }
@@ -37,14 +55,13 @@ function calculateEstimatedTotal() {
   const selectedItems = getSelectedItems();
 
   return selectedItems.reduce((sum, item) => {
-    return sum + (priceMap[item.name] || 0) * item.count;
+    return sum + item.price * item.count;
   }, 0);
 }
 
 function updateEstimatedTotal() {
   const estimatedTotalPriceEl = document.getElementById("estimatedTotalPrice");
-  const total = calculateEstimatedTotal();
-  estimatedTotalPriceEl.textContent = formatPrice(total);
+  estimatedTotalPriceEl.textContent = formatPrice(calculateEstimatedTotal());
 }
 
 function updateSelectedMenuSummary() {
@@ -80,6 +97,12 @@ function bindCounterEvents() {
     const minus = counter.querySelector(".minus");
     const plus = counter.querySelector(".plus");
     const count = counter.querySelector(".count");
+    const soldOut = counter.dataset.soldOut === "true";
+
+    if (soldOut) {
+      count.textContent = "0";
+      return;
+    }
 
     minus.onclick = () => {
       const current = parseInt(count.textContent, 10) || 0;
@@ -125,6 +148,24 @@ function validateTableMatch(inputName, scannedTable) {
   return true;
 }
 
+async function loadMenuImage() {
+  const menuImageEl = document.getElementById("menuImage");
+
+  try {
+    const settingsRef = doc(db, "settings", "public");
+    const snapshot = await getDoc(settingsRef);
+
+    if (snapshot.exists()) {
+      const data = snapshot.data();
+      if (data.menuImageUrl) {
+        menuImageEl.src = data.menuImageUrl;
+      }
+    }
+  } catch (error) {
+    console.error("메뉴판 이미지 불러오기 실패:", error);
+  }
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   const noticeModal = document.getElementById("noticeModal");
   const closeModal = document.getElementById("closeModal");
@@ -159,9 +200,19 @@ window.addEventListener("DOMContentLoaded", () => {
     tableInfo.textContent = `내 테이블 번호: ${scannedTable}`;
   }
 
-  renderMenus(mainSection, sideSection);
-  bindCounterEvents();
-  refreshMenuPreview();
+  loadMenuImage();
+
+  const q = query(collection(db, "menus"), orderBy("createdAt", "asc"));
+  onSnapshot(q, (snapshot) => {
+    currentMenus = snapshot.docs.map((docSnap) => ({
+      id: docSnap.id,
+      ...docSnap.data()
+    }));
+
+    renderMenus(mainSection, sideSection, currentMenus);
+    bindCounterEvents();
+    refreshMenuPreview();
+  });
 
   if (resetMenuBtn) {
     resetMenuBtn.onclick = () => {
@@ -202,11 +253,10 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const flat = items.map((item) => `${item.name}*${item.count}`).join(", ");
     const query = buildQueryString({
       table: scannedTable,
       name,
-      items: flat
+      items: JSON.stringify(items)
     });
 
     window.location.href = `check.html?${query}`;

@@ -1,5 +1,4 @@
 import { db } from "./common.js";
-import { priceMap } from "./menuData.js";
 import {
   formatDate,
   formatPrice,
@@ -88,7 +87,7 @@ function renderSummary() {
     .filter((data) => !data.deleted);
 
   const totalSales = activeOrders.reduce((sum, data) => {
-    return sum + calculateOrderTotal(data.items || [], priceMap);
+    return sum + calculateOrderTotal(data.items || []);
   }, 0);
 
   const pendingCount = activeOrders.filter((data) => data.completed !== true).length;
@@ -116,7 +115,7 @@ function renderOrders() {
   });
 
   filtered.forEach(({ id, data }) => {
-    const total = calculateOrderTotal(data.items || [], priceMap);
+    const total = calculateOrderTotal(data.items || []);
     const itemList = (data.items || [])
       .map((item) => `${item.name} ${item.count}개`)
       .join("<br>");
@@ -134,7 +133,7 @@ function renderOrders() {
     div.innerHTML = `
       <p><strong>테이블 ${data.table}</strong> | 입금자: ${data.name}</p>
       <p>주문:<br>${itemList}</p>
-      <p><strong>총 금액: ${total.toLocaleString()}원</strong></p>
+      <p><strong>총 금액: ${formatPrice(total)}</strong></p>
       <small>${formattedDate}</small><br>
       <button class="toggle-btn">${btnText}</button>
       <button class="delete-btn">${deleteBtnText}</button>

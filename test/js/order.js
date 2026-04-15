@@ -3,6 +3,18 @@ import { collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.1/fi
 
 let isSubmitting = false;
 
+function buildOrderPayload({ table, name, items }) {
+  return {
+    table,
+    name,
+    items,
+    timestamp: Date.now(),
+    completed: false,
+    deleted: false,
+    serveStatus: {}
+  };
+}
+
 export async function saveOrder(orderData) {
   if (isSubmitting) {
     throw new Error("already-submitting");
@@ -11,16 +23,12 @@ export async function saveOrder(orderData) {
   isSubmitting = true;
 
   try {
-    const docRef = await addDoc(collection(db, "orders"), {
-      table: orderData.table,
-      name: orderData.name,
-      items: orderData.items,
-      timestamp: Date.now(),
-      completed: false,
-      status: "주문 완료"
-    });
-
+    const payload = buildOrderPayload(orderData);
+    const docRef = await addDoc(collection(db, "orders"), payload);
     return docRef;
+  } catch (error) {
+    console.error("주문 저장 실패:", error);
+    throw error;
   } finally {
     isSubmitting = false;
   }

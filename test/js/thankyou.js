@@ -4,7 +4,6 @@ import {
   calculateOrderTotal,
   getPageParams
 } from "./utils.js";
-import { priceMap } from "./menuData.js";
 import { appConfig } from "./appConfig.js";
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -27,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
   accountNumberEl.textContent = appConfig.accountText;
 
   const items = parseItems(itemString);
-  const total = calculateOrderTotal(items, priceMap);
+  const total = calculateOrderTotal(items);
 
   itemsEl.innerHTML = "";
 

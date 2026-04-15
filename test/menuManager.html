@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메뉴 관리</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+  <h2>메뉴 관리</h2>
+
+  <div id="authBox" class="box">
+    <div class="section">
+      <label><strong>이메일</strong></label>
+      <input type="text" id="loginEmailInput" placeholder="관리자 이메일" />
+    </div>
+
+    <div class="section">
+      <label><strong>비밀번호</strong></label>
+      <input type="password" id="loginPasswordInput" placeholder="비밀번호" />
+    </div>
+
+    <div class="buttons">
+      <button class="confirm-btn" type="button" id="loginBtn">로그인</button>
+    </div>
+  </div>
+
+  <div id="managerBox" style="display: none;">
+    <div class="box">
+      <div class="section">
+        <strong id="currentAdminEmail">로그인됨</strong>
+      </div>
+
+      <div class="buttons">
+        <button class="back-btn" type="button" id="logoutBtn">로그아웃</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="section">
+        <label><strong>메뉴 이름</strong></label>
+        <input type="text" id="menuNameInput" placeholder="예: 신메뉴 이름" />
+      </div>
+
+      <div class="section">
+        <label><strong>가격</strong></label>
+        <input type="text" id="menuPriceInput" placeholder="예: 12000" />
+      </div>
+
+      <div class="section">
+        <label><strong>구분</strong></label>
+        <select id="menuTypeInput">
+          <option value="main">메인</option>
+          <option value="side">사이드</option>
+        </select>
+      </div>
+
+      <div class="section">
+        <label><input type="checkbox" id="menuSoldOutInput" /> 매진 처리</label>
+      </div>
+
+      <div class="section">
+        <label><input type="checkbox" id="menuVisibleInput" checked /> 주문 페이지에 표시</label>
+      </div>
+
+      <div class="buttons">
+        <button class="confirm-btn" type="button" id="saveMenuBtn">저장</button>
+        <button class="back-btn" type="button" id="resetMenuFormBtn">입력 초기화</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="section">
+        <label><strong>새 메뉴판 이미지 업로드</strong></label>
+        <input type="file" id="menuImageFileInput" accept="image/*" />
+      </div>
+
+      <div class="buttons">
+        <button class="confirm-btn" type="button" id="uploadMenuImageBtn">이미지 업로드</button>
+      </div>
+
+      <div class="section">
+        <label><strong>현재 메뉴판 이미지</strong></label>
+        <div>
+          <img id="currentMenuImage" src="menu.png" alt="현재 메뉴판" style="max-width: 100%; border-radius: 8px;" />
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>등록된 메뉴 목록</h3>
+      <div id="menuManagerList" class="grid"></div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/menuManager.js"></script>
+</body>
+</html>

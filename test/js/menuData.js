@@ -11,3 +11,7 @@ export const priceMap = menuItems.reduce((acc, item) => {
   acc[item.name] = item.price;
   return acc;
 }, {});
+
+export function getMenuPrice(name) {
+  return priceMap[name] || 0;
+}

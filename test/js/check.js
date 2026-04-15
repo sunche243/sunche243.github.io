@@ -6,7 +6,6 @@ import {
   calculateOrderTotal,
   getPageParams
 } from "./utils.js";
-import { priceMap } from "./menuData.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const params = getPageParams();
@@ -27,7 +26,7 @@ window.addEventListener("DOMContentLoaded", () => {
   payerEl.textContent = name;
 
   const items = parseItems(itemString);
-  const total = calculateOrderTotal(items, priceMap);
+  const total = calculateOrderTotal(items);
 
   itemsEl.innerHTML = "";
 
