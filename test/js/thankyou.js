@@ -25,7 +25,7 @@ function buildTossSendLink(amount, bankName, accountNo) {
   const encodedBank = encodeURIComponent(bankName);
   const cleanAccountNo = String(accountNo).replace(/[^0-9]/g, "");
 
-  return `supertoss://send?amount=${amount}&bank=${encodedBank}%AC&accountNo=${cleanAccountNo}&origin=qr`;
+  return `supertoss://send?amount=${amount}&bank=${encodedBank}&accountNo=${cleanAccountNo}&origin=qr`;
 }
 
 async function loadPaymentSettings() {
