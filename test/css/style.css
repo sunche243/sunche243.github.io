@@ -581,3 +581,15 @@ body.thankyou-page h2 {
     padding: 6px 12px;
   }
 }
+
+.toss-btn {
+  margin-top: 10px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #0064ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  display: inline-block;
+}

@@ -36,6 +36,11 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const currentAdminEmail = document.getElementById("currentAdminEmail");
 
+const bankNameInput = document.getElementById("bankNameInput");
+const accountNoInput = document.getElementById("accountNoInput");
+const accountHolderInput = document.getElementById("accountHolderInput");
+const savePaymentBtn = document.getElementById("savePaymentBtn");
+
 const menuNameInput = document.getElementById("menuNameInput");
 const menuPriceInput = document.getElementById("menuPriceInput");
 const menuTypeInput = document.getElementById("menuTypeInput");
@@ -74,19 +79,26 @@ function showLoggedInUI(email) {
   currentAdminEmail.textContent = `${email} 로그인됨`;
 }
 
-async function loadCurrentMenuImage() {
+async function loadSettings() {
   try {
     const settingsRef = doc(db, "settings", "public");
     const snapshot = await getDoc(settingsRef);
 
-    if (snapshot.exists()) {
-      const data = snapshot.data();
-      if (data.menuImageUrl) {
-        currentMenuImage.src = data.menuImageUrl;
-      }
+    if (!snapshot.exists()) {
+      return;
     }
+
+    const data = snapshot.data();
+
+    if (data.menuImageUrl) {
+      currentMenuImage.src = data.menuImageUrl;
+    }
+
+    bankNameInput.value = data.bankName || "";
+    accountNoInput.value = data.accountNo || "";
+    accountHolderInput.value = data.accountHolder || "";
   } catch (error) {
-    console.error("현재 메뉴판 이미지 조회 실패:", error);
+    console.error("설정 조회 실패:", error);
   }
 }
 
@@ -171,6 +183,45 @@ logoutBtn.onclick = async () => {
   } catch (error) {
     console.error("로그아웃 실패:", error);
     alert("로그아웃에 실패했어요.");
+  }
+};
+
+savePaymentBtn.onclick = async () => {
+  const bankName = bankNameInput.value.trim();
+  const accountNo = accountNoInput.value.replace(/[^0-9]/g, "");
+  const accountHolder = accountHolderInput.value.trim();
+
+  if (!bankName) {
+    alert("은행명을 입력해 주세요.");
+    return;
+  }
+
+  if (!accountNo) {
+    alert("계좌번호를 입력해 주세요.");
+    return;
+  }
+
+  if (!accountHolder) {
+    alert("예금주를 입력해 주세요.");
+    return;
+  }
+
+  try {
+    await setDoc(
+      doc(db, "settings", "public"),
+      {
+        bankName,
+        accountNo,
+        accountHolder
+      },
+      { merge: true }
+    );
+
+    accountNoInput.value = accountNo;
+    alert("결제 정보가 저장되었습니다.");
+  } catch (error) {
+    console.error("결제 정보 저장 실패:", error);
+    alert("결제 정보 저장에 실패했어요.");
   }
 };
 
@@ -260,6 +311,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   showLoggedInUI(user.email || "관리자");
-  await loadCurrentMenuImage();
+  await loadSettings();
   startMenuListener();
 });
