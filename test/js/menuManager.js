@@ -94,7 +94,10 @@ async function loadSettings() {
       currentMenuImage.src = data.menuImageUrl;
     }
 
-    bankNameInput.value = data.bankName || "";
+    if (data.bankName) {
+      bankNameInput.value = data.bankName;
+    }
+
     accountNoInput.value = data.accountNo || "";
     accountHolderInput.value = data.accountHolder || "";
   } catch (error) {
@@ -187,12 +190,12 @@ logoutBtn.onclick = async () => {
 };
 
 savePaymentBtn.onclick = async () => {
-  const bankName = bankNameInput.value.trim();
+  const bankName = bankNameInput.value;
   const accountNo = accountNoInput.value.replace(/[^0-9]/g, "");
   const accountHolder = accountHolderInput.value.trim();
 
   if (!bankName) {
-    alert("은행명을 입력해 주세요.");
+    alert("은행명을 선택해 주세요.");
     return;
   }
 

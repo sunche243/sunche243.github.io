@@ -5,7 +5,6 @@ import {
   calculateOrderTotal,
   getPageParams
 } from "./utils.js";
-import { appConfig } from "./appConfig.js";
 import {
   doc,
   getDoc
@@ -21,11 +20,38 @@ function buildAccountText(settings) {
   return `${settings.bankName} ${settings.accountNo} (${settings.accountHolder})`;
 }
 
+function normalizeBankName(bankName) {
+  const map = {
+    "SC": "SC제일은행",
+    "SC은행": "SC제일은행",
+    "SC제일": "SC제일은행",
+    "스탠다드차타드": "SC제일은행",
+    "스탠다드차타드은행": "SC제일은행",
+    "국민": "KB국민은행",
+    "국민은행": "KB국민은행",
+    "KB": "KB국민은행",
+    "KB은행": "KB국민은행",
+    "신한": "신한은행",
+    "우리": "우리은행",
+    "하나": "하나은행",
+    "농협": "NH농협은행",
+    "농협은행": "NH농협은행",
+    "NH": "NH농협은행",
+    "카카오": "카카오뱅크",
+    "카카오은행": "카카오뱅크",
+    "토스": "토스뱅크",
+    "토스은행": "토스뱅크"
+  };
+
+  return map[bankName] || bankName;
+}
+
 function buildTossSendLink(amount, bankName, accountNo) {
-  const encodedBank = encodeURIComponent(bankName);
+  const normalizedBankName = normalizeBankName(bankName);
+  const encodedBankName = encodeURIComponent(normalizedBankName);
   const cleanAccountNo = String(accountNo).replace(/[^0-9]/g, "");
 
-  return `supertoss://send?amount=${amount}&bank=${encodedBank}&accountNo=${cleanAccountNo}&origin=qr`;
+  return `supertoss://send?amount=${amount}&bank=${encodedBankName}&accountNo=${cleanAccountNo}&origin=qr`;
 }
 
 async function loadPaymentSettings() {
