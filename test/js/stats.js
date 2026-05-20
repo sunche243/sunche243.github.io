@@ -2,7 +2,8 @@ import { db } from "./common.js";
 import {
   formatPrice,
   formatCount,
-  calculateOrderTotal
+  calculateOrderTotal,
+  calculateOrderItemTotal
 } from "./utils.js";
 import { collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
@@ -129,7 +130,7 @@ onSnapshot(collection(db, "orders"), (snapshot) => {
     data.items.forEach((item) => {
       const itemName = item.name;
       const itemCount = Number(item.count) || 0;
-      const itemSales = (Number(item.price) || 0) * itemCount;
+      const itemSales = calculateOrderItemTotal(item);
 
       totalCount += itemCount;
 

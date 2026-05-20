@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>테이블 관리</title>
+  <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="stats-page">
+
+  <h2>테이블 관리</h2>
+
+  <div id="authRequiredBox" class="box" style="display: none;">
+    관리자 로그인이 필요합니다. menuManager에서 로그인 후 다시 접속해 주세요.
+  </div>
+
+  <div id="tableManagerContent" style="display: none;">
+    <div class="stats-summary-grid">
+      <div class="stats-card">
+        <div class="stats-label">사용 중 테이블</div>
+        <div class="stats-value" id="occupiedTableCount">0개</div>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-label">비어 있는 테이블</div>
+        <div class="stats-value" id="emptyTableCount">100개</div>
+      </div>
+
+      <div class="stats-card">
+        <div class="stats-label">활성 세션 수</div>
+        <div class="stats-value" id="activeSessionCount">0개</div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="check-summary-block">
+        <div class="check-summary-label">관리 범위</div>
+        <div class="check-summary-value">1번부터 100번까지</div>
+      </div>
+
+      <div class="check-summary-block">
+        <div class="check-summary-label">자릿세</div>
+        <div class="check-summary-value">1인당 10,000원</div>
+      </div>
+
+      <div class="check-summary-block">
+        <div class="check-summary-label">퇴장 차단 기준</div>
+        <div class="check-summary-value">미확인 주문 또는 미완료 서빙이 남아 있으면 퇴장 불가</div>
+      </div>
+    </div>
+
+    <div id="tableGrid" class="grid"></div>
+  </div>
+
+  <script type="module" src="./js/tableManager.js"></script>
+</body>
+</html>

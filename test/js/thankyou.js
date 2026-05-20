@@ -2,13 +2,19 @@ import { db } from "./common.js";
 import {
   parseItems,
   formatPrice,
+  formatOrderItemCount,
   calculateOrderTotal,
-  getPageParams
+  getPageParams,
+  normalizeItemOptions,
+  normalizeTableNumber,
+  readSessionStorageJSON
 } from "./utils.js";
 import {
   doc,
   getDoc
 } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+const COMPLETED_ORDER_KEY = "completedOrder";
 
 let paymentSettings = {
   bankName: "SC제일은행",
@@ -54,6 +60,20 @@ function buildTossSendLink(amount, bankName, accountNo) {
   return `supertoss://send?amount=${amount}&bank=${encodedBankName}&accountNo=${cleanAccountNo}&origin=qr`;
 }
 
+function appendItemOptions(container, item) {
+  const selectedOptions = normalizeItemOptions(item.options);
+
+  selectedOptions.forEach((option) => {
+    const optionRow = document.createElement("div");
+    optionRow.style.marginTop = "4px";
+    optionRow.style.paddingLeft = "8px";
+    optionRow.style.fontSize = "13px";
+    optionRow.style.color = "#666";
+    optionRow.textContent = `└ ${option.label} ${option.count}개 (+${Number(option.price).toLocaleString()}원)`;
+    container.appendChild(optionRow);
+  });
+}
+
 async function loadPaymentSettings() {
   try {
     const settingsRef = doc(db, "settings", "public");
@@ -79,10 +99,8 @@ window.addEventListener("DOMContentLoaded", async () => {
   await loadPaymentSettings();
 
   const params = getPageParams();
-
-  const table = params.get("table") || "-";
-  const name = params.get("name") || "-";
-  const itemString = params.get("items") || "";
+  const urlTable = normalizeTableNumber(params.get("table")) || "";
+  const completedOrder = readSessionStorageJSON(COMPLETED_ORDER_KEY);
 
   const tableNumEl = document.getElementById("tableNum");
   const payerEl = document.getElementById("payer");
@@ -93,13 +111,28 @@ window.addEventListener("DOMContentLoaded", async () => {
   const tossBtn = document.getElementById("tossBtn");
   const copyMsg = document.getElementById("copyMsg");
 
+  if (!urlTable) {
+    alert("테이블 정보를 확인할 수 없습니다. 메뉴 화면으로 돌아갑니다.");
+    window.location.href = "menu.html";
+    return;
+  }
+
+  if (!completedOrder || String(completedOrder.table || "") !== urlTable) {
+    alert("완료된 주문 정보를 확인할 수 없습니다. 메뉴 화면으로 돌아갑니다.");
+    window.location.href = `menu.html?table=${encodeURIComponent(urlTable)}`;
+    return;
+  }
+
+  const table = urlTable;
+  const name = String(completedOrder.name || "-");
+  const items = parseItems(JSON.stringify(completedOrder.items || []));
+
   tableNumEl.textContent = table;
   payerEl.textContent = name;
 
   const accountText = buildAccountText(paymentSettings);
   accountNumberEl.textContent = accountText;
 
-  const items = parseItems(itemString);
   const total = calculateOrderTotal(items);
 
   itemsEl.innerHTML = "";
@@ -111,13 +144,17 @@ window.addEventListener("DOMContentLoaded", async () => {
       const row = document.createElement("div");
       row.className = "check-item-row";
 
-      const left = document.createElement("span");
+      const left = document.createElement("div");
       left.className = "check-item-name";
-      left.textContent = item.name;
+
+      const itemName = document.createElement("div");
+      itemName.textContent = item.name;
+      left.appendChild(itemName);
+      appendItemOptions(left, item);
 
       const right = document.createElement("strong");
       right.className = "check-item-count";
-      right.textContent = `${item.count}개`;
+      right.textContent = formatOrderItemCount(item);
 
       row.appendChild(left);
       row.appendChild(right);

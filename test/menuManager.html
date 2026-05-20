@@ -88,7 +88,24 @@
         <select id="menuTypeInput">
           <option value="main">메인</option>
           <option value="side">사이드</option>
+          <option value="drink">음료</option>
         </select>
+      </div>
+
+      <div class="section">
+        <label><input type="checkbox" id="comboEnabledInput" /> 조합형 메뉴</label>
+      </div>
+
+      <div class="section" id="comboUnitSizeSection" hidden>
+        <label><strong>조합 단위 개수</strong></label>
+        <input type="text" id="comboUnitSizeInput" placeholder="예: 3" />
+      </div>
+
+      <div class="section">
+        <label><strong>옵션</strong></label>
+        <div id="menuOptionsList"></div>
+        <button class="toggle-btn" type="button" id="addMenuOptionBtn">옵션 추가</button>
+        <div class="menu-option-hint">옵션이 없으면 추가하지 않아도 됩니다.</div>
       </div>
 
       <div class="section">

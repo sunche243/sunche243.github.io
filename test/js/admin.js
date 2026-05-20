@@ -2,7 +2,9 @@ import { db } from "./common.js";
 import {
   formatDate,
   formatPrice,
-  calculateOrderTotal
+  formatOrderItemCount,
+  calculateOrderTotal,
+  normalizeItemOptions
 } from "./utils.js";
 import {
   collection,
@@ -99,6 +101,40 @@ function renderSummary() {
   adminCompletedCountEl.textContent = `${completedCount}건`;
 }
 
+function appendItemOptions(container, item) {
+  const selectedOptions = normalizeItemOptions(item.options);
+
+  selectedOptions.forEach((option) => {
+    const optionRow = document.createElement("div");
+    optionRow.style.marginTop = "4px";
+    optionRow.style.paddingLeft = "8px";
+    optionRow.style.fontSize = "13px";
+    optionRow.style.color = "#666";
+    optionRow.textContent = `└ ${option.label} ${option.count}개 (+${Number(option.price).toLocaleString()}원)`;
+    container.appendChild(optionRow);
+  });
+}
+
+function buildOrderItemsElement(items) {
+  const wrapper = document.createElement("div");
+
+  (items || []).forEach((item, index) => {
+    const itemRow = document.createElement("div");
+
+    if (index > 0) {
+      itemRow.style.marginTop = "10px";
+    }
+
+    const itemName = document.createElement("div");
+    itemName.textContent = `${item.name} ${formatOrderItemCount(item)}`;
+    itemRow.appendChild(itemName);
+    appendItemOptions(itemRow, item);
+    wrapper.appendChild(itemRow);
+  });
+
+  return wrapper;
+}
+
 function renderOrders() {
   const keyword = searchInput.value.trim();
   const filterValue = statusFilter.value;
@@ -116,10 +152,6 @@ function renderOrders() {
 
   filtered.forEach(({ id, data }) => {
     const total = calculateOrderTotal(data.items || []);
-    const itemList = (data.items || [])
-      .map((item) => `${item.name} ${item.count}개`)
-      .join("<br>");
-
     const formattedDate = formatDate(data.timestamp);
     const btnText = data.completed ? "확인취소" : "확인";
     const deleteBtnText = data.deleted ? "복구" : "삭제";
@@ -130,16 +162,41 @@ function renderOrders() {
       (data.completed ? " completed" : "") +
       (data.deleted ? " deleted" : "");
 
-    div.innerHTML = `
-      <p><strong>테이블 ${data.table}</strong> | 입금자: ${data.name}</p>
-      <p>주문:<br>${itemList}</p>
-      <p><strong>총 금액: ${formatPrice(total)}</strong></p>
-      <small>${formattedDate}</small><br>
-      <button class="toggle-btn">${btnText}</button>
-      <button class="delete-btn">${deleteBtnText}</button>
-    `;
+    const header = document.createElement("p");
+    header.innerHTML = `<strong>테이블 ${data.table}</strong> | 입금자: ${data.name}`;
 
-    div.querySelector(".toggle-btn").onclick = async () => {
+    const orderLabel = document.createElement("p");
+    orderLabel.textContent = "주문:";
+
+    const itemsWrapper = buildOrderItemsElement(data.items || []);
+    itemsWrapper.style.marginBottom = "12px";
+
+    const totalEl = document.createElement("p");
+    totalEl.innerHTML = `<strong>총 금액: ${formatPrice(total)}</strong>`;
+
+    const dateEl = document.createElement("small");
+    dateEl.textContent = formattedDate;
+
+    const br = document.createElement("br");
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "toggle-btn";
+    toggleBtn.textContent = btnText;
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = deleteBtnText;
+
+    div.appendChild(header);
+    div.appendChild(orderLabel);
+    div.appendChild(itemsWrapper);
+    div.appendChild(totalEl);
+    div.appendChild(dateEl);
+    div.appendChild(br);
+    div.appendChild(toggleBtn);
+    div.appendChild(deleteBtn);
+
+    toggleBtn.onclick = async () => {
       if (data.deleted) return;
 
       await updateDoc(doc(db, "orders", id), {
@@ -147,7 +204,7 @@ function renderOrders() {
       });
     };
 
-    div.querySelector(".delete-btn").onclick = async () => {
+    deleteBtn.onclick = async () => {
       if (data.deleted) {
         await updateDoc(doc(db, "orders", id), {
           deleted: false

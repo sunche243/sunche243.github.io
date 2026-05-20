@@ -1,6 +1,11 @@
 import { db } from "./common.js";
 import { appConfig } from "./appConfig.js";
 import {
+  formatOrderItemCount,
+  normalizeComboRule,
+  normalizeItemOptions
+} from "./utils.js";
+import {
   collection,
   query,
   where,
@@ -16,6 +21,27 @@ const serveFilter = document.getElementById("serveFilter");
 
 let currentUser = "";
 let allServeItems = [];
+
+function getServeUnitOptions(item, countIndex) {
+  return normalizeItemOptions(item.options)
+    .filter((option) => countIndex < option.count)
+    .map((option) => ({
+      label: option.label,
+      price: option.price,
+      count: 1
+    }));
+}
+
+function appendItemOptions(container, options) {
+  normalizeItemOptions(options).forEach((option) => {
+    const optionRow = document.createElement("div");
+    optionRow.style.marginTop = "4px";
+    optionRow.style.fontSize = "13px";
+    optionRow.style.color = "#666";
+    optionRow.textContent = `└ ${option.label} ${option.count}개`;
+    container.appendChild(optionRow);
+  });
+}
 
 function matchesSearch(itemData, keyword) {
   if (!keyword) return true;
@@ -77,9 +103,12 @@ function renderServeItems() {
       table,
       orderName,
       item,
+      countText,
       itemStatus,
       assignedTo,
-      serveEntry
+      serveEntry,
+      displayOptions,
+      isCombo
     } = itemData;
 
     if (itemStatus === "서빙 완료") return;
@@ -92,10 +121,18 @@ function renderServeItems() {
 
     div.innerHTML = `
       <p><strong>${item.name}</strong></p>
+      ${isCombo ? `<p>수량: ${countText}</p>` : ""}
       <p>테이블: ${table}</p>
       <p>입금자: ${orderName}</p>
       <p>상태: ${itemStatus}${assignedTo ? ` (${assignedTo})` : ""}</p>
     `;
+
+    if (displayOptions.length > 0) {
+      const optionBlock = document.createElement("div");
+      optionBlock.style.marginBottom = "8px";
+      appendItemOptions(optionBlock, displayOptions);
+      div.insertBefore(optionBlock, div.children[isCombo ? 2 : 1] || null);
+    }
 
     if (itemStatus === "주문 완료") {
       const btn = document.createElement("button");
@@ -158,8 +195,10 @@ window.addEventListener("DOMContentLoaded", () => {
       const serveStatus = data.serveStatus || {};
 
       data.items.forEach((item, itemIndex) => {
-        for (let countIndex = 0; countIndex < item.count; countIndex++) {
-          const serveId = `${orderId}_${itemIndex}_${countIndex}`;
+        const comboRule = normalizeComboRule(item.comboRule);
+
+        if (comboRule) {
+          const serveId = `${orderId}_${itemIndex}_combo`;
           const serveEntry = serveStatus[serveId] || {};
           const itemStatus = serveEntry.status || "주문 완료";
           const assignedTo = serveEntry.assignedTo || null;
@@ -170,6 +209,32 @@ window.addEventListener("DOMContentLoaded", () => {
             table: data.table,
             orderName: data.name,
             item,
+            countText: formatOrderItemCount(item),
+            displayOptions: normalizeItemOptions(item.options),
+            isCombo: true,
+            itemStatus,
+            assignedTo,
+            serveEntry
+          });
+          return;
+        }
+
+        for (let countIndex = 0; countIndex < item.count; countIndex++) {
+          const serveId = `${orderId}_${itemIndex}_${countIndex}`;
+          const serveEntry = serveStatus[serveId] || {};
+          const itemStatus = serveEntry.status || "주문 완료";
+          const assignedTo = serveEntry.assignedTo || null;
+          const displayOptions = getServeUnitOptions(item, countIndex);
+
+          allServeItems.push({
+            orderId,
+            serveId,
+            table: data.table,
+            orderName: data.name,
+            item,
+            countText: "1개",
+            displayOptions,
+            isCombo: false,
             itemStatus,
             assignedTo,
             serveEntry
