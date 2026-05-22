@@ -22,7 +22,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-auth.js";
 
 const TABLE_COUNT = 100;
-const SEAT_FEE_PER_PERSON = 10000;
+const DEFAULT_SEAT_FEE_PER_PERSON = 10000;
 const ADMIN_EMAILS = ["starcj7@naver.com"];
 const auth = getAuth();
 
@@ -58,7 +58,7 @@ function getDefaultTableData() {
     currentSessionId: null,
     headCount: null,
     paidSeatCount: null,
-    seatFeePerPerson: SEAT_FEE_PER_PERSON,
+    seatFeePerPerson: DEFAULT_SEAT_FEE_PER_PERSON,
     startedAt: null,
     endedAt: null
   };
@@ -95,6 +95,60 @@ function parseCountInput(value, label, allowZero = false) {
   }
 
   return count;
+}
+
+function normalizeSeatFeePerPerson(value) {
+  const seatFeePerPerson = parseInt(value, 10);
+
+  if (!Number.isFinite(seatFeePerPerson) || seatFeePerPerson <= 0) {
+    return DEFAULT_SEAT_FEE_PER_PERSON;
+  }
+
+  return seatFeePerPerson;
+}
+
+function getStoredCount(value) {
+  if (value === null || value === undefined || value === "") {
+    return null;
+  }
+
+  const count = Number(value);
+
+  if (!Number.isFinite(count) || count < 0) {
+    return null;
+  }
+
+  return count;
+}
+
+function getSeatFeeChargedCount(tableData) {
+  const paidSeatCount = getStoredCount(tableData?.paidSeatCount);
+
+  if (paidSeatCount !== null) {
+    return paidSeatCount;
+  }
+
+  return getStoredCount(tableData?.headCount) ?? 0;
+}
+
+function getSeatFeeTotal(tableData) {
+  return getSeatFeeChargedCount(tableData) * normalizeSeatFeePerPerson(tableData?.seatFeePerPerson);
+}
+
+async function getConfiguredSeatFeePerPerson() {
+  try {
+    const settingsRef = doc(db, "settings", "public");
+    const snapshot = await getDoc(settingsRef);
+
+    if (!snapshot.exists()) {
+      return DEFAULT_SEAT_FEE_PER_PERSON;
+    }
+
+    return normalizeSeatFeePerPerson(snapshot.data()?.seatFeePerPerson);
+  } catch (error) {
+    console.error("자릿세 설정 조회 실패:", error);
+    return DEFAULT_SEAT_FEE_PER_PERSON;
+  }
 }
 
 async function readLatestTableData(tableNumber) {
@@ -245,13 +299,6 @@ function buildEmptyCard(tableNumber, tableData) {
       <input type="text" inputmode="numeric" data-field="headCount" placeholder="예: 4" />
     </div>
 
-    <div class="section">
-      <label><strong>자릿세 납부 인원</strong></label>
-      <input type="text" inputmode="numeric" data-field="paidSeatCount" placeholder="예: 4" />
-    </div>
-
-    <p><strong>자릿세 1인당: ${formatPrice(SEAT_FEE_PER_PERSON)}</strong></p>
-
     <div class="buttons">
       <button class="confirm-btn" type="button" data-action="enter" data-table="${tableNumber}">입장 처리</button>
     </div>
@@ -259,9 +306,10 @@ function buildEmptyCard(tableNumber, tableData) {
 }
 
 function buildOccupiedCard(tableNumber, tableData) {
-  const headCount = Number(tableData.headCount) || 0;
-  const paidSeatCount = Number(tableData.paidSeatCount) || 0;
-  const seatFeePerPerson = Number(tableData.seatFeePerPerson) || SEAT_FEE_PER_PERSON;
+  const headCount = getStoredCount(tableData.headCount) ?? 0;
+  const paidSeatCount = getSeatFeeChargedCount(tableData);
+  const seatFeePerPerson = normalizeSeatFeePerPerson(tableData.seatFeePerPerson);
+  const seatFeeTotal = getSeatFeeTotal(tableData);
   const sessionPreview = tableData.currentSessionId
     ? String(tableData.currentSessionId).slice(0, 12)
     : "-";
@@ -271,8 +319,9 @@ function buildOccupiedCard(tableNumber, tableData) {
     <p>상태: 사용 중</p>
     <p>현재 세션: ${sessionPreview}</p>
     <p>입장 인원: ${headCount}명</p>
-    <p>자릿세 납부 인원: ${paidSeatCount}명</p>
-    <p>자릿세 1인당: ${formatPrice(seatFeePerPerson)}</p>
+    <p><strong>자릿세 총액: ${formatPrice(seatFeeTotal)}</strong></p>
+    ${paidSeatCount !== headCount ? `<p>자릿세 적용 인원: ${paidSeatCount}명</p>` : ""}
+    <p>적용 단가: ${formatPrice(seatFeePerPerson)}</p>
     <p>입장 시간: ${formatDate(tableData.startedAt) || "-"}</p>
 
     <div class="buttons">
@@ -323,24 +372,9 @@ function startTableListener() {
 
 async function handleEnter(tableNumber, card) {
   const headCountInput = card.querySelector('[data-field="headCount"]');
-  const paidSeatCountInput = card.querySelector('[data-field="paidSeatCount"]');
 
   const headCount = parseCountInput(headCountInput.value, "입장 인원");
   if (headCount === null) {
-    return;
-  }
-
-  const paidSeatCount = parseCountInput(
-    paidSeatCountInput.value,
-    "자릿세 납부 인원",
-    true
-  );
-  if (paidSeatCount === null) {
-    return;
-  }
-
-  if (paidSeatCount > headCount) {
-    alert("자릿세 납부 인원은 입장 인원보다 많을 수 없습니다.");
     return;
   }
 
@@ -351,14 +385,16 @@ async function handleEnter(tableNumber, card) {
     return;
   }
 
+  const seatFeePerPerson = await getConfiguredSeatFeePerPerson();
+
   await setDoc(
     doc(db, "tables", String(tableNumber)),
     {
       status: "occupied",
       currentSessionId: createSessionId(tableNumber),
       headCount,
-      paidSeatCount,
-      seatFeePerPerson: SEAT_FEE_PER_PERSON,
+      paidSeatCount: headCount,
+      seatFeePerPerson,
       startedAt: Date.now(),
       endedAt: null
     },

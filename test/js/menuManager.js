@@ -40,6 +40,7 @@ const currentAdminEmail = document.getElementById("currentAdminEmail");
 const bankNameInput = document.getElementById("bankNameInput");
 const accountNoInput = document.getElementById("accountNoInput");
 const accountHolderInput = document.getElementById("accountHolderInput");
+const seatFeePerPersonInput = document.getElementById("seatFeePerPersonInput");
 const savePaymentBtn = document.getElementById("savePaymentBtn");
 
 const menuNameInput = document.getElementById("menuNameInput");
@@ -64,6 +65,7 @@ const menuManagerList = document.getElementById("menuManagerList");
 let editingMenuId = null;
 let unsubscribeMenus = null;
 let currentMenus = [];
+const DEFAULT_SEAT_FEE_PER_PERSON = 10000;
 
 function hasValidSortOrder(menu) {
   return Number.isFinite(Number(menu?.sortOrder));
@@ -87,6 +89,16 @@ function getMenuTypeLabel(type) {
 
 function sanitizePriceText(value) {
   return String(value ?? "").replace(/[^0-9]/g, "");
+}
+
+function normalizeSeatFeePerPerson(value) {
+  const seatFeePerPerson = parseInt(value, 10);
+
+  if (!Number.isFinite(seatFeePerPerson) || seatFeePerPerson <= 0) {
+    return DEFAULT_SEAT_FEE_PER_PERSON;
+  }
+
+  return seatFeePerPerson;
 }
 
 function updateComboRuleUI() {
@@ -399,6 +411,8 @@ async function loadSettings() {
     const settingsRef = doc(db, "settings", "public");
     const snapshot = await getDoc(settingsRef);
 
+    seatFeePerPersonInput.value = String(DEFAULT_SEAT_FEE_PER_PERSON);
+
     if (!snapshot.exists()) {
       return;
     }
@@ -415,6 +429,9 @@ async function loadSettings() {
 
     accountNoInput.value = data.accountNo || "";
     accountHolderInput.value = data.accountHolder || "";
+    seatFeePerPersonInput.value = String(
+      normalizeSeatFeePerPerson(data.seatFeePerPerson)
+    );
   } catch (error) {
     console.error("설정 조회 실패:", error);
   }
@@ -537,6 +554,8 @@ savePaymentBtn.onclick = async () => {
   const bankName = bankNameInput.value;
   const accountNo = accountNoInput.value.replace(/[^0-9]/g, "");
   const accountHolder = accountHolderInput.value.trim();
+  const seatFeePerPersonText = sanitizePriceText(seatFeePerPersonInput.value);
+  const seatFeePerPerson = parseInt(seatFeePerPersonText, 10);
 
   if (!bankName) {
     alert("은행명을 선택해 주세요.");
@@ -553,22 +572,29 @@ savePaymentBtn.onclick = async () => {
     return;
   }
 
+  if (!Number.isFinite(seatFeePerPerson) || seatFeePerPerson <= 0) {
+    alert("자릿세 단가를 올바르게 입력해 주세요.");
+    return;
+  }
+
   try {
     await setDoc(
       doc(db, "settings", "public"),
       {
         bankName,
         accountNo,
-        accountHolder
+        accountHolder,
+        seatFeePerPerson
       },
       { merge: true }
     );
 
     accountNoInput.value = accountNo;
-    alert("결제 정보가 저장되었습니다.");
+    seatFeePerPersonInput.value = String(seatFeePerPerson);
+    alert("결제 정보와 자릿세 단가가 저장되었습니다.");
   } catch (error) {
-    console.error("결제 정보 저장 실패:", error);
-    alert("결제 정보 저장에 실패했어요.");
+    console.error("설정 저장 실패:", error);
+    alert("설정 저장에 실패했어요.");
   }
 };
 
@@ -674,6 +700,10 @@ comboUnitSizeInput.oninput = () => {
   comboUnitSizeInput.value = sanitizePriceText(comboUnitSizeInput.value);
 };
 
+seatFeePerPersonInput.oninput = () => {
+  seatFeePerPersonInput.value = sanitizePriceText(seatFeePerPersonInput.value);
+};
+
 uploadMenuImageBtn.onclick = async () => {
   const file = menuImageFileInput.files[0];
 
@@ -723,3 +753,4 @@ onAuthStateChanged(auth, async (user) => {
 
 updateComboRuleUI();
 renderMenuOptionRows();
+seatFeePerPersonInput.value = String(DEFAULT_SEAT_FEE_PER_PERSON);

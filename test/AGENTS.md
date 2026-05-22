@@ -444,3 +444,151 @@ utils.js 사용 가능성 검토.
 4. 승인 후 수정
 
 항상 보수적으로 행동한다.
+
+---
+
+# 주문 데이터 전달 정책 (매우 중요)
+
+## URL 정책
+
+보안 및 URL 안정성을 위해:
+
+URL query parameter에는 `table`만 허용한다.
+
+허용:
+
+menu.html?table=7
+
+금지:
+
+- sessionId
+- items
+- payer name
+- total amount
+- order object
+- 기타 주문 관련 데이터
+
+주문 데이터는 URL로 전달하지 않는다.
+
+---
+
+## sessionStorage 정책
+
+주문 흐름 데이터는 sessionStorage를 사용한다.
+
+### pendingOrder
+
+용도:
+
+menu.html → check.html
+
+저장 정보:
+
+- table
+- sessionId
+- payer name
+- items
+
+check.html은 URL 파라미터가 아니라
+sessionStorage.pendingOrder를 읽어 렌더링한다.
+
+---
+
+### completedOrder
+
+용도:
+
+check.html → thankyou.html
+
+저장 정보:
+
+- 주문 완료 화면 표시용 데이터
+
+thankyou.html은 URL 파라미터가 아니라
+sessionStorage.completedOrder를 읽어 렌더링한다.
+
+---
+
+## 신뢰 모델(Security)
+
+sessionStorage는 조작 가능하므로 신뢰하지 않는다.
+
+최종 신뢰는 반드시 Firestore transaction 검증으로 유지한다.
+
+절대 제거 금지:
+
+- order.js sessionId 재검증 로직
+- Firestore transaction 검증
+- table session 검증
+
+프론트 데이터는 편의용이며,
+최종 데이터 검증은 서버(Firebase) 기준이다.
+
+---
+
+# 관리자 페이지 정책
+
+관리자/운영진 페이지는
+일반 고객 대상 UI가 아니다.
+
+따라서:
+
+불필요한 설명 문구 노출을 최소화한다.
+
+예:
+
+- “1인당 10,000원” 같은 운영자가 이미 아는 설명
+- 중복 안내 문구
+- 과도한 UX helper text
+
+운영 효율 중심 UI를 우선한다.
+
+단,
+실수 방지에 필요한 정보는 유지 가능하다.
+
+---
+
+## 설정값 관리 원칙
+
+자주 변경 가능한 운영값은
+하드코딩하지 않는다.
+
+예:
+
+- 자릿세
+- 계좌정보
+- 토스 정보
+- 운영 설정값
+
+가능한 경우:
+
+menuManager.html 등 관리자 페이지에서 수정 가능하도록 구현한다.
+
+단,
+기존 Firebase 구조와 backward compatibility를 유지해야 한다.
+
+---
+
+# AGENTS.md 수정 정책
+
+새로운 요청이 들어왔을 때:
+
+다음 조건을 만족하면
+AGENTS.md 추가 후보로 간주한다.
+
+1. 앞으로 반복 적용될 규칙
+2. 프로젝트 전체에 영향을 주는 정책
+3. 여러 기능에서 공통으로 사용되는 구조
+4. 보안/데이터 흐름 관련 규칙
+5. 기존 기능 안정성과 직접 관련된 규칙
+
+이 경우:
+
+수정 전에
+
+“이건 AGENTS.md에 추가하는 게 좋아 보입니다”
+
+라고 먼저 제안한다.
+
+일회성 기능 변경은
+AGENTS.md에 추가하지 않는다.
