@@ -7,39 +7,61 @@
   <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<body class="check-page">
+<body class="customer-page check-page page-check">
 
-  <h2>주문 내용을 확인해 주세요</h2>
+  <div class="customer-shell check-shell">
+    <header class="customer-hero customer-hero--compact">
+      <div class="customer-step-badge">STEP 2 / 3</div>
+      <h2>주문 내용을 확인해 주세요</h2>
+      <p class="customer-hero-copy">
+        접수 전 마지막 확인 단계예요. 아래 내용으로 주문이 저장됩니다.
+      </p>
+      <div class="flow-progress">
+        <span class="flow-progress-item is-done">메뉴 선택</span>
+        <span class="flow-progress-item is-current">주문 확인</span>
+        <span class="flow-progress-item">주문 완료</span>
+      </div>
+    </header>
 
-  <div class="box">
-    <div class="check-summary-block">
-      <div class="check-summary-label">테이블 번호</div>
-      <div class="check-summary-value" id="tableNum">-</div>
+    <div class="box check-card">
+      <div class="check-summary-block">
+        <div class="check-summary-label">테이블 번호</div>
+        <div class="check-summary-value" id="tableNum">-</div>
+      </div>
+
+      <div class="check-summary-block">
+        <div class="check-summary-label">입금자명</div>
+        <div class="check-summary-value" id="payer">-</div>
+      </div>
+
+      <div class="check-summary-block">
+        <div class="check-summary-label">주문한 항목</div>
+        <div id="items" class="check-item-list">-</div>
+      </div>
+
+      <div class="check-summary-total">
+        <span>총 금액</span>
+        <strong id="totalPrice">0원</strong>
+      </div>
     </div>
 
-    <div class="check-summary-block">
-      <div class="check-summary-label">입금자명</div>
-      <div class="check-summary-value" id="payer">-</div>
+    <div class="customer-note-card">
+      <div class="customer-note-title">주문 전 확인</div>
+      <p class="customer-note-text">
+        주문 확정 후에는 바로 접수가 진행되므로, 메뉴 구성과 입금자명을 다시 확인해 주세요.
+      </p>
     </div>
 
-    <div class="check-summary-block">
-      <div class="check-summary-label">주문한 항목</div>
-      <div id="items" class="check-item-list">-</div>
+    <div class="check-action-shell">
+      <div class="buttons check-action-bar">
+        <button class="back-btn" id="goBack" type="button">이전으로</button>
+        <button class="confirm-btn" id="goConfirm" type="button">주문 확정</button>
+      </div>
     </div>
 
-    <div class="check-summary-total">
-      <span>총 금액</span>
-      <strong id="totalPrice">0원</strong>
+    <div class="spinner" id="spinner">
+      <div class="spinner-border"></div>
     </div>
-  </div>
-
-  <div class="buttons">
-    <button class="back-btn" id="goBack" type="button">이전으로</button>
-    <button class="confirm-btn" id="goConfirm" type="button">주문 확정</button>
-  </div>
-
-  <div class="spinner" id="spinner">
-    <div class="spinner-border"></div>
   </div>
 
   <script type="module" src="./js/check.js"></script>

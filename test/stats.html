@@ -7,79 +7,139 @@
   <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<body class="stats-page">
+<body class="admin-page stats-page page-stats">
 
-  <h2>주문 통계</h2>
+  <div class="stats-shell">
+    <header class="stats-header">
+      <div class="stats-header-copy">
+        <div class="stats-eyebrow">ANALYTICS</div>
+        <h2>주문 통계</h2>
+        <p class="stats-header-description">
+          주문, 매출, 서빙 속도, 인기 메뉴 흐름을 한 화면에서 파악할 수 있는 운영용 분석 대시보드입니다.
+        </p>
+      </div>
+    </header>
 
-  <div class="stats-summary-grid">
-    <div class="stats-card">
-      <div class="stats-label">총 매출</div>
-      <div class="stats-value" id="totalSales">0원</div>
-    </div>
+    <section class="stats-kpi-section">
+      <div class="stats-section-heading">
+        <div>
+          <div class="stats-section-title">핵심 지표</div>
+          <div class="stats-section-note">삭제되지 않은 주문 기준으로 집계됩니다.</div>
+        </div>
+      </div>
 
-    <div class="stats-card">
-      <div class="stats-label">총 판매 수량</div>
-      <div class="stats-value" id="totalCount">0개</div>
-    </div>
+      <div class="stats-summary-grid stats-dashboard-grid">
+        <div class="stats-card">
+          <div class="stats-label">총 매출</div>
+          <div class="stats-value" id="totalSales">0원</div>
+        </div>
 
-    <div class="stats-card">
-      <div class="stats-label">총 주문 수</div>
-      <div class="stats-value" id="totalOrders">0건</div>
-    </div>
+        <div class="stats-card">
+          <div class="stats-label">총 판매 수량</div>
+          <div class="stats-value" id="totalCount">0개</div>
+        </div>
 
-    <div class="stats-card">
-      <div class="stats-label">평균 주문 금액</div>
-      <div class="stats-value" id="averageSales">0원</div>
-    </div>
-  </div>
+        <div class="stats-card">
+          <div class="stats-label">총 주문 수</div>
+          <div class="stats-value" id="totalOrders">0건</div>
+        </div>
 
-  <div class="stats-summary-grid">
-    <div class="stats-card">
-      <div class="stats-label">평균 서빙 완료 시간</div>
-      <div class="stats-value" id="averageServeTime">-</div>
-    </div>
+        <div class="stats-card">
+          <div class="stats-label">평균 주문 금액</div>
+          <div class="stats-value" id="averageSales">0원</div>
+        </div>
+      </div>
+    </section>
 
-    <div class="stats-card">
-      <div class="stats-label">서빙 완료 항목 수</div>
-      <div class="stats-value" id="completedServeCount">0개</div>
-    </div>
+    <section class="stats-serve-section">
+      <div class="stats-section-heading">
+        <div>
+          <div class="stats-section-title">서빙 성과</div>
+          <div class="stats-section-note">서빙 완료된 항목을 기준으로 평균과 극값을 계산합니다.</div>
+        </div>
+      </div>
 
-    <div class="stats-card">
-      <div class="stats-label">가장 빠른 서빙</div>
-      <div class="stats-value" id="fastestServeTime">-</div>
-    </div>
+      <div class="stats-summary-grid stats-dashboard-grid">
+        <div class="stats-card">
+          <div class="stats-label">평균 서빙 완료 시간</div>
+          <div class="stats-value" id="averageServeTime">-</div>
+        </div>
 
-    <div class="stats-card">
-      <div class="stats-label">가장 느린 서빙</div>
-      <div class="stats-value" id="slowestServeTime">-</div>
-    </div>
-  </div>
+        <div class="stats-card">
+          <div class="stats-label">서빙 완료 항목 수</div>
+          <div class="stats-value" id="completedServeCount">0개</div>
+        </div>
 
-  <div class="stats-highlight-grid">
-    <div class="stats-card">
-      <div class="stats-label">가장 많이 팔린 메뉴</div>
-      <div class="stats-value stats-highlight" id="bestMenu">-</div>
-    </div>
+        <div class="stats-card">
+          <div class="stats-label">가장 빠른 서빙</div>
+          <div class="stats-value" id="fastestServeTime">-</div>
+        </div>
 
-    <div class="stats-card">
-      <div class="stats-label">가장 매출이 높은 메뉴</div>
-      <div class="stats-value stats-highlight" id="topSalesMenu">-</div>
-    </div>
-  </div>
+        <div class="stats-card">
+          <div class="stats-label">가장 느린 서빙</div>
+          <div class="stats-value" id="slowestServeTime">-</div>
+        </div>
+      </div>
+    </section>
 
-  <div class="stats-section">
-    <h3>시간대별 주문 수</h3>
-    <div id="hourlyOrderStats" class="stats-list"></div>
-  </div>
+    <section class="stats-highlight-section">
+      <div class="stats-section-heading">
+        <div>
+          <div class="stats-section-title">하이라이트</div>
+          <div class="stats-section-note">가장 많이 팔린 메뉴와 매출 기여도가 가장 높은 메뉴를 표시합니다.</div>
+        </div>
+      </div>
 
-  <div class="stats-section">
-    <h3>메뉴별 판매량</h3>
-    <div id="menuCountStats" class="stats-list"></div>
-  </div>
+      <div class="stats-highlight-grid stats-dashboard-highlight">
+        <div class="stats-card">
+          <div class="stats-label">가장 많이 팔린 메뉴</div>
+          <div class="stats-value stats-highlight" id="bestMenu">-</div>
+        </div>
 
-  <div class="stats-section">
-    <h3>메뉴별 매출</h3>
-    <div id="menuSalesStats" class="stats-list"></div>
+        <div class="stats-card">
+          <div class="stats-label">가장 매출이 높은 메뉴</div>
+          <div class="stats-value stats-highlight" id="topSalesMenu">-</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-staff-section">
+      <div class="stats-section-heading">
+        <div>
+          <div class="stats-section-title">직원별 성과표</div>
+          <div class="stats-section-note">서빙 완료와 진행 중인 서빙 항목을 담당자별로 집계합니다.</div>
+        </div>
+      </div>
+
+      <div id="staffPerformanceStats" class="stats-list stats-staff-list"></div>
+      <div id="staffPerformanceDetails" class="stats-staff-details"></div>
+    </section>
+
+    <section class="stats-detail-section">
+      <div class="stats-section-heading">
+        <div>
+          <div class="stats-section-title">상세 분석</div>
+          <div class="stats-section-note">시간대 흐름과 메뉴별 판매량, 매출 기여도를 세부적으로 확인할 수 있습니다.</div>
+        </div>
+      </div>
+
+      <div class="stats-detail-grid">
+        <div class="stats-section stats-detail-card">
+          <h3>시간대별 주문 수</h3>
+          <div id="hourlyOrderStats" class="stats-list"></div>
+        </div>
+
+        <div class="stats-section stats-detail-card">
+          <h3>메뉴별 판매량</h3>
+          <div id="menuCountStats" class="stats-list"></div>
+        </div>
+
+        <div class="stats-section stats-detail-card">
+          <h3>메뉴별 매출</h3>
+          <div id="menuSalesStats" class="stats-list"></div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script type="module" src="./js/stats.js"></script>

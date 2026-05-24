@@ -16,11 +16,119 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
 
 const container = document.getElementById("orders");
+const staffRequestsList = document.getElementById("staffRequestsList");
 const serveSearchInput = document.getElementById("serveSearchInput");
 const serveFilter = document.getElementById("serveFilter");
 
 let currentUser = "";
 let allServeItems = [];
+let allStaffRequests = [];
+
+function getRequestCreatedAt(data) {
+  const rawCreatedAt = data?.createdAt ?? data?.timestamp;
+
+  if (typeof rawCreatedAt === "number") {
+    return Number.isFinite(rawCreatedAt) && rawCreatedAt > 0 ? rawCreatedAt : null;
+  }
+
+  if (typeof rawCreatedAt === "string") {
+    const parsedCreatedAt = Number(rawCreatedAt.trim());
+    return Number.isFinite(parsedCreatedAt) && parsedCreatedAt > 0 ? parsedCreatedAt : null;
+  }
+
+  if (rawCreatedAt && typeof rawCreatedAt.toMillis === "function") {
+    const millis = Number(rawCreatedAt.toMillis());
+    return Number.isFinite(millis) && millis > 0 ? millis : null;
+  }
+
+  if (rawCreatedAt && typeof rawCreatedAt === "object") {
+    const seconds = Number(rawCreatedAt.seconds);
+    const nanoseconds = Number(rawCreatedAt.nanoseconds);
+
+    if (!Number.isFinite(seconds) || !Number.isFinite(nanoseconds)) {
+      return null;
+    }
+
+    const millis = seconds * 1000 + nanoseconds / 1000000;
+    return Number.isFinite(millis) && millis > 0 ? millis : null;
+  }
+
+  return null;
+}
+
+function getServeDelayMeta(orderData) {
+  const createdAt = getRequestCreatedAt(orderData);
+
+  if (!createdAt) {
+    return {
+      label: "접수 시간 확인 불가",
+      className: "is-muted"
+    };
+  }
+
+  const elapsedMinutes = Math.max(0, Math.floor((Date.now() - createdAt) / 60000));
+
+  if (elapsedMinutes >= 30) {
+    return {
+      label: `${elapsedMinutes}분 경과 · 긴급`,
+      className: "is-urgent"
+    };
+  }
+
+  if (elapsedMinutes >= 20) {
+    return {
+      label: `${elapsedMinutes}분 경과 · 지연`,
+      className: "is-delayed"
+    };
+  }
+
+  if (elapsedMinutes >= 15) {
+    return {
+      label: `${elapsedMinutes}분 경과 · 주의`,
+      className: "is-warning"
+    };
+  }
+
+  return {
+    label: `${elapsedMinutes}분 경과`,
+    className: "is-normal"
+  };
+}
+
+function formatRequestElapsed(createdAt) {
+  if (!createdAt) {
+    return "접수 시간 확인 불가";
+  }
+
+  const elapsedMinutes = Math.max(0, Math.floor((Date.now() - createdAt) / 60000));
+
+  if (elapsedMinutes < 1) {
+    return "방금 접수";
+  }
+
+  return `${elapsedMinutes}분 전 접수`;
+}
+
+function getServeStatusMeta(itemStatus) {
+  if (itemStatus === "서빙 예정") {
+    return {
+      label: "서빙 예정",
+      className: "is-serving"
+    };
+  }
+
+  if (itemStatus === "서빙 완료") {
+    return {
+      label: "서빙 완료",
+      className: "is-done"
+    };
+  }
+
+  return {
+    label: "미배정",
+    className: "is-pending"
+  };
+}
 
 function getServeUnitOptions(item, countIndex) {
   return normalizeItemOptions(item.options)
@@ -35,6 +143,7 @@ function getServeUnitOptions(item, countIndex) {
 function appendItemOptions(container, options) {
   normalizeItemOptions(options).forEach((option) => {
     const optionRow = document.createElement("div");
+    optionRow.className = "serve-item-option";
     optionRow.style.marginTop = "4px";
     optionRow.style.fontSize = "13px";
     optionRow.style.color = "#666";
@@ -86,6 +195,69 @@ async function completeServe(orderId, serveId, serveEntry = {}) {
   });
 }
 
+async function resolveStaffRequest(requestId) {
+  await updateDoc(doc(db, "tableRequests", requestId), {
+    status: "resolved",
+    resolvedAt: Date.now()
+  });
+}
+
+function renderStaffRequests() {
+  if (!staffRequestsList) {
+    return;
+  }
+
+  staffRequestsList.innerHTML = "";
+
+  if (allStaffRequests.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "serve-staff-request-empty";
+    empty.textContent = "대기 중인 직원 호출이 없습니다.";
+    staffRequestsList.appendChild(empty);
+    return;
+  }
+
+  allStaffRequests.forEach((request) => {
+    const card = document.createElement("div");
+    card.className = "serve-staff-request-card";
+    card.dataset.requestId = request.id;
+
+    const content = document.createElement("div");
+    content.className = "serve-staff-request-content";
+
+    const title = document.createElement("div");
+    title.className = "serve-staff-request-title";
+    title.textContent = `🔔 ${request.table}번 테이블 직원 호출`;
+
+    const meta = document.createElement("div");
+    meta.className = "serve-staff-request-meta";
+    meta.textContent = formatRequestElapsed(request.createdAt);
+
+    content.appendChild(title);
+    content.appendChild(meta);
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "serve-staff-request-resolve";
+    button.textContent = "처리 완료";
+    button.onclick = async () => {
+      button.disabled = true;
+
+      try {
+        await resolveStaffRequest(request.id);
+      } catch (error) {
+        console.error("직원 호출 처리 실패:", error);
+        alert("직원 호출 처리에 실패했어요.");
+        button.disabled = false;
+      }
+    };
+
+    card.appendChild(content);
+    card.appendChild(button);
+    staffRequestsList.appendChild(card);
+  });
+}
+
 function renderServeItems() {
   const keyword = serveSearchInput.value.trim();
   const filterValue = serveFilter.value;
@@ -108,30 +280,81 @@ function renderServeItems() {
       assignedTo,
       serveEntry,
       displayOptions,
-      isCombo
+      isCombo,
+      delayMeta
     } = itemData;
 
     if (itemStatus === "서빙 완료") return;
 
+    const statusMeta = getServeStatusMeta(itemStatus);
+
     const div = document.createElement("div");
     div.className = "item";
+    div.dataset.status = statusMeta.className;
+    div.dataset.delayStatus = delayMeta.className;
 
     if (itemStatus === "서빙 예정") div.classList.add("serving");
     if (itemStatus === "서빙 완료") div.classList.add("done");
 
-    div.innerHTML = `
-      <p><strong>${item.name}</strong></p>
-      ${isCombo ? `<p>수량: ${countText}</p>` : ""}
-      <p>테이블: ${table}</p>
-      <p>입금자: ${orderName}</p>
-      <p>상태: ${itemStatus}${assignedTo ? ` (${assignedTo})` : ""}</p>
-    `;
+    const header = document.createElement("div");
+    header.className = "serve-item-header";
+
+    const titleRow = document.createElement("div");
+    titleRow.className = "serve-item-title-row";
+
+    const menuName = document.createElement("div");
+    menuName.className = "serve-item-menu";
+    menuName.textContent = item.name;
+
+    const statusLabel = document.createElement("div");
+    statusLabel.className = `serve-item-status ${statusMeta.className}`;
+    statusLabel.textContent = statusMeta.label;
+
+    titleRow.appendChild(menuName);
+    titleRow.appendChild(statusLabel);
+
+    const metaRow = document.createElement("div");
+    metaRow.className = "serve-item-meta";
+
+    const tableLabel = document.createElement("div");
+    tableLabel.className = "serve-item-table";
+    tableLabel.textContent = `테이블 ${table}`;
+
+    metaRow.appendChild(tableLabel);
+
+    const delayLabel = document.createElement("div");
+    delayLabel.className = `serve-item-delay ${delayMeta.className}`;
+    delayLabel.textContent = delayMeta.label;
+    metaRow.appendChild(delayLabel);
+
+    if (isCombo) {
+      const countLabel = document.createElement("div");
+      countLabel.className = "serve-item-count";
+      countLabel.textContent = countText;
+      metaRow.appendChild(countLabel);
+    }
+
+    const payerLabel = document.createElement("div");
+    payerLabel.className = "serve-item-payer";
+    payerLabel.textContent = `입금자 ${orderName}`;
+
+    const assigneeLabel = document.createElement("div");
+    assigneeLabel.className = "serve-item-assignee";
+    assigneeLabel.textContent = assignedTo ? `담당 ${assignedTo}` : "담당 미배정";
+
+    header.appendChild(titleRow);
+    header.appendChild(metaRow);
+    header.appendChild(payerLabel);
+    header.appendChild(assigneeLabel);
+
+    div.appendChild(header);
 
     if (displayOptions.length > 0) {
       const optionBlock = document.createElement("div");
+      optionBlock.className = "serve-item-options";
       optionBlock.style.marginBottom = "8px";
       appendItemOptions(optionBlock, displayOptions);
-      div.insertBefore(optionBlock, div.children[isCombo ? 2 : 1] || null);
+      div.appendChild(optionBlock);
     }
 
     if (itemStatus === "주문 완료") {
@@ -141,7 +364,11 @@ function renderServeItems() {
       btn.onclick = async () => {
         await assignServe(orderId, serveId, serveEntry);
       };
-      div.appendChild(btn);
+
+      const actionRow = document.createElement("div");
+      actionRow.className = "serve-item-actions";
+      actionRow.appendChild(btn);
+      div.appendChild(actionRow);
     } else if (itemStatus === "서빙 예정" && assignedTo === currentUser) {
       const btn = document.createElement("button");
       btn.textContent = "서빙 완료";
@@ -149,7 +376,11 @@ function renderServeItems() {
       btn.onclick = async () => {
         await completeServe(orderId, serveId, serveEntry);
       };
-      div.appendChild(btn);
+
+      const actionRow = document.createElement("div");
+      actionRow.className = "serve-item-actions";
+      actionRow.appendChild(btn);
+      div.appendChild(actionRow);
     }
 
     container.appendChild(div);
@@ -193,6 +424,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!Array.isArray(data.items)) return;
 
       const serveStatus = data.serveStatus || {};
+      const delayMeta = getServeDelayMeta(data);
 
       data.items.forEach((item, itemIndex) => {
         const comboRule = normalizeComboRule(item.comboRule);
@@ -214,7 +446,8 @@ window.addEventListener("DOMContentLoaded", () => {
             isCombo: true,
             itemStatus,
             assignedTo,
-            serveEntry
+            serveEntry,
+            delayMeta
           });
           return;
         }
@@ -237,13 +470,45 @@ window.addEventListener("DOMContentLoaded", () => {
             isCombo: false,
             itemStatus,
             assignedTo,
-            serveEntry
+            serveEntry,
+            delayMeta
           });
         }
       });
     });
 
     renderServeItems();
+  });
+
+  const staffRequestsQuery = query(
+    collection(db, "tableRequests"),
+    where("type", "==", "staff"),
+    where("status", "==", "pending")
+  );
+
+  onSnapshot(staffRequestsQuery, (snapshot) => {
+    allStaffRequests = snapshot.docs
+      .map((docSnap) => {
+        const data = docSnap.data();
+
+        return {
+          id: docSnap.id,
+          table: String(data.table || ""),
+          createdAt: getRequestCreatedAt(data)
+        };
+      })
+      .sort((left, right) => {
+        const leftCreatedAt = left.createdAt ?? Number.MAX_SAFE_INTEGER;
+        const rightCreatedAt = right.createdAt ?? Number.MAX_SAFE_INTEGER;
+
+        if (leftCreatedAt !== rightCreatedAt) {
+          return leftCreatedAt - rightCreatedAt;
+        }
+
+        return Number(left.table) - Number(right.table);
+      });
+
+    renderStaffRequests();
   });
 
   serveSearchInput.addEventListener("input", renderServeItems);

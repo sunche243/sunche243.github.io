@@ -43,6 +43,10 @@ const accountHolderInput = document.getElementById("accountHolderInput");
 const seatFeePerPersonInput = document.getElementById("seatFeePerPersonInput");
 const savePaymentBtn = document.getElementById("savePaymentBtn");
 
+const emergencyNoticeEnabledInput = document.getElementById("emergencyNoticeEnabledInput");
+const emergencyNoticeTextInput = document.getElementById("emergencyNoticeTextInput");
+const saveEmergencyNoticeBtn = document.getElementById("saveEmergencyNoticeBtn");
+
 const menuNameInput = document.getElementById("menuNameInput");
 const menuPriceInput = document.getElementById("menuPriceInput");
 const menuTypeInput = document.getElementById("menuTypeInput");
@@ -432,6 +436,8 @@ async function loadSettings() {
     seatFeePerPersonInput.value = String(
       normalizeSeatFeePerPerson(data.seatFeePerPerson)
     );
+    emergencyNoticeEnabledInput.checked = data.emergencyNoticeEnabled === true;
+    emergencyNoticeTextInput.value = String(data.emergencyNoticeText || "");
   } catch (error) {
     console.error("설정 조회 실패:", error);
   }
@@ -458,26 +464,50 @@ function startMenuListener() {
       const isLast = index === currentMenus.length - 1;
       const optionSummary = formatMenuOptionSummary(data.options);
       const comboSummary = formatComboRuleSummary(data.comboRule);
+      const visibleLabel = data.visible === false ? "숨김" : "표시";
+      const soldOutLabel = data.soldOut ? "품절" : "판매중";
 
       const card = document.createElement("div");
-      card.className = "order";
+      card.className = "order menu-manager-menu-card";
+      card.dataset.menuType = String(data.type || "");
+      card.dataset.soldOut = data.soldOut ? "true" : "false";
+      card.dataset.visible = data.visible === false ? "false" : "true";
 
       card.innerHTML = `
-        <p><strong>${data.name}</strong></p>
-        <p>가격: ${Number(data.price).toLocaleString()}원</p>
-        <p>구분: ${getMenuTypeLabel(data.type)}</p>
-        ${comboSummary ? `<p>조합형: ${comboSummary}</p>` : ""}
-        ${optionSummary ? `<p>옵션: ${optionSummary}</p>` : ""}
-        <p>매진: ${data.soldOut ? "예" : "아니오"}</p>
-        <p>표시: ${data.visible === false ? "숨김" : "표시"}</p>
-        <button class="toggle-btn move-up-btn" ${isFirst ? "disabled" : ""}>위로</button>
-        <button class="toggle-btn move-down-btn" ${isLast ? "disabled" : ""}>아래로</button>
-        <button class="toggle-btn edit-btn">수정</button>
-        <button class="delete-btn delete-menu-btn">삭제</button>
+        <div class="menu-manager-menu-header">
+          <div class="menu-manager-menu-title-row">
+            <div class="menu-manager-menu-name">${data.name}</div>
+            <div class="menu-manager-menu-type">${getMenuTypeLabel(data.type)}</div>
+          </div>
+          <div class="menu-manager-menu-price">${Number(data.price).toLocaleString()}원</div>
+        </div>
+
+        <div class="menu-manager-menu-badges">
+          <span class="menu-manager-menu-badge is-order">정렬 ${index + 1}</span>
+          ${comboSummary ? `<span class="menu-manager-menu-badge is-combo">조합형 ${comboSummary}</span>` : ""}
+          <span class="menu-manager-menu-badge ${data.soldOut ? "is-danger" : "is-neutral"}">${soldOutLabel}</span>
+          <span class="menu-manager-menu-badge ${data.visible === false ? "is-muted" : "is-success"}">표시 ${visibleLabel}</span>
+        </div>
+
+        <div class="menu-manager-menu-details">
+          <div class="menu-manager-menu-detail-row">
+            <div class="menu-manager-menu-detail-label">옵션</div>
+            <div class="menu-manager-menu-detail-value">${optionSummary || "없음"}</div>
+          </div>
+        </div>
+
+        <div class="menu-manager-menu-actions">
+          <button class="toggle-btn move-up-btn" ${isFirst ? "disabled" : ""}>위로</button>
+          <button class="toggle-btn move-down-btn" ${isLast ? "disabled" : ""}>아래로</button>
+          <button class="toggle-btn quick-soldout-btn">${data.soldOut ? "판매중 전환" : "품절 처리"}</button>
+          <button class="toggle-btn edit-btn">수정</button>
+          <button class="delete-btn delete-menu-btn">삭제</button>
+        </div>
       `;
 
       const moveUpBtn = card.querySelector(".move-up-btn");
       const moveDownBtn = card.querySelector(".move-down-btn");
+      const quickSoldOutBtn = card.querySelector(".quick-soldout-btn");
       const editBtn = card.querySelector(".edit-btn");
       const deleteBtn = card.querySelector(".delete-menu-btn");
 
@@ -489,6 +519,20 @@ function startMenuListener() {
       moveDownBtn.onclick = async () => {
         if (moveDownBtn.disabled) return;
         await moveMenu(id, 1);
+      };
+
+      quickSoldOutBtn.onclick = async () => {
+        quickSoldOutBtn.disabled = true;
+
+        try {
+          await updateDoc(doc(db, "menus", id), {
+            soldOut: !data.soldOut
+          });
+        } catch (error) {
+          console.error("품절 상태 변경 실패:", error);
+          alert("품절 상태 변경에 실패했어요.");
+          quickSoldOutBtn.disabled = false;
+        }
       };
 
       editBtn.onclick = () => {
@@ -595,6 +639,33 @@ savePaymentBtn.onclick = async () => {
   } catch (error) {
     console.error("설정 저장 실패:", error);
     alert("설정 저장에 실패했어요.");
+  }
+};
+
+saveEmergencyNoticeBtn.onclick = async () => {
+  const emergencyNoticeEnabled = emergencyNoticeEnabledInput.checked;
+  const emergencyNoticeText = emergencyNoticeTextInput.value.trim();
+
+  if (emergencyNoticeEnabled && !emergencyNoticeText) {
+    alert("공지 표시를 켜려면 공지 문구를 입력해 주세요.");
+    return;
+  }
+
+  try {
+    await setDoc(
+      doc(db, "settings", "public"),
+      {
+        emergencyNoticeEnabled,
+        emergencyNoticeText
+      },
+      { merge: true }
+    );
+
+    emergencyNoticeTextInput.value = emergencyNoticeText;
+    alert("긴급 공지가 저장되었습니다.");
+  } catch (error) {
+    console.error("긴급 공지 저장 실패:", error);
+    alert("긴급 공지 저장에 실패했어요.");
   }
 };
 

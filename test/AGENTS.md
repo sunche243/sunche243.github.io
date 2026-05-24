@@ -592,3 +592,215 @@ AGENTS.md 추가 후보로 간주한다.
 
 일회성 기능 변경은
 AGENTS.md에 추가하지 않는다.
+
+---
+
+# 수정 후 검수 정책 (매우 중요)
+
+대규모 수정(UI 개편, CSS 변경, 공통 컴포넌트 수정, 관리자 페이지 수정 등) 후에는 반드시 변경 범위를 요약 보고한다.
+
+특히:
+
+- style.css 수정
+- 공통 class 수정
+- HTML 구조 수정
+- DOM selector 영향 가능 변경
+- 관리자 페이지 변경
+- Firebase 연동 UI 변경
+
+시 아래 내용을 반드시 포함한다.
+
+## 필수 보고 형식
+
+### 1. 수정된 파일 목록
+
+예:
+- test/css/style.css
+- test/menu.html
+- test/js/menu.js
+
+---
+
+### 2. 변경 요약
+
+파일별로:
+- 무엇을 수정했는지
+- 왜 수정했는지
+- 기존 동작 유지 여부
+
+3~5줄 이내로 요약한다.
+
+---
+
+### 3. 영향 범위 분석
+
+반드시 포함:
+
+- JS selector 영향 여부
+- id/class 변경 여부
+- DOM dependency 영향 여부
+- Firebase 영향 여부
+- responsive 영향 여부
+- 모바일 UI 영향 여부
+
+---
+
+### 4. 위험 요소
+
+잠재적 회귀(regression) 가능성을 보고한다.
+
+예:
+- sticky UI 충돌 가능성
+- 전역 selector 영향 가능성
+- 특정 페이지 layout 충돌 가능성
+
+---
+
+### 5. QA 체크리스트
+
+페이지별 정상 동작 확인 항목 작성:
+
+- menu.html
+- check.html
+- thankyou.html
+- admin.html
+- serve.html
+- stats.html
+- menuManager.html
+- tableManager.html
+
+추가로:
+
+- console error 없음
+- broken import 없음
+- id/class mismatch 없음
+- Firebase read/write 영향 없음
+
+---
+
+### 6. 변경량 보고
+
+반드시 git diff 요약 기준으로 보고한다.
+
+예:
+style.css (+120 -35)
+menu.html (+12 -3)
+
+대규모 변경 시
+전체 diff를 출력하지 말고 요약 중심으로 보고한다.
+
+---
+
+## 위험 기준
+
+다음 상황은 반드시 경고 후 진행한다.
+
+- style.css 300줄 이상 변경
+- HTML 여러 페이지 구조 변경
+- JS selector 변경
+- class/id rename
+- Firebase 구조 영향 가능성
+- 전역 selector 재정의
+
+이 경우:
+
+"회귀 위험이 있어 추가 검토가 필요합니다"
+
+를 먼저 알린다.
+
+---
+
+# 출력 및 변경 보고 정책
+
+대규모 수정 시
+(특히 UI, CSS, 공통 스타일, 여러 페이지 변경)
+
+절대 전체 diff를 그대로 출력하지 마라.
+
+터미널 출력이 잘릴 수 있으므로,
+반드시 요약 중심으로 보고한다.
+
+## 기본 보고 형식
+
+### 1. 수정된 파일 목록
+
+예:
+- test/css/style.css
+- test/menu.html
+
+---
+
+### 2. git diff --stat 요약
+
+반드시 포함:
+
+예:
+test/css/style.css | 120 +++++---
+test/menu.html     | 12 +-
+
+3 files changed,
+180 insertions(+),
+46 deletions(-)
+
+---
+
+### 3. 위험 selector 변경 요약
+
+특히 아래 변경 여부를 반드시 보고:
+
+- body
+- .grid
+- .box
+- .order
+- .item
+- .buttons button
+- input[type="text"]
+- select
+- modal 관련 selector
+- responsive breakpoint
+- JS가 의존하는 class/id
+
+보고 내용:
+- 무엇이 변경됐는지
+- 영향 가능성
+- 회귀 위험도
+
+---
+
+### 4. JS 영향 여부
+
+반드시 보고:
+
+- JS 파일 수정 여부
+- id/class rename 여부
+- selector 호환성 여부
+- DOM dependency 영향 여부
+
+---
+
+### 5. 위험도 판정
+
+반드시 다음 중 하나로 결론:
+
+A. 안전  
+B. 경미한 QA 필요  
+C. 추가 검토 필요  
+D. rollback 권장
+
+---
+
+## 금지 사항
+
+절대:
+
+- 전체 git diff 수천 줄 출력
+- style.css 전체 출력
+- 수정된 파일 전체 재출력
+
+하지 마라.
+
+필요 시:
+
+"파일별 diff 요청 시 제공"
+
+방식으로 제한한다.

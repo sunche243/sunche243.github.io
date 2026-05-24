@@ -1,11 +1,13 @@
 import { db } from "./common.js";
 import {
   validateName,
+  formatDate,
   formatPrice,
   formatOrderItemCount,
   calculateOrderTotal,
   normalizeComboRule,
   normalizeMenuOptions,
+  normalizeItemOptions,
   normalizeTableNumber,
   isValidTableNumber,
   parseItems,
@@ -16,6 +18,7 @@ import { appConfig } from "./appConfig.js";
 import {
   collection,
   query,
+  addDoc,
   onSnapshot,
   doc,
   getDoc,
@@ -25,6 +28,7 @@ import {
 
 let currentMenus = [];
 const PENDING_ORDER_KEY = "pendingOrder";
+const STAFF_CALL_COOLDOWN_MS = 60000;
 
 function hasValidSortOrder(menu) {
   return Number.isFinite(Number(menu?.sortOrder));
@@ -129,14 +133,59 @@ function renderMenus(mainSection, sideSection, drinkSection, menus) {
     if (item.visible === false) return;
     if (!["main", "side", "drink"].includes(item.type)) return;
 
-    const soldOutText = item.soldOut ? " (매진)" : "";
     const menuOptions = normalizeMenuOptions(item.options);
     const comboRule = normalizeComboRule(item.comboRule);
     const div = document.createElement("div");
     div.className = "menu-item";
 
+    if (item.soldOut === true) {
+      div.classList.add("is-soldout");
+    }
+
+    if (comboRule) {
+      div.classList.add("is-combo");
+    }
+
+    const head = document.createElement("div");
+    head.className = "menu-item-head";
+
+    const copy = document.createElement("div");
+    copy.className = "menu-item-copy";
+
     const title = document.createElement("strong");
-    title.textContent = `${item.name} (${Number(item.price).toLocaleString()}원)${soldOutText}`;
+    title.className = "menu-item-name";
+    title.textContent = item.name;
+
+    const meta = document.createElement("div");
+    meta.className = "menu-item-meta";
+
+    const price = document.createElement("span");
+    price.className = "menu-item-price";
+    price.textContent = `${Number(item.price).toLocaleString()}원`;
+    meta.appendChild(price);
+
+    if (comboRule) {
+      const comboBadge = document.createElement("span");
+      comboBadge.className = "menu-item-badge";
+      comboBadge.textContent = `${comboRule.unitSize}개 조합`;
+      meta.appendChild(comboBadge);
+    } else if (menuOptions.length > 0) {
+      const optionBadge = document.createElement("span");
+      optionBadge.className = "menu-item-badge";
+      optionBadge.textContent = "옵션 선택";
+      meta.appendChild(optionBadge);
+    }
+
+    if (item.soldOut) {
+      const soldOutBadge = document.createElement("span");
+      soldOutBadge.className = "menu-item-badge is-soldout";
+      soldOutBadge.textContent = "품절";
+      meta.appendChild(soldOutBadge);
+    }
+
+    copy.appendChild(title);
+    head.appendChild(copy);
+    head.appendChild(meta);
 
     const menuCounter = document.createElement("div");
     menuCounter.className = "counter";
@@ -168,7 +217,7 @@ function renderMenus(mainSection, sideSection, drinkSection, menus) {
     menuCounter.appendChild(countEl);
     menuCounter.appendChild(plusBtn);
 
-    div.appendChild(title);
+    div.appendChild(head);
     div.appendChild(menuCounter);
 
     if (menuOptions.length > 0) {
@@ -475,6 +524,7 @@ function updateSelectedMenuSummary() {
 
   selectionStates.forEach((state) => {
     const itemBlock = document.createElement("div");
+    itemBlock.className = "menu-summary-item";
 
     const row = document.createElement("div");
     row.className = "menu-summary-row";
@@ -483,9 +533,14 @@ function updateSelectedMenuSummary() {
     nameEl.textContent = state.name;
 
     const countEl = document.createElement("strong");
+    countEl.className = "menu-summary-count";
     countEl.textContent = state.isCombo && !state.isValidCombo
       ? "조합 미완성"
       : formatOrderItemCount(state);
+
+    if (state.isCombo && !state.isValidCombo) {
+      countEl.classList.add("is-warning");
+    }
 
     row.appendChild(nameEl);
     row.appendChild(countEl);
@@ -708,8 +763,232 @@ async function isFirstSessionOrder(sessionId) {
   return !snapshot.docs.some((docSnap) => docSnap.data().deleted !== true);
 }
 
+function getRequestCreatedAt(data) {
+  const rawCreatedAt = data?.createdAt ?? data?.timestamp;
+
+  if (typeof rawCreatedAt === "number") {
+    return Number.isFinite(rawCreatedAt) && rawCreatedAt > 0 ? rawCreatedAt : null;
+  }
+
+  if (typeof rawCreatedAt === "string") {
+    const parsedCreatedAt = Number(rawCreatedAt.trim());
+    return Number.isFinite(parsedCreatedAt) && parsedCreatedAt > 0 ? parsedCreatedAt : null;
+  }
+
+  if (rawCreatedAt && typeof rawCreatedAt.toMillis === "function") {
+    const millis = Number(rawCreatedAt.toMillis());
+    return Number.isFinite(millis) && millis > 0 ? millis : null;
+  }
+
+  if (rawCreatedAt && typeof rawCreatedAt === "object") {
+    const seconds = Number(rawCreatedAt.seconds);
+    const nanoseconds = Number(rawCreatedAt.nanoseconds);
+
+    if (!Number.isFinite(seconds) || !Number.isFinite(nanoseconds)) {
+      return null;
+    }
+
+    const millis = seconds * 1000 + nanoseconds / 1000000;
+    return Number.isFinite(millis) && millis > 0 ? millis : null;
+  }
+
+  return null;
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function getOrderCreatedAt(data) {
+  return getRequestCreatedAt(data);
+}
+
+function getServeStatusLabel(orderId, orderData, item, itemIndex) {
+  const serveStatus = orderData.serveStatus || {};
+  const comboRule = normalizeComboRule(item?.comboRule);
+
+  if (comboRule) {
+    const serveEntry = serveStatus[`${orderId}_${itemIndex}_combo`];
+    return serveEntry?.status || "서빙 전";
+  }
+
+  const itemCount = Number(item?.count) || 0;
+
+  if (itemCount <= 0) {
+    return "서빙 전";
+  }
+
+  let completedCount = 0;
+  let servingCount = 0;
+
+  for (let countIndex = 0; countIndex < itemCount; countIndex += 1) {
+    const serveEntry = serveStatus[`${orderId}_${itemIndex}_${countIndex}`];
+
+    if (serveEntry?.status === "서빙 완료") {
+      completedCount += 1;
+      continue;
+    }
+
+    if (serveEntry?.status === "서빙 예정") {
+      servingCount += 1;
+    }
+  }
+
+  if (completedCount === itemCount) {
+    return "서빙 완료";
+  }
+
+  if (completedCount > 0 || servingCount > 0) {
+    return `서빙 예정 (${completedCount}/${itemCount} 완료)`;
+  }
+
+  return "서빙 전";
+}
+
+function renderMyOrdersContent(contentEl, orders) {
+  contentEl.innerHTML = "";
+
+  if (orders.length === 0) {
+    contentEl.innerHTML = `<div class="my-orders-empty">현재 확인 가능한 주문이 없습니다.</div>`;
+    return;
+  }
+
+  orders.forEach(({ id, data }) => {
+    const orderCard = document.createElement("div");
+    orderCard.className = "my-order-card";
+
+    const orderTime = getOrderCreatedAt(data);
+    const orderTimeText = orderTime ? formatDate(orderTime) : "주문 시간 확인 불가";
+    const itemsHTML = (data.items || []).map((item, itemIndex) => {
+      const options = normalizeItemOptions(item.options);
+      const statusLabel = getServeStatusLabel(id, data, item, itemIndex);
+      const optionsHTML = options.length > 0
+        ? options.map((option) => {
+            return `<div class="my-order-option">└ ${escapeHTML(option.label)} ${Number(option.count) || 0}개</div>`;
+          }).join("")
+        : "";
+
+      return `
+        <div class="my-order-item">
+          <div class="my-order-item-row">
+            <div class="my-order-item-name">${escapeHTML(item.name)} ${escapeHTML(formatOrderItemCount(item))}</div>
+            <div class="my-order-serve-status">${escapeHTML(statusLabel)}</div>
+          </div>
+          ${optionsHTML}
+        </div>
+      `;
+    }).join("");
+
+    orderCard.innerHTML = `
+      <div class="my-order-header">
+        <div class="my-order-time">${escapeHTML(orderTimeText)}</div>
+        <div class="my-order-total">${formatPrice(calculateOrderTotal(data.items || []))}</div>
+      </div>
+      <div class="my-order-items">${itemsHTML}</div>
+    `;
+
+    contentEl.appendChild(orderCard);
+  });
+}
+
+async function loadMyOrders(tableNumber) {
+  if (!isValidTableNumber(tableNumber)) {
+    throw new Error("invalid-table");
+  }
+
+  const activeSession = await getActiveTableSession(tableNumber);
+  let ordersQuery;
+
+  if (activeSession?.sessionId) {
+    ordersQuery = query(
+      collection(db, "orders"),
+      where("sessionId", "==", String(activeSession.sessionId))
+    );
+  } else {
+    ordersQuery = query(
+      collection(db, "orders"),
+      where("table", "==", String(tableNumber))
+    );
+  }
+
+  const snapshot = await getDocs(ordersQuery);
+
+  return snapshot.docs
+    .map((docSnap) => ({
+      id: docSnap.id,
+      data: docSnap.data()
+    }))
+    .filter((order) => order.data.deleted !== true)
+    .sort((left, right) => {
+      const leftCreatedAt = getOrderCreatedAt(left.data) ?? 0;
+      const rightCreatedAt = getOrderCreatedAt(right.data) ?? 0;
+      return rightCreatedAt - leftCreatedAt;
+    });
+}
+
+async function hasPendingStaffRequest(tableNumber) {
+  const requestsQuery = query(
+    collection(db, "tableRequests"),
+    where("table", "==", String(tableNumber)),
+    where("type", "==", "staff"),
+    where("status", "==", "pending")
+  );
+  const snapshot = await getDocs(requestsQuery);
+
+  return !snapshot.empty;
+}
+
+async function hasRecentStaffRequest(tableNumber) {
+  const requestsQuery = query(
+    collection(db, "tableRequests"),
+    where("table", "==", String(tableNumber)),
+    where("type", "==", "staff")
+  );
+  const snapshot = await getDocs(requestsQuery);
+  const now = Date.now();
+
+  return snapshot.docs.some((docSnap) => {
+    const createdAt = getRequestCreatedAt(docSnap.data());
+    return createdAt !== null && now - createdAt < STAFF_CALL_COOLDOWN_MS;
+  });
+}
+
+async function requestStaffCall(tableNumber) {
+  if (!isValidTableNumber(tableNumber)) {
+    alert("유효한 테이블 QR로 접속해 주세요.");
+    return;
+  }
+
+  if (await hasPendingStaffRequest(tableNumber)) {
+    alert("이미 직원 호출이 접수되었습니다.");
+    return;
+  }
+
+  if (await hasRecentStaffRequest(tableNumber)) {
+    alert("직원 호출이 접수된 지 얼마 지나지 않았습니다. 잠시 후 다시 시도해 주세요.");
+    return;
+  }
+
+  await addDoc(collection(db, "tableRequests"), {
+    table: String(tableNumber),
+    type: "staff",
+    status: "pending",
+    createdAt: Date.now(),
+    resolvedAt: null
+  });
+
+  alert("직원 호출이 접수되었습니다.");
+}
+
 async function loadMenuImage() {
   const menuImageEl = document.getElementById("menuImage");
+  const emergencyNoticeBanner = document.getElementById("emergencyNoticeBanner");
+  const emergencyNoticeText = document.getElementById("emergencyNoticeText");
 
   try {
     const settingsRef = doc(db, "settings", "public");
@@ -720,9 +999,21 @@ async function loadMenuImage() {
       if (data.menuImageUrl) {
         menuImageEl.src = data.menuImageUrl;
       }
+
+      const noticeText = String(data.emergencyNoticeText || "").trim();
+
+      if (emergencyNoticeBanner && emergencyNoticeText) {
+        if (data.emergencyNoticeEnabled === true && noticeText) {
+          emergencyNoticeText.textContent = noticeText;
+          emergencyNoticeBanner.style.display = "flex";
+        } else {
+          emergencyNoticeText.textContent = "";
+          emergencyNoticeBanner.style.display = "none";
+        }
+      }
     }
   } catch (error) {
-    console.error("메뉴판 이미지 불러오기 실패:", error);
+    console.error("공개 설정 불러오기 실패:", error);
   }
 }
 
@@ -732,7 +1023,12 @@ window.addEventListener("DOMContentLoaded", () => {
   const menuModal = document.getElementById("menuModal");
   const menuViewBtn = document.getElementById("menuViewBtn");
   const closeMenuModal = document.getElementById("closeMenuModal");
+  const myOrdersModal = document.getElementById("myOrdersModal");
+  const myOrdersBtn = document.getElementById("myOrdersBtn");
+  const closeMyOrdersModal = document.getElementById("closeMyOrdersModal");
+  const myOrdersContent = document.getElementById("myOrdersContent");
   const resetMenuBtn = document.getElementById("resetMenuBtn");
+  const staffCallBtn = document.getElementById("staffCallBtn");
   const orderForm = document.getElementById("orderForm");
   const payerNameInput = document.getElementById("payerName");
   const tableInfo = document.getElementById("tableInfo");
@@ -742,9 +1038,26 @@ window.addEventListener("DOMContentLoaded", () => {
   const noticeMessage = document.getElementById("noticeMessage");
   const submitBtn = orderForm.querySelector(".submit-btn");
   let pendingOrderRestored = false;
+  let hasPendingStaffCall = false;
+  let isStaffCallSubmitting = false;
 
   const scannedTableParam = new URLSearchParams(window.location.search).get("table");
   const scannedTable = normalizeTableNumber(scannedTableParam) || "unknown";
+
+  const syncStaffCallButtonState = () => {
+    if (!staffCallBtn) {
+      return;
+    }
+
+    if (hasPendingStaffCall) {
+      staffCallBtn.textContent = "🔔 직원 호출 중";
+      staffCallBtn.disabled = true;
+      return;
+    }
+
+    staffCallBtn.textContent = "직원 호출";
+    staffCallBtn.disabled = isStaffCallSubmitting;
+  };
 
   if (noticeMessage) {
     noticeMessage.innerHTML = appConfig.noticeMessage;
@@ -765,6 +1078,27 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   loadMenuImage();
+
+  if (staffCallBtn && isValidTableNumber(scannedTable)) {
+    const staffRequestsQuery = query(
+      collection(db, "tableRequests"),
+      where("table", "==", String(scannedTable)),
+      where("type", "==", "staff"),
+      where("status", "==", "pending")
+    );
+
+    onSnapshot(staffRequestsQuery, (snapshot) => {
+      hasPendingStaffCall = !snapshot.empty;
+
+      if (hasPendingStaffCall) {
+        isStaffCallSubmitting = false;
+      }
+
+      syncStaffCallButtonState();
+    });
+  } else {
+    syncStaffCallButtonState();
+  }
 
   onSnapshot(collection(db, "menus"), (snapshot) => {
     currentMenus = getSortedMenus(
@@ -802,6 +1136,29 @@ window.addEventListener("DOMContentLoaded", () => {
       }
 
       resetAllCounters();
+    };
+  }
+
+  if (staffCallBtn) {
+    staffCallBtn.onclick = async () => {
+      if (staffCallBtn.disabled) {
+        return;
+      }
+
+      isStaffCallSubmitting = true;
+      syncStaffCallButtonState();
+
+      try {
+        await requestStaffCall(scannedTable);
+        hasPendingStaffCall = true;
+        syncStaffCallButtonState();
+      } catch (error) {
+        console.error("직원 호출 실패:", error);
+        alert("직원 호출에 실패했어요. 잠시 후 다시 시도해 주세요.");
+      } finally {
+        isStaffCallSubmitting = false;
+        syncStaffCallButtonState();
+      }
     };
   }
 
@@ -885,6 +1242,34 @@ window.addEventListener("DOMContentLoaded", () => {
   if (menuViewBtn) {
     menuViewBtn.onclick = () => {
       menuModal.style.display = "flex";
+    };
+  }
+
+  if (myOrdersBtn && myOrdersModal && myOrdersContent) {
+    myOrdersBtn.onclick = async () => {
+      if (myOrdersBtn.disabled) {
+        return;
+      }
+
+      myOrdersBtn.disabled = true;
+      myOrdersContent.innerHTML = `<div class="my-orders-empty">주문 내역을 불러오는 중입니다.</div>`;
+      myOrdersModal.style.display = "flex";
+
+      try {
+        const orders = await loadMyOrders(scannedTable);
+        renderMyOrdersContent(myOrdersContent, orders);
+      } catch (error) {
+        console.error("내 주문 조회 실패:", error);
+        myOrdersContent.innerHTML = `<div class="my-orders-empty">주문 내역을 불러오지 못했어요.</div>`;
+      } finally {
+        myOrdersBtn.disabled = false;
+      }
+    };
+  }
+
+  if (closeMyOrdersModal && myOrdersModal) {
+    closeMyOrdersModal.onclick = () => {
+      myOrdersModal.style.display = "none";
     };
   }
 

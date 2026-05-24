@@ -24,6 +24,9 @@ import {
 const TABLE_COUNT = 100;
 const DEFAULT_SEAT_FEE_PER_PERSON = 10000;
 const ADMIN_EMAILS = ["starcj7@naver.com"];
+const DEBUG_TABLE_SORT = false;
+const DEFAULT_TABLE_SORT = "startedAtDesc";
+const OPERATION_MEMO_MAX_LENGTH = 100;
 const auth = getAuth();
 
 const authRequiredBox = document.getElementById("authRequiredBox");
@@ -31,10 +34,18 @@ const tableManagerContent = document.getElementById("tableManagerContent");
 const occupiedTableCountEl = document.getElementById("occupiedTableCount");
 const emptyTableCountEl = document.getElementById("emptyTableCount");
 const activeSessionCountEl = document.getElementById("activeSessionCount");
+const tableSortSelect = document.getElementById("tableSortSelect");
+const tableStatusFilterSelect = document.getElementById("tableStatusFilterSelect");
 const tableGrid = document.getElementById("tableGrid");
 
 let tablesMap = {};
+let ordersMap = {};
+let tableRequestsMap = {};
 let unsubscribeTables = null;
+let unsubscribeOrders = null;
+let unsubscribeTableRequests = null;
+let currentTableSort = DEFAULT_TABLE_SORT;
+let currentTableStatusFilter = "all";
 
 function isAdminEmail(email) {
   const normalizedEmail = String(email || "").trim().toLowerCase();
@@ -60,7 +71,8 @@ function getDefaultTableData() {
     paidSeatCount: null,
     seatFeePerPerson: DEFAULT_SEAT_FEE_PER_PERSON,
     startedAt: null,
-    endedAt: null
+    endedAt: null,
+    operationMemo: ""
   };
 }
 
@@ -135,6 +147,173 @@ function getSeatFeeTotal(tableData) {
   return getSeatFeeChargedCount(tableData) * normalizeSeatFeePerPerson(tableData?.seatFeePerPerson);
 }
 
+function isOccupiedTable(tableData) {
+  return tableData.status === "occupied" && tableData.currentSessionId;
+}
+
+function getStartedAtSortValue(tableData) {
+  const rawStartedAt = tableData?.startedAt;
+
+  if (typeof rawStartedAt === "number") {
+    if (!Number.isFinite(rawStartedAt) || rawStartedAt <= 0) {
+      return null;
+    }
+
+    return rawStartedAt;
+  }
+
+  if (typeof rawStartedAt === "string") {
+    const parsedStartedAt = Number(rawStartedAt.trim());
+
+    if (!Number.isFinite(parsedStartedAt) || parsedStartedAt <= 0) {
+      return null;
+    }
+
+    return parsedStartedAt;
+  }
+
+  if (rawStartedAt && typeof rawStartedAt.toMillis === "function") {
+    const millis = Number(rawStartedAt.toMillis());
+
+    if (!Number.isFinite(millis) || millis <= 0) {
+      return null;
+    }
+
+    return millis;
+  }
+
+  if (rawStartedAt && typeof rawStartedAt === "object") {
+    const seconds = Number(rawStartedAt.seconds);
+    const nanoseconds = Number(rawStartedAt.nanoseconds);
+
+    if (!Number.isFinite(seconds) || !Number.isFinite(nanoseconds)) {
+      return null;
+    }
+
+    const millis = seconds * 1000 + nanoseconds / 1000000;
+
+    if (!Number.isFinite(millis) || millis <= 0) {
+      return null;
+    }
+
+    return millis;
+  }
+
+  return null;
+}
+
+function formatTableStayDuration(tableData) {
+  const elapsedMinutes = getTableStayMinutes(tableData);
+
+  if (!Number.isFinite(elapsedMinutes)) {
+    return "입장 시간 확인 불가";
+  }
+
+  return `입장 후 ${elapsedMinutes}분 경과`;
+}
+
+function getTableStayMinutes(tableData) {
+  const startedAt = getStartedAtSortValue(tableData);
+
+  if (!Number.isFinite(startedAt)) {
+    return null;
+  }
+
+  return Math.max(0, Math.floor((Date.now() - startedAt) / 60000));
+}
+
+function escapeHTML(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function compareByTableNumber(left, right, descending = false) {
+  if (descending) {
+    return right.tableNumber - left.tableNumber;
+  }
+
+  return left.tableNumber - right.tableNumber;
+}
+
+function normalizeTableSortValue(value) {
+  if (
+    value === "tableNumberAsc" ||
+    value === "tableNumberDesc" ||
+    value === "startedAtAsc" ||
+    value === "startedAtDesc"
+  ) {
+    return value;
+  }
+
+  return DEFAULT_TABLE_SORT;
+}
+
+function setCurrentTableSort(value) {
+  const normalizedSort = normalizeTableSortValue(value);
+  currentTableSort = normalizedSort;
+
+  if (tableSortSelect && tableSortSelect.value !== normalizedSort) {
+    tableSortSelect.value = normalizedSort;
+  }
+
+  return currentTableSort;
+}
+
+function formatRawStartedAtForDebug(rawStartedAt) {
+  if (rawStartedAt === null || rawStartedAt === undefined) {
+    return rawStartedAt;
+  }
+
+  if (typeof rawStartedAt === "number" || typeof rawStartedAt === "string") {
+    return rawStartedAt;
+  }
+
+  if (typeof rawStartedAt.toMillis === "function") {
+    const seconds = Number(rawStartedAt.seconds);
+    const nanoseconds = Number(rawStartedAt.nanoseconds);
+
+    if (Number.isFinite(seconds) && Number.isFinite(nanoseconds)) {
+      return `Timestamp(seconds=${seconds}, nanoseconds=${nanoseconds})`;
+    }
+
+    return "Timestamp(toMillis)";
+  }
+
+  if (typeof rawStartedAt === "object") {
+    const seconds = Number(rawStartedAt.seconds);
+    const nanoseconds = Number(rawStartedAt.nanoseconds);
+
+    if (Number.isFinite(seconds) && Number.isFinite(nanoseconds)) {
+      return `{seconds:${seconds}, nanoseconds:${nanoseconds}}`;
+    }
+  }
+
+  return String(rawStartedAt);
+}
+
+function logTableSortDebug(label, entries, includeRenderedOrderIndex = false) {
+  if (!DEBUG_TABLE_SORT) {
+    return;
+  }
+
+  console.log(`[tableManager sort debug] ${label}`);
+  console.table(entries.map((entry, index) => {
+    return {
+      currentTableSort,
+      currentTableStatusFilter,
+      tableNumber: entry.tableNumber,
+      isOccupied: entry.isOccupied,
+      rawStartedAt: formatRawStartedAtForDebug(entry.tableData?.startedAt),
+      normalizedStartedAt: getStartedAtSortValue(entry.tableData),
+      renderedOrderIndex: includeRenderedOrderIndex ? index : "-"
+    };
+  }));
+}
+
 async function getConfiguredSeatFeePerPerson() {
   try {
     const settingsRef = doc(db, "settings", "public");
@@ -165,16 +344,17 @@ async function readLatestTableData(tableNumber) {
   };
 }
 
-function hasUnfinishedServeItems(orderId, orderData) {
+function countUnfinishedServeItems(orderId, orderData) {
   if (orderData.deleted) {
-    return false;
+    return 0;
   }
 
   if (!Array.isArray(orderData.items) || orderData.items.length === 0) {
-    return false;
+    return 0;
   }
 
   const serveStatus = orderData.serveStatus || {};
+  let unfinishedCount = 0;
 
   for (let itemIndex = 0; itemIndex < orderData.items.length; itemIndex += 1) {
     const item = orderData.items[itemIndex];
@@ -185,7 +365,7 @@ function hasUnfinishedServeItems(orderId, orderData) {
       const comboServeEntry = serveStatus[comboServeId];
 
       if (!comboServeEntry || comboServeEntry.status !== "서빙 완료") {
-        return true;
+        unfinishedCount += 1;
       }
 
       continue;
@@ -198,12 +378,111 @@ function hasUnfinishedServeItems(orderId, orderData) {
       const serveEntry = serveStatus[serveId];
 
       if (!serveEntry || serveEntry.status !== "서빙 완료") {
-        return true;
+        unfinishedCount += 1;
       }
     }
   }
 
-  return false;
+  return unfinishedCount;
+}
+
+function hasUnfinishedServeItems(orderId, orderData) {
+  return countUnfinishedServeItems(orderId, orderData) > 0;
+}
+
+function getUnservedCountForSession(sessionId) {
+  const normalizedSessionId = String(sessionId || "");
+
+  if (!normalizedSessionId) {
+    return 0;
+  }
+
+  return Object.entries(ordersMap).reduce((totalCount, [orderId, orderData]) => {
+    if (String(orderData?.sessionId || "") !== normalizedSessionId) {
+      return totalCount;
+    }
+
+    return totalCount + countUnfinishedServeItems(orderId, orderData);
+  }, 0);
+}
+
+function hasPendingStaffRequestForTable(tableNumber) {
+  const normalizedTableNumber = String(tableNumber || "");
+
+  return Object.values(tableRequestsMap).some((requestData) => {
+    return (
+      String(requestData?.table || "") === normalizedTableNumber &&
+      requestData?.type === "staff" &&
+      requestData?.status === "pending"
+    );
+  });
+}
+
+function getTableRiskMeta(tableNumber, tableData, unservedCount) {
+  const hasStaffRequest = hasPendingStaffRequestForTable(tableNumber);
+  const stayMinutes = getTableStayMinutes(tableData);
+  const hasManyUnserved = unservedCount >= 5;
+  const hasLongStay = Number.isFinite(stayMinutes) && stayMinutes >= 90;
+  const badges = [];
+
+  if (hasStaffRequest) {
+    badges.push({
+      label: "🔔 직원 호출",
+      className: "is-staff"
+    });
+  }
+
+  if (hasManyUnserved) {
+    badges.push({
+      label: `미서빙 ${unservedCount}건`,
+      className: "is-unserved"
+    });
+  }
+
+  if (hasLongStay) {
+    badges.push({
+      label: `${stayMinutes}분 이용`,
+      className: "is-long"
+    });
+  }
+
+  if (hasStaffRequest) {
+    return {
+      main: {
+        label: "🔔 직원 호출",
+        className: "is-staff"
+      },
+      subBadges: badges.filter((badge) => badge.label !== "🔔 직원 호출")
+    };
+  }
+
+  if (hasManyUnserved) {
+    return {
+      main: {
+        label: "미서빙 많음",
+        className: "is-unserved"
+      },
+      subBadges: badges.filter((badge) => badge.className !== "is-unserved")
+    };
+  }
+
+  if (hasLongStay) {
+    return {
+      main: {
+        label: "장시간 이용",
+        className: "is-long"
+      },
+      subBadges: badges.filter((badge) => badge.className !== "is-long")
+    };
+  }
+
+  return {
+    main: {
+      label: "정상",
+      className: "is-normal"
+    },
+    subBadges: []
+  };
 }
 
 async function getExitBlockReason(sessionId) {
@@ -245,6 +524,8 @@ async function getExitBlockReason(sessionId) {
 
 function resetTableManagerState() {
   tablesMap = {};
+  ordersMap = {};
+  tableRequestsMap = {};
   occupiedTableCountEl.textContent = "0개";
   emptyTableCountEl.textContent = `${TABLE_COUNT}개`;
   activeSessionCountEl.textContent = "0개";
@@ -275,7 +556,7 @@ function renderSummary() {
   for (let tableNumber = 1; tableNumber <= TABLE_COUNT; tableNumber += 1) {
     const tableData = getTableData(tableNumber);
 
-    if (tableData.status === "occupied" && tableData.currentSessionId) {
+    if (isOccupiedTable(tableData)) {
       occupiedCount += 1;
       activeSessionCount += 1;
     }
@@ -290,16 +571,23 @@ function buildEmptyCard(tableNumber, tableData) {
   const endedAtText = tableData.endedAt ? formatDate(tableData.endedAt) : "-";
 
   return `
-    <p><strong>${tableNumber}번 테이블</strong></p>
-    <p>상태: 비어 있음</p>
-    <p>마지막 퇴장: ${endedAtText}</p>
-
-    <div class="section">
-      <label><strong>입장 인원</strong></label>
-      <input type="text" inputmode="numeric" data-field="headCount" placeholder="예: 4" />
+    <div class="table-card-header">
+      <div class="table-card-title-row">
+        <div class="table-card-table">테이블 ${tableNumber}</div>
+        <div class="table-card-status is-empty">비어 있음</div>
+      </div>
+      <div class="table-card-subtitle">마지막 퇴장 ${endedAtText}</div>
     </div>
 
-    <div class="buttons">
+    <div class="table-card-section">
+      <div class="table-card-section-label">입장 준비</div>
+      <div class="table-card-input">
+        <label><strong>입장 인원</strong></label>
+        <input type="text" inputmode="numeric" data-field="headCount" placeholder="예: 4" />
+      </div>
+    </div>
+
+    <div class="buttons table-card-actions">
       <button class="confirm-btn" type="button" data-action="enter" data-table="${tableNumber}">입장 처리</button>
     </div>
   `;
@@ -310,36 +598,160 @@ function buildOccupiedCard(tableNumber, tableData) {
   const paidSeatCount = getSeatFeeChargedCount(tableData);
   const seatFeePerPerson = normalizeSeatFeePerPerson(tableData.seatFeePerPerson);
   const seatFeeTotal = getSeatFeeTotal(tableData);
+  const unservedCount = getUnservedCountForSession(tableData.currentSessionId);
+  const unservedClassName = unservedCount > 0 ? "is-pending" : "is-clear";
+  const riskMeta = getTableRiskMeta(tableNumber, tableData, unservedCount);
+  const operationMemo = String(tableData.operationMemo || "").trim();
+  const escapedOperationMemo = escapeHTML(operationMemo);
   const sessionPreview = tableData.currentSessionId
     ? String(tableData.currentSessionId).slice(0, 12)
     : "-";
 
   return `
-    <p><strong>${tableNumber}번 테이블</strong></p>
-    <p>상태: 사용 중</p>
-    <p>현재 세션: ${sessionPreview}</p>
-    <p>입장 인원: ${headCount}명</p>
-    <p><strong>자릿세 총액: ${formatPrice(seatFeeTotal)}</strong></p>
-    ${paidSeatCount !== headCount ? `<p>자릿세 적용 인원: ${paidSeatCount}명</p>` : ""}
-    <p>적용 단가: ${formatPrice(seatFeePerPerson)}</p>
-    <p>입장 시간: ${formatDate(tableData.startedAt) || "-"}</p>
+    <div class="table-card-header">
+      <div class="table-card-title-row">
+        <div class="table-card-table">테이블 ${tableNumber}</div>
+        <div class="table-card-status is-occupied">사용 중</div>
+      </div>
+      <div class="table-card-risk">
+        <div class="table-card-risk-main ${riskMeta.main.className}">${riskMeta.main.label}</div>
+        ${riskMeta.subBadges.length > 0 ? `
+          <div class="table-card-risk-sub-list">
+            ${riskMeta.subBadges.map((badge) => `
+              <span class="table-card-risk-sub ${badge.className}">${badge.label}</span>
+            `).join("")}
+          </div>
+        ` : ""}
+      </div>
+      <div class="table-card-session">세션 ${sessionPreview}</div>
+      <div class="table-card-unserved ${unservedClassName}">미서빙 ${unservedCount}건</div>
+    </div>
 
-    <div class="buttons">
+    <div class="table-card-meta">
+      <div class="table-card-meta-item">
+        <div class="table-card-meta-label">입장 인원</div>
+        <div class="table-card-meta-value">${headCount}명</div>
+      </div>
+      <div class="table-card-meta-item">
+        <div class="table-card-meta-label">체류 시간</div>
+        <div class="table-card-meta-value">${formatTableStayDuration(tableData)}</div>
+      </div>
+    </div>
+
+    <div class="table-card-fee">
+      <div class="table-card-fee-label">자릿세 총액</div>
+      <div class="table-card-fee-value">${formatPrice(seatFeeTotal)}</div>
+    </div>
+
+    <div class="table-card-details">
+      ${paidSeatCount !== headCount ? `
+        <div class="table-card-detail-row">
+          <div class="table-card-detail-label">자릿세 적용 인원</div>
+          <div class="table-card-detail-value">${paidSeatCount}명</div>
+        </div>
+      ` : ""}
+      <div class="table-card-detail-row">
+        <div class="table-card-detail-label">적용 단가</div>
+        <div class="table-card-detail-value">${formatPrice(seatFeePerPerson)}</div>
+      </div>
+    </div>
+
+    <div class="table-card-memo">
+      <div class="table-card-section-label">운영 메모</div>
+      <div class="table-card-memo-display">${escapedOperationMemo || "메모 없음"}</div>
+      <textarea
+        data-field="operationMemo"
+        maxlength="${OPERATION_MEMO_MAX_LENGTH}"
+        placeholder="예: 소주 2, 맥주 3 보관"
+      >${escapedOperationMemo}</textarea>
+      <div class="buttons table-card-memo-actions">
+        <button class="toggle-btn" type="button" data-action="saveMemo" data-table="${tableNumber}">메모 저장</button>
+      </div>
+    </div>
+
+    <div class="buttons table-card-actions">
       <button class="back-btn" type="button" data-action="exit" data-table="${tableNumber}">퇴장 처리</button>
     </div>
   `;
 }
 
-function renderTables() {
-  tableGrid.innerHTML = "";
+function getRenderableTables() {
+  let tableSort = currentTableSort;
+
+  if (tableSortSelect) {
+    tableSort = setCurrentTableSort(tableSortSelect.value);
+  } else {
+    tableSort = normalizeTableSortValue(currentTableSort);
+    currentTableSort = tableSort;
+  }
+
+  const tableEntries = [];
 
   for (let tableNumber = 1; tableNumber <= TABLE_COUNT; tableNumber += 1) {
     const tableData = getTableData(tableNumber);
-    const isOccupied = tableData.status === "occupied" && tableData.currentSessionId;
 
+    tableEntries.push({
+      tableNumber,
+      tableData,
+      isOccupied: isOccupiedTable(tableData)
+    });
+  }
+
+  const filteredEntries = tableEntries
+    .filter((entry) => {
+      if (currentTableStatusFilter === "empty") {
+        return !entry.isOccupied;
+      }
+
+      if (currentTableStatusFilter === "occupied") {
+        return entry.isOccupied;
+      }
+
+      return true;
+    });
+
+  logTableSortDebug("before-sort", filteredEntries, false);
+
+  const sortedEntries = filteredEntries.sort((left, right) => {
+      if (tableSort === "tableNumberDesc") {
+        return compareByTableNumber(left, right, true);
+      }
+
+      if (tableSort === "startedAtAsc" || tableSort === "startedAtDesc") {
+        const leftStartedAt = getStartedAtSortValue(left.tableData);
+        const rightStartedAt = getStartedAtSortValue(right.tableData);
+        const leftHasStartedAt = Number.isFinite(leftStartedAt);
+        const rightHasStartedAt = Number.isFinite(rightStartedAt);
+
+        if (leftHasStartedAt && rightHasStartedAt && leftStartedAt !== rightStartedAt) {
+          if (tableSort === "startedAtAsc") {
+            return leftStartedAt - rightStartedAt;
+          }
+
+          return rightStartedAt - leftStartedAt;
+        }
+
+        if (leftHasStartedAt !== rightHasStartedAt) {
+          return leftHasStartedAt ? -1 : 1;
+        }
+      }
+
+      return compareByTableNumber(left, right);
+    });
+
+  logTableSortDebug("after-sort", sortedEntries, true);
+
+  return sortedEntries;
+}
+
+function renderTables() {
+  tableGrid.innerHTML = "";
+
+  for (const { tableNumber, tableData, isOccupied } of getRenderableTables()) {
     const card = document.createElement("div");
-    card.className = `order${isOccupied ? " completed" : ""}`;
+    card.className = `order table-card${isOccupied ? " completed" : ""}`;
     card.dataset.table = String(tableNumber);
+    card.dataset.status = isOccupied ? "occupied" : "empty";
 
     card.innerHTML = isOccupied
       ? buildOccupiedCard(tableNumber, tableData)
@@ -347,6 +759,32 @@ function renderTables() {
 
     tableGrid.appendChild(card);
   }
+}
+
+if (tableSortSelect) {
+  setCurrentTableSort(tableSortSelect.value);
+
+  const handleTableSortChange = (event) => {
+    setCurrentTableSort(event.currentTarget.value);
+    renderTables();
+  };
+
+  tableSortSelect.addEventListener("change", handleTableSortChange);
+  tableSortSelect.addEventListener("input", handleTableSortChange);
+}
+
+if (tableStatusFilterSelect) {
+  tableStatusFilterSelect.addEventListener("change", () => {
+    const nextFilter = tableStatusFilterSelect.value;
+
+    if (nextFilter === "empty" || nextFilter === "occupied") {
+      currentTableStatusFilter = nextFilter;
+    } else {
+      currentTableStatusFilter = "all";
+    }
+
+    renderTables();
+  });
 }
 
 function startTableListener() {
@@ -366,6 +804,44 @@ function startTableListener() {
     });
 
     renderSummary();
+    renderTables();
+  });
+}
+
+function startOrderListener() {
+  if (unsubscribeOrders) {
+    unsubscribeOrders();
+  }
+
+  unsubscribeOrders = onSnapshot(collection(db, "orders"), (snapshot) => {
+    ordersMap = {};
+
+    snapshot.forEach((docSnap) => {
+      ordersMap[docSnap.id] = docSnap.data();
+    });
+
+    renderTables();
+  });
+}
+
+function startTableRequestListener() {
+  if (unsubscribeTableRequests) {
+    unsubscribeTableRequests();
+  }
+
+  unsubscribeTableRequests = onSnapshot(collection(db, "tableRequests"), (snapshot) => {
+    tableRequestsMap = {};
+
+    snapshot.forEach((docSnap) => {
+      const requestData = docSnap.data();
+
+      if (requestData?.type !== "staff" || requestData?.status !== "pending") {
+        return;
+      }
+
+      tableRequestsMap[docSnap.id] = requestData;
+    });
+
     renderTables();
   });
 }
@@ -396,8 +872,25 @@ async function handleEnter(tableNumber, card) {
       paidSeatCount: headCount,
       seatFeePerPerson,
       startedAt: Date.now(),
-      endedAt: null
+      endedAt: null,
+      operationMemo: ""
     },
+    { merge: true }
+  );
+}
+
+async function handleSaveMemo(tableNumber, card) {
+  const memoInput = card.querySelector('[data-field="operationMemo"]');
+  const operationMemo = String(memoInput?.value || "").trim();
+
+  if (operationMemo.length > OPERATION_MEMO_MAX_LENGTH) {
+    alert(`운영 메모는 ${OPERATION_MEMO_MAX_LENGTH}자 이하로 입력해 주세요.`);
+    return;
+  }
+
+  await setDoc(
+    doc(db, "tables", String(tableNumber)),
+    { operationMemo },
     { merge: true }
   );
 }
@@ -432,7 +925,8 @@ async function handleExit(tableNumber) {
     {
       status: "empty",
       currentSessionId: null,
-      endedAt: Date.now()
+      endedAt: Date.now(),
+      operationMemo: ""
     },
     { merge: true }
   );
@@ -462,6 +956,11 @@ tableGrid.addEventListener("click", async (event) => {
       return;
     }
 
+    if (action === "saveMemo") {
+      await handleSaveMemo(tableNumber, card);
+      return;
+    }
+
     if (action === "exit") {
       await handleExit(tableNumber);
     }
@@ -484,6 +983,16 @@ onAuthStateChanged(auth, (user) => {
       unsubscribeTables = null;
     }
 
+    if (unsubscribeOrders) {
+      unsubscribeOrders();
+      unsubscribeOrders = null;
+    }
+
+    if (unsubscribeTableRequests) {
+      unsubscribeTableRequests();
+      unsubscribeTableRequests = null;
+    }
+
     resetTableManagerState();
     return;
   }
@@ -496,10 +1005,22 @@ onAuthStateChanged(auth, (user) => {
       unsubscribeTables = null;
     }
 
+    if (unsubscribeOrders) {
+      unsubscribeOrders();
+      unsubscribeOrders = null;
+    }
+
+    if (unsubscribeTableRequests) {
+      unsubscribeTableRequests();
+      unsubscribeTableRequests = null;
+    }
+
     resetTableManagerState();
     return;
   }
 
   showLoggedInUI();
   startTableListener();
+  startOrderListener();
+  startTableRequestListener();
 });

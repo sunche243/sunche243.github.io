@@ -6,20 +6,59 @@
   <title>서빙 대시보드</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
-<body>
+<body class="admin-page page-serve">
 
-  <h2>서빙 대시보드</h2>
+  <div class="serve-shell">
+    <header class="serve-header">
+      <div class="serve-header-copy">
+        <div class="serve-eyebrow">SERVE OPS</div>
+        <h2>서빙 대시보드</h2>
+        <p class="serve-header-description">
+          확인 완료된 주문을 서빙 단위로 빠르게 배정하고, 담당자 기준으로 작업 상태를 관리합니다.
+        </p>
+      </div>
+    </header>
 
-  <div class="admin-toolbar">
-    <input type="text" id="serveSearchInput" placeholder="테이블 번호, 입금자명, 메뉴명 검색" />
-    <select id="serveFilter">
-      <option value="all">전체</option>
-      <option value="unassigned">미배정만</option>
-      <option value="mine">내 담당만</option>
-    </select>
+    <section class="serve-toolbar-section">
+      <div class="serve-section-heading">
+        <div>
+          <div class="serve-section-title">작업 필터</div>
+          <div class="serve-section-note">메뉴명, 테이블, 입금자명으로 검색하고 담당 기준으로 좁혀볼 수 있습니다.</div>
+        </div>
+      </div>
+
+      <div class="admin-toolbar serve-toolbar">
+        <input type="text" id="serveSearchInput" placeholder="테이블 번호, 입금자명, 메뉴명 검색" />
+        <select id="serveFilter">
+          <option value="all">전체</option>
+          <option value="unassigned">미배정만</option>
+          <option value="mine">내 담당만</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="serve-list-section">
+      <div class="serve-section-heading">
+        <div>
+          <div class="serve-section-title">직원 호출</div>
+          <div class="serve-section-note">고객이 요청한 호출을 오래된 순으로 처리합니다.</div>
+        </div>
+      </div>
+
+      <div id="staffRequestsList" class="serve-staff-requests-list"></div>
+    </section>
+
+    <section class="serve-list-section">
+      <div class="serve-section-heading">
+        <div>
+          <div class="serve-section-title">서빙 대기열</div>
+          <div class="serve-section-note">서빙 완료된 항목은 목록에서 제외됩니다.</div>
+        </div>
+      </div>
+
+      <div id="orders" class="grid serve-orders-grid"></div>
+    </section>
   </div>
-
-  <div id="orders" class="grid"></div>
 
   <script type="module" src="./js/serve.js"></script>
 </body>

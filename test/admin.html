@@ -7,48 +7,85 @@
   <link rel="stylesheet" href="./css/style.css">
 </head>
 
-<body>
+<body class="admin-page page-admin">
 
-  <h2>주문 관리</h2>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="admin-header-copy">
+        <div class="admin-eyebrow">ORDER OPS</div>
+        <h2>주문 관리</h2>
+        <p class="admin-header-description">
+          실시간 주문 상태를 빠르게 확인하고, 확인 처리와 복구 작업을 한 화면에서 관리합니다.
+        </p>
+      </div>
+    </header>
 
-  <div class="stats-summary-grid admin-summary-grid">
-    <div class="stats-card">
-      <div class="stats-label">현재 주문 수</div>
-      <div class="stats-value" id="adminOrderCount">0건</div>
-    </div>
+    <section class="admin-kpi-section">
+      <div class="admin-section-heading">
+        <div>
+          <div class="admin-section-title">실시간 요약</div>
+          <div class="admin-section-note">삭제되지 않은 주문 기준으로 집계됩니다.</div>
+        </div>
+      </div>
 
-    <div class="stats-card">
-      <div class="stats-label">현재 총 매출</div>
-      <div class="stats-value" id="adminTotalSales">0원</div>
-    </div>
+      <div class="stats-summary-grid admin-summary-grid">
+        <div class="stats-card">
+          <div class="stats-label">현재 주문 수</div>
+          <div class="stats-value" id="adminOrderCount">0건</div>
+        </div>
 
-    <div class="stats-card">
-      <div class="stats-label">미확인 주문</div>
-      <div class="stats-value" id="adminPendingCount">0건</div>
-    </div>
+        <div class="stats-card">
+          <div class="stats-label">현재 총 매출</div>
+          <div class="stats-value" id="adminTotalSales">0원</div>
+        </div>
 
-    <div class="stats-card">
-      <div class="stats-label">확인 완료 주문</div>
-      <div class="stats-value" id="adminCompletedCount">0건</div>
-    </div>
+        <div class="stats-card">
+          <div class="stats-label">미확인 주문</div>
+          <div class="stats-value" id="adminPendingCount">0건</div>
+        </div>
+
+        <div class="stats-card">
+          <div class="stats-label">확인 완료 주문</div>
+          <div class="stats-value" id="adminCompletedCount">0건</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="admin-filter-section">
+      <div class="admin-section-heading">
+        <div>
+          <div class="admin-section-title">검색 및 필터</div>
+          <div class="admin-section-note">테이블, 입금자명, 메뉴명으로 바로 찾을 수 있습니다.</div>
+        </div>
+      </div>
+
+      <div class="admin-toolbar">
+        <input type="text" id="searchInput" placeholder="테이블 번호, 입금자명, 메뉴명 검색" />
+
+        <select id="tableFilter">
+          <option value="all">전체 테이블</option>
+        </select>
+
+        <select id="statusFilter">
+          <option value="all">전체</option>
+          <option value="completed">확인 완료</option>
+          <option value="pending">미확인</option>
+          <option value="deleted">삭제됨</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="admin-orders-section">
+      <div class="admin-section-heading">
+        <div>
+          <div class="admin-section-title">주문 리스트</div>
+          <div class="admin-section-note">최신 주문 순으로 표시됩니다.</div>
+        </div>
+      </div>
+
+      <div id="orders" class="grid admin-orders-grid"></div>
+    </section>
   </div>
-
-  <div class="admin-toolbar">
-    <input type="text" id="searchInput" placeholder="테이블 번호, 입금자명, 메뉴명 검색" />
-
-    <select id="tableFilter">
-      <option value="all">전체 테이블</option>
-    </select>
-
-    <select id="statusFilter">
-      <option value="all">전체</option>
-      <option value="completed">확인 완료</option>
-      <option value="pending">미확인</option>
-      <option value="deleted">삭제됨</option>
-    </select>
-  </div>
-
-  <div id="orders" class="grid"></div>
 
   <script type="module" src="./js/admin.js"></script>
 

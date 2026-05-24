@@ -65,6 +65,7 @@ function appendItemOptions(container, item) {
 
   selectedOptions.forEach((option) => {
     const optionRow = document.createElement("div");
+    optionRow.className = "check-item-option";
     optionRow.style.marginTop = "4px";
     optionRow.style.paddingLeft = "8px";
     optionRow.style.fontSize = "13px";
@@ -148,6 +149,7 @@ window.addEventListener("DOMContentLoaded", async () => {
       left.className = "check-item-name";
 
       const itemName = document.createElement("div");
+      itemName.className = "check-item-title";
       itemName.textContent = item.name;
       left.appendChild(itemName);
       appendItemOptions(left, item);

@@ -6,45 +6,103 @@
   <title>테이블 관리</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
-<body class="stats-page">
+<body class="admin-page stats-page page-table-manager">
 
-  <h2>테이블 관리</h2>
-
-  <div id="authRequiredBox" class="box" style="display: none;">
-    관리자 로그인이 필요합니다. menuManager에서 로그인 후 다시 접속해 주세요.
-  </div>
-
-  <div id="tableManagerContent" style="display: none;">
-    <div class="stats-summary-grid">
-      <div class="stats-card">
-        <div class="stats-label">사용 중 테이블</div>
-        <div class="stats-value" id="occupiedTableCount">0개</div>
+  <div class="table-manager-shell">
+    <header class="table-manager-header">
+      <div class="table-manager-header-copy">
+        <div class="table-manager-eyebrow">TABLE OPS</div>
+        <h2>테이블 관리</h2>
+        <p class="table-manager-header-description">
+          테이블 점유 상태와 세션 정보를 빠르게 확인하고, 입장과 퇴장 처리를 실시간으로 관리합니다.
+        </p>
       </div>
+    </header>
 
-      <div class="stats-card">
-        <div class="stats-label">비어 있는 테이블</div>
-        <div class="stats-value" id="emptyTableCount">100개</div>
-      </div>
-
-      <div class="stats-card">
-        <div class="stats-label">활성 세션 수</div>
-        <div class="stats-value" id="activeSessionCount">0개</div>
-      </div>
+    <div id="authRequiredBox" class="box" style="display: none;">
+      관리자 로그인이 필요합니다. menuManager에서 로그인 후 다시 접속해 주세요.
     </div>
 
-    <div class="box">
-      <div class="check-summary-block">
-        <div class="check-summary-label">관리 범위</div>
-        <div class="check-summary-value">1번부터 100번까지</div>
-      </div>
+    <div id="tableManagerContent" style="display: none;">
+      <section class="table-manager-kpi-section">
+        <div class="table-manager-section-heading">
+          <div>
+            <div class="table-manager-section-title">실시간 테이블 현황</div>
+            <div class="table-manager-section-note">현재 점유 상태와 활성 세션 기준으로 집계됩니다.</div>
+          </div>
+        </div>
 
-      <div class="check-summary-block">
-        <div class="check-summary-label">퇴장 차단 기준</div>
-        <div class="check-summary-value">미확인 주문 또는 미완료 서빙이 남아 있으면 퇴장 불가</div>
-      </div>
+        <div class="stats-summary-grid table-manager-summary-grid">
+          <div class="stats-card">
+            <div class="stats-label">사용 중 테이블</div>
+            <div class="stats-value" id="occupiedTableCount">0개</div>
+          </div>
+
+          <div class="stats-card">
+            <div class="stats-label">비어 있는 테이블</div>
+            <div class="stats-value" id="emptyTableCount">100개</div>
+          </div>
+
+          <div class="stats-card">
+            <div class="stats-label">활성 세션 수</div>
+            <div class="stats-value" id="activeSessionCount">0개</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-manager-guide-section">
+        <div class="table-manager-section-heading">
+          <div>
+            <div class="table-manager-section-title">운영 기준</div>
+            <div class="table-manager-section-note">입장 범위와 퇴장 차단 기준을 한눈에 확인할 수 있습니다.</div>
+          </div>
+        </div>
+
+        <div class="box table-manager-guide-card">
+          <div class="check-summary-block">
+            <div class="check-summary-label">관리 범위</div>
+            <div class="check-summary-value">1번부터 100번까지</div>
+          </div>
+
+          <div class="check-summary-block">
+            <div class="check-summary-label">퇴장 차단 기준</div>
+            <div class="check-summary-value">미확인 주문 또는 미완료 서빙이 남아 있으면 퇴장 불가</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="table-manager-list-section">
+        <div class="table-manager-section-heading">
+          <div>
+            <div class="table-manager-section-title">테이블 리스트</div>
+            <div class="table-manager-section-note">비어 있는 테이블은 바로 입장 처리하고, 사용 중 테이블은 세션과 금액을 확인할 수 있습니다.</div>
+          </div>
+        </div>
+
+        <div class="table-manager-toolbar" aria-label="테이블 정렬 및 필터">
+          <div class="table-manager-toolbar-field">
+            <label for="tableSortSelect">정렬 기준</label>
+            <select id="tableSortSelect">
+              <option value="tableNumberAsc">테이블 번호 ↑</option>
+              <option value="tableNumberDesc">테이블 번호 ↓</option>
+              <option value="startedAtAsc">입장 시간 오래된 순</option>
+              <option value="startedAtDesc" selected>입장 시간 최근 순</option>
+            </select>
+          </div>
+
+          <div class="table-manager-toolbar-field">
+            <label for="tableStatusFilterSelect">표시 기준</label>
+            <select id="tableStatusFilterSelect">
+              <option value="all">전체 테이블</option>
+              <option value="empty">빈 테이블만</option>
+              <option value="occupied">사용 중 테이블만</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="tableGrid" class="grid table-manager-grid"></div>
+      </section>
     </div>
-
-    <div id="tableGrid" class="grid"></div>
   </div>
 
   <script type="module" src="./js/tableManager.js"></script>

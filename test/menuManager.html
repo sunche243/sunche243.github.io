@@ -6,148 +6,235 @@
   <title>메뉴 관리</title>
   <link rel="stylesheet" href="./css/style.css">
 </head>
-<body>
+<body class="admin-page page-menu-manager">
 
-  <h2>메뉴 관리</h2>
-
-  <div id="authBox" class="box">
-    <div class="section">
-      <label><strong>이메일</strong></label>
-      <input type="text" id="loginEmailInput" placeholder="관리자 이메일" />
-    </div>
-
-    <div class="section">
-      <label><strong>비밀번호</strong></label>
-      <input type="password" id="loginPasswordInput" placeholder="비밀번호" />
-    </div>
-
-    <div class="buttons">
-      <button class="confirm-btn" type="button" id="loginBtn">로그인</button>
-    </div>
-  </div>
-
-  <div id="managerBox" style="display: none;">
-    <div class="box">
-      <div class="section">
-        <strong id="currentAdminEmail">로그인됨</strong>
+  <div class="menu-manager-shell">
+    <header class="menu-manager-header">
+      <div class="menu-manager-header-copy">
+        <div class="menu-manager-eyebrow">SETTINGS</div>
+        <h2>메뉴 관리</h2>
+        <p class="menu-manager-header-description">
+          로그인, 결제 정보, 메뉴 구성, 메뉴판 이미지를 한 화면에서 관리하는 운영용 설정 페이지입니다.
+        </p>
       </div>
+    </header>
 
-      <div class="buttons">
-        <button class="back-btn" type="button" id="logoutBtn">로그아웃</button>
-      </div>
-    </div>
-
-    <div class="box">
-      <h3>결제 정보 관리</h3>
-
-      <div class="section">
-        <label><strong>은행명</strong></label>
-        <select id="bankNameInput">
-          <option value="SC제일은행">SC제일은행</option>
-          <option value="KB국민은행">KB국민은행</option>
-          <option value="신한은행">신한은행</option>
-          <option value="우리은행">우리은행</option>
-          <option value="하나은행">하나은행</option>
-          <option value="NH농협은행">NH농협은행</option>
-          <option value="IBK기업은행">IBK기업은행</option>
-          <option value="카카오뱅크">카카오뱅크</option>
-          <option value="토스뱅크">토스뱅크</option>
-        </select>
-      </div>
-
-      <div class="section">
-        <label><strong>계좌번호</strong></label>
-        <input type="text" id="accountNoInput" placeholder="숫자만 입력" />
-      </div>
-
-      <div class="section">
-        <label><strong>예금주</strong></label>
-        <input type="text" id="accountHolderInput" placeholder="예: 박찬준" />
-      </div>
-
-      <div class="section">
-        <label><strong>자릿세 1인당</strong></label>
-        <input type="text" id="seatFeePerPersonInput" inputmode="numeric" placeholder="예: 10000" />
-      </div>
-
-      <div class="buttons">
-        <button class="confirm-btn" type="button" id="savePaymentBtn">결제 정보 저장</button>
-      </div>
-    </div>
-
-    <div class="box">
-      <h3>메뉴 등록 / 수정</h3>
-
-      <div class="section">
-        <label><strong>메뉴 이름</strong></label>
-        <input type="text" id="menuNameInput" placeholder="예: 신메뉴 이름" />
-      </div>
-
-      <div class="section">
-        <label><strong>가격</strong></label>
-        <input type="text" id="menuPriceInput" placeholder="예: 12000" />
-      </div>
-
-      <div class="section">
-        <label><strong>구분</strong></label>
-        <select id="menuTypeInput">
-          <option value="main">메인</option>
-          <option value="side">사이드</option>
-          <option value="drink">음료</option>
-        </select>
-      </div>
-
-      <div class="section">
-        <label><input type="checkbox" id="comboEnabledInput" /> 조합형 메뉴</label>
-      </div>
-
-      <div class="section" id="comboUnitSizeSection" hidden>
-        <label><strong>조합 단위 개수</strong></label>
-        <input type="text" id="comboUnitSizeInput" placeholder="예: 3" />
-      </div>
-
-      <div class="section">
-        <label><strong>옵션</strong></label>
-        <div id="menuOptionsList"></div>
-        <button class="toggle-btn" type="button" id="addMenuOptionBtn">옵션 추가</button>
-        <div class="menu-option-hint">옵션이 없으면 추가하지 않아도 됩니다.</div>
-      </div>
-
-      <div class="section">
-        <label><input type="checkbox" id="menuSoldOutInput" /> 매진 처리</label>
-      </div>
-
-      <div class="section">
-        <label><input type="checkbox" id="menuVisibleInput" checked /> 주문 페이지에 표시</label>
-      </div>
-
-      <div class="buttons">
-        <button class="confirm-btn" type="button" id="saveMenuBtn">저장</button>
-        <button class="back-btn" type="button" id="resetMenuFormBtn">입력 초기화</button>
-      </div>
-    </div>
-
-    <div class="box">
-      <div class="section">
-        <label><strong>새 메뉴판 이미지 업로드</strong></label>
-        <input type="file" id="menuImageFileInput" accept="image/*" />
-      </div>
-
-      <div class="buttons">
-        <button class="confirm-btn" type="button" id="uploadMenuImageBtn">이미지 업로드</button>
-      </div>
-
-      <div class="section">
-        <label><strong>현재 메뉴판 이미지</strong></label>
+    <div id="authBox" class="box menu-manager-auth-card">
+      <div class="menu-manager-section-heading">
         <div>
-          <img id="currentMenuImage" src="menu.png" alt="현재 메뉴판" style="max-width: 100%; border-radius: 8px;" />
+          <div class="menu-manager-section-title">관리자 로그인</div>
+          <div class="menu-manager-section-note">메뉴 및 결제 설정을 변경하려면 관리자 계정으로 로그인해야 합니다.</div>
         </div>
       </div>
+
+      <div class="section">
+        <label><strong>이메일</strong></label>
+        <input type="text" id="loginEmailInput" placeholder="관리자 이메일" />
+      </div>
+
+      <div class="section">
+        <label><strong>비밀번호</strong></label>
+        <input type="password" id="loginPasswordInput" placeholder="비밀번호" />
+      </div>
+
+      <div class="buttons">
+        <button class="confirm-btn" type="button" id="loginBtn">로그인</button>
+      </div>
     </div>
 
-    <div class="section">
-      <h3>등록된 메뉴 목록</h3>
-      <div id="menuManagerList" class="grid"></div>
+    <div id="managerBox" class="menu-manager-content" style="display: none;">
+      <div class="menu-manager-layout">
+        <div class="menu-manager-main-column">
+          <section class="menu-manager-section menu-manager-section--session">
+            <div class="menu-manager-section-heading">
+              <div>
+                <div class="menu-manager-section-title">관리자 상태</div>
+                <div class="menu-manager-section-note">현재 로그인된 관리자 계정과 세션 상태를 표시합니다.</div>
+              </div>
+            </div>
+
+            <div class="box menu-manager-status-card">
+              <div class="section">
+                <strong id="currentAdminEmail">로그인됨</strong>
+              </div>
+
+              <div class="buttons">
+                <button class="back-btn" type="button" id="logoutBtn">로그아웃</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="menu-manager-section menu-manager-section--payment">
+            <div class="menu-manager-section-heading">
+              <div>
+                <div class="menu-manager-section-title">결제 정보 관리</div>
+                <div class="menu-manager-section-note">입금 계좌와 자릿세 단가를 저장해 주문 페이지와 테이블 관리에 반영합니다.</div>
+              </div>
+            </div>
+
+            <div class="box menu-manager-payment-card">
+              <div class="section">
+                <label><strong>은행명</strong></label>
+                <select id="bankNameInput">
+                  <option value="SC제일은행">SC제일은행</option>
+                  <option value="KB국민은행">KB국민은행</option>
+                  <option value="신한은행">신한은행</option>
+                  <option value="우리은행">우리은행</option>
+                  <option value="하나은행">하나은행</option>
+                  <option value="NH농협은행">NH농협은행</option>
+                  <option value="IBK기업은행">IBK기업은행</option>
+                  <option value="카카오뱅크">카카오뱅크</option>
+                  <option value="토스뱅크">토스뱅크</option>
+                </select>
+              </div>
+
+              <div class="section">
+                <label><strong>계좌번호</strong></label>
+                <input type="text" id="accountNoInput" placeholder="숫자만 입력" />
+              </div>
+
+              <div class="section">
+                <label><strong>예금주</strong></label>
+                <input type="text" id="accountHolderInput" placeholder="예: 박찬준" />
+              </div>
+
+              <div class="section">
+                <label><strong>자릿세 1인당</strong></label>
+                <input type="text" id="seatFeePerPersonInput" inputmode="numeric" placeholder="예: 10000" />
+              </div>
+
+              <div class="buttons">
+                <button class="confirm-btn" type="button" id="savePaymentBtn">결제 정보 저장</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="menu-manager-section menu-manager-section--notice">
+            <div class="menu-manager-section-heading">
+              <div>
+                <div class="menu-manager-section-title">긴급 공지 관리</div>
+                <div class="menu-manager-section-note">고객 주문 화면 상단에 표시할 운영 공지를 관리합니다.</div>
+              </div>
+            </div>
+
+            <div class="box menu-manager-notice-card">
+              <div class="section">
+                <label><input type="checkbox" id="emergencyNoticeEnabledInput" /> 공지 표시</label>
+              </div>
+
+              <div class="section">
+                <label><strong>공지 문구</strong></label>
+                <textarea
+                  id="emergencyNoticeTextInput"
+                  rows="3"
+                  placeholder="예: 현재 주문량 증가로 조리 시간이 20~30분 소요될 수 있습니다."
+                ></textarea>
+              </div>
+
+              <div class="buttons">
+                <button class="confirm-btn" type="button" id="saveEmergencyNoticeBtn">공지 저장</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="menu-manager-section menu-manager-section--form">
+            <div class="menu-manager-section-heading">
+              <div>
+                <div class="menu-manager-section-title">메뉴 등록 / 수정</div>
+                <div class="menu-manager-section-note">메뉴명, 가격, 구분, 옵션, 조합형 설정, 표시 여부를 관리합니다.</div>
+              </div>
+            </div>
+
+            <div class="box menu-manager-form-card">
+              <div class="section">
+                <label><strong>메뉴 이름</strong></label>
+                <input type="text" id="menuNameInput" placeholder="예: 신메뉴 이름" />
+              </div>
+
+              <div class="section">
+                <label><strong>가격</strong></label>
+                <input type="text" id="menuPriceInput" placeholder="예: 12000" />
+              </div>
+
+              <div class="section">
+                <label><strong>구분</strong></label>
+                <select id="menuTypeInput">
+                  <option value="main">메인</option>
+                  <option value="side">사이드</option>
+                  <option value="drink">음료</option>
+                </select>
+              </div>
+
+              <div class="section">
+                <label><input type="checkbox" id="comboEnabledInput" /> 조합형 메뉴</label>
+              </div>
+
+              <div class="section" id="comboUnitSizeSection" hidden>
+                <label><strong>조합 단위 개수</strong></label>
+                <input type="text" id="comboUnitSizeInput" placeholder="예: 3" />
+              </div>
+
+              <div class="section">
+                <label><strong>옵션</strong></label>
+                <div id="menuOptionsList"></div>
+                <button class="toggle-btn" type="button" id="addMenuOptionBtn">옵션 추가</button>
+                <div class="menu-option-hint">옵션이 없으면 추가하지 않아도 됩니다.</div>
+              </div>
+
+              <div class="section">
+                <label><input type="checkbox" id="menuSoldOutInput" /> 매진 처리</label>
+              </div>
+
+              <div class="section">
+                <label><input type="checkbox" id="menuVisibleInput" checked /> 주문 페이지에 표시</label>
+              </div>
+
+              <div class="buttons">
+                <button class="confirm-btn" type="button" id="saveMenuBtn">저장</button>
+                <button class="back-btn" type="button" id="resetMenuFormBtn">입력 초기화</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="menu-manager-section menu-manager-section--image">
+            <div class="menu-manager-section-heading">
+              <div>
+                <div class="menu-manager-section-title">메뉴판 이미지</div>
+                <div class="menu-manager-section-note">현재 메뉴판 이미지를 확인하고 새 파일로 교체 업로드할 수 있습니다.</div>
+              </div>
+            </div>
+
+            <div class="box menu-manager-image-card">
+              <div class="section">
+                <label><strong>새 메뉴판 이미지 업로드</strong></label>
+                <input type="file" id="menuImageFileInput" accept="image/*" />
+              </div>
+
+              <div class="buttons">
+                <button class="confirm-btn" type="button" id="uploadMenuImageBtn">이미지 업로드</button>
+              </div>
+
+              <div class="section">
+                <label><strong>현재 메뉴판 이미지</strong></label>
+                <div class="menu-manager-image-preview">
+                  <img id="currentMenuImage" class="menu-manager-image" src="menu.png" alt="현재 메뉴판" />
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <section class="menu-manager-section menu-manager-section--list">
+          <div class="menu-manager-section-heading">
+            <div>
+              <div class="menu-manager-section-title">등록된 메뉴 목록</div>
+              <div class="menu-manager-section-note">정렬 순서, 표시 여부, 매진 여부, 옵션 구성까지 한눈에 확인하고 바로 수정할 수 있습니다.</div>
+            </div>
+          </div>
+
+          <div id="menuManagerList" class="grid menu-manager-list-grid"></div>
+        </section>
+      </div>
     </div>
   </div>
 

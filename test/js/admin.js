@@ -27,6 +27,106 @@ const adminCompletedCountEl = document.getElementById("adminCompletedCount");
 
 let allOrders = [];
 
+function getOrderCreatedTime(data) {
+  const rawTime = data?.createdAt ?? data?.timestamp;
+
+  if (typeof rawTime === "number") {
+    return Number.isFinite(rawTime) && rawTime > 0 ? rawTime : null;
+  }
+
+  if (typeof rawTime === "string") {
+    const parsedTime = Number(rawTime.trim());
+    return Number.isFinite(parsedTime) && parsedTime > 0 ? parsedTime : null;
+  }
+
+  if (rawTime && typeof rawTime.toMillis === "function") {
+    const millis = Number(rawTime.toMillis());
+    return Number.isFinite(millis) && millis > 0 ? millis : null;
+  }
+
+  if (rawTime && typeof rawTime === "object") {
+    const seconds = Number(rawTime.seconds);
+    const nanoseconds = Number(rawTime.nanoseconds);
+
+    if (!Number.isFinite(seconds) || !Number.isFinite(nanoseconds)) {
+      return null;
+    }
+
+    const millis = seconds * 1000 + nanoseconds / 1000000;
+    return Number.isFinite(millis) && millis > 0 ? millis : null;
+  }
+
+  return null;
+}
+
+function getOrderElapsedMeta(data) {
+  const createdTime = getOrderCreatedTime(data);
+
+  if (!createdTime) {
+    return {
+      label: "접수 시간 확인 불가",
+      className: "is-muted"
+    };
+  }
+
+  const elapsedMinutes = Math.max(0, Math.floor((Date.now() - createdTime) / 60000));
+  const isInactiveOrder = data.completed === true || data.deleted === true;
+
+  if (isInactiveOrder) {
+    return {
+      label: `접수 후 ${elapsedMinutes}분 경과`,
+      className: "is-muted"
+    };
+  }
+
+  if (elapsedMinutes >= 20) {
+    return {
+      label: `접수 후 ${elapsedMinutes}분 경과 · 긴급`,
+      className: "is-urgent"
+    };
+  }
+
+  if (elapsedMinutes >= 15) {
+    return {
+      label: `접수 후 ${elapsedMinutes}분 경과 · 지연`,
+      className: "is-delayed"
+    };
+  }
+
+  if (elapsedMinutes >= 10) {
+    return {
+      label: `접수 후 ${elapsedMinutes}분 경과 · 주의`,
+      className: "is-warning"
+    };
+  }
+
+  return {
+    label: `접수 후 ${elapsedMinutes}분 경과`,
+    className: "is-normal"
+  };
+}
+
+function getOrderStatusMeta(data) {
+  if (data.deleted) {
+    return {
+      label: "삭제됨",
+      className: "is-deleted"
+    };
+  }
+
+  if (data.completed) {
+    return {
+      label: "확인 완료",
+      className: "is-completed"
+    };
+  }
+
+  return {
+    label: "미확인",
+    className: "is-pending"
+  };
+}
+
 function matchesSearch(order, keyword) {
   if (!keyword) return true;
 
@@ -106,6 +206,7 @@ function appendItemOptions(container, item) {
 
   selectedOptions.forEach((option) => {
     const optionRow = document.createElement("div");
+    optionRow.className = "admin-order-option";
     optionRow.style.marginTop = "4px";
     optionRow.style.paddingLeft = "8px";
     optionRow.style.fontSize = "13px";
@@ -117,15 +218,18 @@ function appendItemOptions(container, item) {
 
 function buildOrderItemsElement(items) {
   const wrapper = document.createElement("div");
+  wrapper.className = "admin-order-items";
 
   (items || []).forEach((item, index) => {
     const itemRow = document.createElement("div");
+    itemRow.className = "admin-order-item";
 
     if (index > 0) {
       itemRow.style.marginTop = "10px";
     }
 
     const itemName = document.createElement("div");
+    itemName.className = "admin-order-item-name";
     itemName.textContent = `${item.name} ${formatOrderItemCount(item)}`;
     itemRow.appendChild(itemName);
     appendItemOptions(itemRow, item);
@@ -155,29 +259,82 @@ function renderOrders() {
     const formattedDate = formatDate(data.timestamp);
     const btnText = data.completed ? "확인취소" : "확인";
     const deleteBtnText = data.deleted ? "복구" : "삭제";
+    const statusMeta = getOrderStatusMeta(data);
+    const elapsedMeta = getOrderElapsedMeta(data);
 
     const div = document.createElement("div");
     div.className =
       "order" +
       (data.completed ? " completed" : "") +
       (data.deleted ? " deleted" : "");
+    div.dataset.status = statusMeta.className;
+    div.dataset.elapsedStatus = elapsedMeta.className;
 
-    const header = document.createElement("p");
-    header.innerHTML = `<strong>테이블 ${data.table}</strong> | 입금자: ${data.name}`;
+    const header = document.createElement("div");
+    header.className = "admin-order-header";
 
-    const orderLabel = document.createElement("p");
+    const titleRow = document.createElement("div");
+    titleRow.className = "admin-order-title-row";
+
+    const tableLabel = document.createElement("div");
+    tableLabel.className = "admin-order-table";
+    tableLabel.textContent = `테이블 ${data.table}`;
+
+    const statusLabel = document.createElement("div");
+    statusLabel.className = `admin-order-status ${statusMeta.className}`;
+    statusLabel.textContent = statusMeta.label;
+
+    titleRow.appendChild(tableLabel);
+    titleRow.appendChild(statusLabel);
+
+    const payerLabel = document.createElement("div");
+    payerLabel.className = "admin-order-payer";
+    payerLabel.textContent = `입금자 ${data.name}`;
+
+    header.appendChild(titleRow);
+    header.appendChild(payerLabel);
+
+    const orderSection = document.createElement("div");
+    orderSection.className = "admin-order-section";
+
+    const orderLabel = document.createElement("div");
+    orderLabel.className = "admin-order-section-label";
     orderLabel.textContent = "주문:";
 
     const itemsWrapper = buildOrderItemsElement(data.items || []);
-    itemsWrapper.style.marginBottom = "12px";
+    itemsWrapper.style.marginBottom = "0";
 
-    const totalEl = document.createElement("p");
-    totalEl.innerHTML = `<strong>총 금액: ${formatPrice(total)}</strong>`;
+    orderSection.appendChild(orderLabel);
+    orderSection.appendChild(itemsWrapper);
 
-    const dateEl = document.createElement("small");
+    const metaRow = document.createElement("div");
+    metaRow.className = "admin-order-meta";
+
+    const totalEl = document.createElement("div");
+    totalEl.className = "admin-order-total";
+
+    const totalLabel = document.createElement("span");
+    totalLabel.className = "admin-order-total-label";
+    totalLabel.textContent = "총 금액";
+
+    const totalValue = document.createElement("strong");
+    totalValue.className = "admin-order-total-value";
+    totalValue.textContent = formatPrice(total);
+
+    totalEl.appendChild(totalLabel);
+    totalEl.appendChild(totalValue);
+
+    const dateEl = document.createElement("div");
+    dateEl.className = "admin-order-time";
     dateEl.textContent = formattedDate;
 
-    const br = document.createElement("br");
+    const elapsedEl = document.createElement("div");
+    elapsedEl.className = `admin-order-elapsed ${elapsedMeta.className}`;
+    elapsedEl.textContent = elapsedMeta.label;
+
+    metaRow.appendChild(totalEl);
+    metaRow.appendChild(dateEl);
+    metaRow.appendChild(elapsedEl);
 
     const toggleBtn = document.createElement("button");
     toggleBtn.className = "toggle-btn";
@@ -187,14 +344,15 @@ function renderOrders() {
     deleteBtn.className = "delete-btn";
     deleteBtn.textContent = deleteBtnText;
 
+    const actionRow = document.createElement("div");
+    actionRow.className = "admin-order-actions";
+    actionRow.appendChild(toggleBtn);
+    actionRow.appendChild(deleteBtn);
+
     div.appendChild(header);
-    div.appendChild(orderLabel);
-    div.appendChild(itemsWrapper);
-    div.appendChild(totalEl);
-    div.appendChild(dateEl);
-    div.appendChild(br);
-    div.appendChild(toggleBtn);
-    div.appendChild(deleteBtn);
+    div.appendChild(orderSection);
+    div.appendChild(metaRow);
+    div.appendChild(actionRow);
 
     toggleBtn.onclick = async () => {
       if (data.deleted) return;
