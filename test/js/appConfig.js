@@ -14,6 +14,11 @@ export const appConfig = {
 입금자명 또는 테이블 번호를 잘못 입력하거나 메뉴를 잘못 선택한 경우,
 <strong>취소 및 환불이 어려우니</strong>
 주문 전 다시 한 번 확인 후 주문 부탁드립니다.
+<br>
+입장료 계좌번호 : 63920432001 SC 제일은행 김영인
+<br>
+<strong>입장료 보낼 때 테이블 번호를 꼭 같이 적어주세요!</strong>
+
   `.trim(),
 
   allowedNames: [
