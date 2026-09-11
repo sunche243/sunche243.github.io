@@ -18,12 +18,30 @@ describe('historyItems', () => {
     ]);
   });
 
-  it('marks only the four major milestones as featured', () => {
-    expect(historyItems.filter(({ featured }) => featured).map(({ year }) => year)).toEqual([
+  it('configures the requested major and minor timeline years', () => {
+    const timelineItems = historyItems.filter(({ timeline }) => timeline);
+
+    expect(timelineItems.map(({ year }) => year)).toEqual([
       '1976',
+      '1979',
       '1981',
       '1984',
+      '1996',
+      '1997',
+      '2000',
+      '2005',
+      '2013',
       '2017',
     ]);
+    expect(
+      timelineItems.filter(({ timeline }) => timeline?.prominence === 'major').map(({ year }) => year),
+    ).toEqual(['1976', '1979', '1981', '1984']);
+  });
+
+  it('groups both 1984 titles without removing the source description', () => {
+    const item = historyItems.find(({ year }) => year === '1984');
+
+    expect(item?.timeline?.titles).toEqual(['회계연구소 설립', '대학원 박사과정 개설']);
+    expect(item?.description).toContain('대학원 박사과정 개설');
   });
 });
