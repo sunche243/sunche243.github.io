@@ -2,6 +2,7 @@ export interface HistoryItem {
   year: string;
   title: string;
   description: string[];
+  featured?: boolean;
 }
 
 export const historyItems: HistoryItem[] = [
@@ -9,6 +10,7 @@ export const historyItems: HistoryItem[] = [
     year: '1976',
     title: '국내 최초로 회계학과 설립',
     description: [],
+    featured: true,
   },
   {
     year: '1979',
@@ -22,6 +24,7 @@ export const historyItems: HistoryItem[] = [
       '공인회계사 시험을 준비하는 학생들에게 체계적인 지도와 지원',
       '매학기 공인회계사 준비생을 선발하여 장학금 지급, 특강 실시, 모의고사·개인지도 실시',
     ],
+    featured: true,
   },
   {
     year: '1984',
@@ -30,6 +33,7 @@ export const historyItems: HistoryItem[] = [
       '학부, 대학원, 연구소, 공인회계사반 등 훌륭한 인재배출을 위한 회계학 교육과 한국 회계학 발전에 기여할 수 있는 체제를 갖추게 됨',
       '대학원 박사과정 개설',
     ],
+    featured: true,
   },
   {
     year: '1986',
@@ -75,5 +79,6 @@ export const historyItems: HistoryItem[] = [
       '회계학과 1학년 모집단위 독립',
       '경영대학 3학과 체제 (경영학과, 회계학과, 경영정보학과)',
     ],
+    featured: true,
   },
 ];
