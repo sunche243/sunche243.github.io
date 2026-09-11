@@ -3,11 +3,16 @@ import { SectionHeader } from '../components/SectionHeader';
 import { programItems } from '../data/program';
 
 export function Program() {
+  const hasProgram = programItems.length > 0;
+
   return (
-    <RevealSection className="section--paper program" label="행사 식순">
+    <RevealSection
+      className={`section--paper program ${hasProgram ? '' : 'program--empty'}`}
+      label="행사 식순"
+    >
       <div className="section-inner">
         <SectionHeader eyebrow="PROGRAM" />
-        {programItems.length > 0 ? (
+        {hasProgram ? (
           <ol className="program-list">
             {programItems.map((item) => (
               <li key={`${item.time}-${item.title}`}>
@@ -20,7 +25,10 @@ export function Program() {
             ))}
           </ol>
         ) : (
-          <div className="program-empty">행사 세부 프로그램은 추후 안내될 예정입니다.</div>
+          <div className="program-empty">
+            <span aria-hidden="true" />
+            <p>행사 세부 프로그램은 추후 안내될 예정입니다.</p>
+          </div>
         )}
       </div>
     </RevealSection>

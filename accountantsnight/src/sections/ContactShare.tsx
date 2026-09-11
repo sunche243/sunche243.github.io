@@ -40,23 +40,18 @@ export function ContactShare({ toast }: ContactShareProps) {
         </p>
         <div className="contact-grid">
           {contacts.map((contact) => (
-            <article className="contact-card" key={contact.name}>
-              <span>{contact.role}</span>
-              <h3>{contact.name}</h3>
-              <p>{contact.phone}</p>
-              <p>{contact.email}</p>
-              <div className="button-row">
-                <a className="button button--dark" href={`tel:${contact.phone}`}>
-                  전화하기
-                </a>
-                <a className="button button--outline-dark" href={`mailto:${contact.email}`}>
-                  이메일 보내기
-                </a>
+            <article className="contact-card" key={`${contact.role}-${contact.phone}`}>
+              <p className="contact-card__organization">{contact.organization}</p>
+              <h3>{contact.role}</h3>
+              <div className="contact-card__links">
+                <a href={`tel:${contact.phone}`}>{contact.phone}</a>
+                <a href={`mailto:${contact.email}`}>{contact.email}</a>
               </div>
             </article>
           ))}
         </div>
         <div className="share-panel">
+          <p className="share-panel__label">SHARE INVITATION</p>
           <p>초대장을 함께 나누세요</p>
           <div className="button-row">
             <button className="button button--gold" type="button" onClick={handleKakao}>

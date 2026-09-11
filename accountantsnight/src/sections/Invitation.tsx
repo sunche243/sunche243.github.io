@@ -6,7 +6,7 @@ export function Invitation() {
   return (
     <RevealSection id="invitation" className="section--ivory invitation" label="초대의 글">
       <div className="section-inner section-inner--narrow">
-        <SectionHeader eyebrow="INVITATION" />
+        <SectionHeader eyebrow="INVITATION" title="초대의 글" />
         <div className="invitation__copy">
           {invitationCopy.map((paragraph) => (
             <p key={paragraph}>

@@ -70,10 +70,18 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
         type="button"
         onClick={toggleAudio}
         aria-label={playing ? 'BGM 일시정지' : 'BGM 재생'}
+        aria-pressed={playing}
+        title={playing ? 'BGM 일시정지' : 'BGM 재생'}
       >
         ♪
       </button>
-      <button className="floating-button" type="button" onClick={onShare} aria-label="초대장 공유">
+      <button
+        className="floating-button"
+        type="button"
+        onClick={onShare}
+        aria-label="초대장 공유"
+        title="초대장 공유"
+      >
         ↗
       </button>
     </div>

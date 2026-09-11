@@ -3,8 +3,13 @@ import { SectionHeader } from '../components/SectionHeader';
 import { historyItems } from '../data/history';
 
 export function History() {
+  const hasHistory = historyItems.length > 0;
+
   return (
-    <RevealSection className="section--ivory history" label="50년 역사">
+    <RevealSection
+      className={`section--ivory history ${hasHistory ? '' : 'history--empty'}`}
+      label="50년 역사"
+    >
       <div className="section-inner">
         <SectionHeader eyebrow="50 YEARS" title="우리의 50년" />
         <div className="history__range" aria-hidden="true">
@@ -12,7 +17,7 @@ export function History() {
           <i />
           <span>2026</span>
         </div>
-        {historyItems.length > 0 ? (
+        {hasHistory ? (
           <ol className="timeline">
             {historyItems.map((item) => (
               <li key={`${item.year}-${item.title}`}>

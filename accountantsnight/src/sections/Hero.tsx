@@ -34,8 +34,8 @@ export function Hero() {
           ))}
         </p>
         <h1>
-          <span>50th</span>
-          <span>ANNIVERSARY</span>
+          <span className="hero__ordinal">50th</span>
+          <span className="hero__anniversary">ANNIVERSARY</span>
         </h1>
         <p className="hero__korean">회계인의 밤</p>
         <p className="hero__years">{event.years}</p>
