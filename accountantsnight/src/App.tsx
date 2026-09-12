@@ -8,7 +8,6 @@ import { Hero } from './sections/Hero';
 import { History } from './sections/History';
 import { Invitation } from './sections/Invitation';
 import { Location } from './sections/Location';
-import { PhotoUpload } from './sections/PhotoUpload';
 import { Program } from './sections/Program';
 import { Sponsorship } from './sections/Sponsorship';
 import { shareInvitation } from './utils/share';
@@ -30,7 +29,6 @@ export function App() {
         <History />
         <Program />
         <Sponsorship />
-        <PhotoUpload />
         <Location />
         <ContactShare toast={toast} />
       </main>

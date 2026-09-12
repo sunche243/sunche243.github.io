@@ -19,6 +19,7 @@ export function FinalClosing() {
           DEPARTMENT OF ACCOUNTING
         </strong>
         <small>2026 · 50th Anniversary</small>
+        <small>© 2026 Park Chanjun. All Rights Reserved.</small>
       </div>
     </footer>
   );

@@ -1,7 +1,7 @@
 export const transport = {
   subway: {
     title: '지하철',
-    items: ['3호선 동대입구역 5번 출구', '호텔 관내 셔틀 안내를 표시할 공간입니다.'],
+    items: ['3호선 동대입구역 5번 출구 하차 후 관내 셔틀버스 이용'],
   },
   bus: {
     title: '버스',
