@@ -47,6 +47,9 @@ export function ContactShare({ toast }: ContactShareProps) {
                 <a href={`tel:${contact.phone}`}>{contact.phone}</a>
                 <a href={`mailto:${contact.email}`}>{contact.email}</a>
               </div>
+              <p className="contact__notice">
+                ※ 문의는 가급적 이메일로 부탁드립니다.
+              </p>
             </article>
           ))}
         </div>

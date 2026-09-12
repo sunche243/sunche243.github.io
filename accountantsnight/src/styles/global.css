@@ -1596,3 +1596,15 @@ img {
   height: 22px;
   object-fit: contain;
 }
+
+.contact__notice {
+  margin: -20px auto 32px;
+  padding-top: 18px;
+  color: var(--gold-dark);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  text-align: left;
+  word-break: keep-all;
+  width: 100%;
+  opacity: 90%;
+}
