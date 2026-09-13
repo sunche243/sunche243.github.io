@@ -26,23 +26,23 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: accountantsnight/package-lock.json
+          cache-dependency-path: accountingnight/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: accountantsnight
+        working-directory: accountingnight
 
       - name: Lint
         run: npm run lint
-        working-directory: accountantsnight
+        working-directory: accountingnight
 
       - name: Test
         run: npm run test
-        working-directory: accountantsnight
+        working-directory: accountingnight
 
       - name: Build
         run: npm run build
-        working-directory: accountantsnight
+        working-directory: accountingnight
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -55,10 +55,10 @@ jobs:
             --exclude='.github/' \
             --exclude='.gitignore' \
             --exclude='.DS_Store' \
-            --exclude='accountantsnight/' \
+            --exclude='accountingnight/' \
             ./ _site/
-          mkdir -p _site/accountantsnight
-          cp -R accountantsnight/dist/. _site/accountantsnight/
+          mkdir -p _site/accountingnight
+          cp -R accountingnight/dist/. _site/accountingnight/
           touch _site/.nojekyll
 
       - name: Upload artifact

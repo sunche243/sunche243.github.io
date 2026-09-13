@@ -19,7 +19,7 @@ export const event = {
   anniversary: '50th ANNIVERSARY',
   years: '1976 — 2026',
   description: '동국대학교 회계학과 50주년 기념 회계인의 밤',
-  siteUrl: 'https://sunche243.github.io/accountantsnight/',
+  siteUrl: 'https://sunche243.github.io/accountingnight/',
   heroImage: `${import.meta.env.BASE_URL}images/hero.webp`,
   ogImage: `${import.meta.env.BASE_URL}images/og-image.jpg`,
 };
