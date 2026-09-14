@@ -35,7 +35,7 @@ describe('historyItems', () => {
     ]);
     expect(
       timelineItems.filter(({ timeline }) => timeline?.prominence === 'major').map(({ year }) => year),
-    ).toEqual(['1976', '1979', '1981', '1984']);
+    ).toEqual(['1976', '1979', '1981', '1984', '2017']);
   });
 
   it('groups both 1984 titles without removing the source description', () => {

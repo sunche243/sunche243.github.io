@@ -100,6 +100,6 @@ export const historyItems: HistoryItem[] = [
       '회계학과 1학년 모집단위 독립',
       '경영대학 3학과 체제 (경영학과, 회계학과, 경영정보학과)',
     ],
-    timeline: { prominence: 'minor' },
+    timeline: { prominence: 'major' },
   },
 ];
