@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react';
 import { event } from '../data/event';
 
-export function Hero() {
+interface HeroProps {
+  scrollLabel?: string;
+  scrollHref?: string;
+  scrollAriaLabel?: string;
+}
+
+export function Hero({
+  scrollLabel = '초대장을 확인해주세요',
+  scrollHref = '#invitation',
+  scrollAriaLabel = '초대장 본문으로 이동',
+}: HeroProps) {
   const [hasHeroImage, setHasHeroImage] = useState(false);
 
   useEffect(() => {
@@ -44,8 +54,8 @@ export function Hero() {
         <p>{event.shortDateLabel}</p>
         <p>{event.venueEnglish}</p>
       </div>
-      <a className="scroll-cue" href="#invitation" aria-label="초대장 본문으로 이동">
-        <span>초대장을 확인해주세요</span>
+      <a className="scroll-cue" href={scrollHref} aria-label={scrollAriaLabel}>
+        <span>{scrollLabel}</span>
         <i aria-hidden="true" />
       </a>
     </header>

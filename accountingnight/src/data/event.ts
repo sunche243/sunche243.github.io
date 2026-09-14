@@ -32,6 +32,6 @@ export const invitationCopy = [
 
 export const sponsorship = {
   status: 'draft' as ContentStatus,
-  url: 'https://test.com',
+  url: `${import.meta.env.BASE_URL}sponsor/`,
   embedUrl: '',
 };

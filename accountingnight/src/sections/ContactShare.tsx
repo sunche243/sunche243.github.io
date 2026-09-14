@@ -5,32 +5,35 @@ import { isKakaoConfigured, shareToKakao } from '../services/kakaoShare';
 import { copyText, shareInvitation } from '../utils/share';
 
 interface ContactShareProps {
-  toast: (message: string) => void;
+  toast?: (message: string) => void;
+  showShare?: boolean;
 }
 
-export function ContactShare({ toast }: ContactShareProps) {
+export function ContactShare({ toast, showShare = true }: ContactShareProps) {
+  const notify = toast ?? (() => undefined);
+
   async function handleKakao() {
     if (!isKakaoConfigured()) {
-      await shareInvitation(toast);
-      toast('Kakao JavaScript Key가 없어 주소 복사로 대신했습니다.');
+      await shareInvitation(notify);
+      notify('Kakao JavaScript Key가 없어 주소 복사로 대신했습니다.');
       return;
     }
 
     try {
       await shareToKakao();
     } catch {
-      await shareInvitation(toast);
-      toast('카카오톡 공유 대신 초대장 주소를 복사했습니다.');
+      await shareInvitation(notify);
+      notify('카카오톡 공유 대신 초대장 주소를 복사했습니다.');
     }
   }
 
   async function handleCopy() {
     await copyText(window.location.href);
-    toast('초대장 주소를 복사했습니다.');
+    notify('초대장 주소를 복사했습니다.');
   }
 
   return (
-    <RevealSection className="section--ivory contact" label="문의와 공유">
+    <RevealSection className="section--ivory contact" label={showShare ? '문의와 공유' : '문의'}>
       <div className="section-inner">
         <SectionHeader eyebrow="CONTACT" />
         <p className="contact__intro">
@@ -53,18 +56,20 @@ export function ContactShare({ toast }: ContactShareProps) {
             </article>
           ))}
         </div>
-        <div className="share-panel">
-          <p className="share-panel__label">SHARE INVITATION</p>
-          <p>초대장을 함께 나누세요</p>
-          <div className="button-row">
-            <button className="button button--gold" type="button" onClick={handleKakao}>
-              카카오톡 공유
-            </button>
-            <button className="button button--outline-dark" type="button" onClick={handleCopy}>
-              URL 복사
-            </button>
+        {showShare ? (
+          <div className="share-panel">
+            <p className="share-panel__label">SHARE INVITATION</p>
+            <p>초대장을 함께 나누세요</p>
+            <div className="button-row">
+              <button className="button button--gold" type="button" onClick={handleKakao}>
+                카카오톡 공유
+              </button>
+              <button className="button button--outline-dark" type="button" onClick={handleCopy}>
+                URL 복사
+              </button>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </RevealSection>
   );
