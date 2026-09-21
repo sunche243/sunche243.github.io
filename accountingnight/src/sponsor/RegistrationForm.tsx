@@ -28,7 +28,7 @@ interface RegistrationFormProps {
 
 function getFieldPlaceholder(field: FormField): string | undefined {
   if (isAdmissionFieldLabel(field.label)) return '예: 98학번';
-  if (isAffiliationFieldLabel(field.label)) return '예: 삼일회계법인 파트너, OO기업 CFO 등';
+  if (isAffiliationFieldLabel(field.label)) return '예: OO기업 CFO 등';
   return undefined;
 }
 
