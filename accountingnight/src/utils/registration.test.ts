@@ -97,4 +97,23 @@ describe('registration utilities', () => {
       'field-1': expect.any(String),
     });
   });
+
+  it('allows the admission year and affiliation fields to be omitted when optional', () => {
+    const optionalFields: FormField[] = [
+      { ...field, id: 'admission-field', label: '입학년도(학번)', required: false },
+      { ...field, id: 'affiliation-field', label: '현재 소속 및 직함', required: false },
+    ];
+    const result = validateRegistration({
+      draft,
+      fields: optionalFields,
+      answers: {},
+      honeypot: '',
+      formStartedAt: 1_000,
+      now: 5_000,
+    });
+
+    expect(result.valid).toBe(true);
+    expect(result.errors['admission-field']).toBeUndefined();
+    expect(result.errors['affiliation-field']).toBeUndefined();
+  });
 });

@@ -93,6 +93,18 @@
   gap: 26px;
 }
 
+.registration-core-group {
+  display: grid;
+  gap: 12px;
+}
+
+.registration-required-note {
+  margin: 0;
+  color: var(--gray-600);
+  font-size: 0.75rem;
+  line-height: 1.6;
+}
+
 .registration-dynamic-fields--additional {
   padding-top: 30px;
   border-top: 1px solid var(--line-dark);

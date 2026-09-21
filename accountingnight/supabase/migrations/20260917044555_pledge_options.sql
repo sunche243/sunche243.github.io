@@ -94,10 +94,10 @@ begin
 
   if admission_field_id is null then
     insert into public.form_fields (label, type, required, options, sort_order, active)
-    values ('입학년도(학번)', 'text', true, '[]'::jsonb, 10, true);
+    values ('입학년도(학번)', 'text', false, '[]'::jsonb, 10, true);
   else
     update public.form_fields
-    set label = '입학년도(학번)', type = 'text', required = true, options = '[]'::jsonb, sort_order = 10, active = true
+    set label = '입학년도(학번)', type = 'text', required = false, options = '[]'::jsonb, sort_order = 10, active = true
     where id = admission_field_id;
   end if;
 
@@ -113,10 +113,10 @@ begin
 
   if affiliation_field_id is null then
     insert into public.form_fields (label, type, required, options, sort_order, active)
-    values ('현재 소속 및 직함', 'text', true, '[]'::jsonb, 20, true);
+    values ('현재 소속 및 직함', 'text', false, '[]'::jsonb, 20, true);
   else
     update public.form_fields
-    set label = '현재 소속 및 직함', type = 'text', required = true, options = '[]'::jsonb, sort_order = 20, active = true
+    set label = '현재 소속 및 직함', type = 'text', required = false, options = '[]'::jsonb, sort_order = 20, active = true
     where id = affiliation_field_id;
   end if;
 end;

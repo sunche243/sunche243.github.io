@@ -70,7 +70,7 @@ begin
     where regexp_replace(lower(label), '[[:space:]()（）·_/-]', '', 'g') in ('입학년도학번', '학번입학년도', '입학년도', '학번')
   ) then
     insert into public.form_fields (label, type, required, options, sort_order, active)
-    values ('입학년도(학번)', 'text', true, '[]'::jsonb, 10, true);
+    values ('입학년도(학번)', 'text', false, '[]'::jsonb, 10, true);
   end if;
 
   if not exists (
@@ -82,7 +82,7 @@ begin
     )
   ) then
     insert into public.form_fields (label, type, required, options, sort_order, active)
-    values ('현재 소속 및 직함', 'text', true, '[]'::jsonb, 20, true);
+    values ('현재 소속 및 직함', 'text', false, '[]'::jsonb, 20, true);
   end if;
 end;
 $$;

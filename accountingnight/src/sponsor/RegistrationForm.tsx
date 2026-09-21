@@ -291,51 +291,54 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                 description="행사 당일 원활한 의전과 네트워킹, 그리고 추후 기부금 약정 안내를 위해 정확한 기재를 부탁드립니다."
               />
             </div>
-            <div className="registration-core-fields">
-              <div className="registration-field">
-                <label htmlFor="registration-name">성명 <span aria-label="필수">*</span></label>
-                <input
-                  id="registration-name"
-                  name="name"
-                  autoComplete="name"
-                  value={draft.name}
-                  onChange={(event) => updateDraft('name', event.target.value)}
-                  aria-invalid={Boolean(errors.name)}
-                  aria-describedby={errors.name ? 'registration-name-error' : undefined}
-                />
-                {errors.name ? <span className="field-error" id="registration-name-error">{errors.name}</span> : null}
+            <div className="registration-core-group">
+              <div className="registration-core-fields">
+                <div className="registration-field">
+                  <label htmlFor="registration-name">성명 <span aria-label="필수">*</span></label>
+                  <input
+                    id="registration-name"
+                    name="name"
+                    autoComplete="name"
+                    value={draft.name}
+                    onChange={(event) => updateDraft('name', event.target.value)}
+                    aria-invalid={Boolean(errors.name)}
+                    aria-describedby={errors.name ? 'registration-name-error' : undefined}
+                  />
+                  {errors.name ? <span className="field-error" id="registration-name-error">{errors.name}</span> : null}
+                </div>
+                {admissionField ? (
+                  <DynamicField
+                    field={admissionField}
+                    value={answers[admissionField.id]}
+                    error={errors[admissionField.id]}
+                    onChange={(value) => updateAnswer(admissionField.id, value)}
+                  />
+                ) : null}
+                <div className="registration-field">
+                  <label htmlFor="registration-phone">휴대전화 번호 <span aria-label="필수">*</span></label>
+                  <input
+                    id="registration-phone"
+                    name="phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    value={draft.phone}
+                    onChange={(event) => updateDraft('phone', event.target.value)}
+                    aria-invalid={Boolean(errors.phone)}
+                    aria-describedby={errors.phone ? 'registration-phone-error' : undefined}
+                  />
+                  {errors.phone ? <span className="field-error" id="registration-phone-error">{errors.phone}</span> : null}
+                </div>
+                {affiliationField ? (
+                  <DynamicField
+                    field={affiliationField}
+                    value={answers[affiliationField.id]}
+                    error={errors[affiliationField.id]}
+                    onChange={(value) => updateAnswer(affiliationField.id, value)}
+                  />
+                ) : null}
               </div>
-              {admissionField ? (
-                <DynamicField
-                  field={admissionField}
-                  value={answers[admissionField.id]}
-                  error={errors[admissionField.id]}
-                  onChange={(value) => updateAnswer(admissionField.id, value)}
-                />
-              ) : null}
-              <div className="registration-field">
-                <label htmlFor="registration-phone">휴대전화 번호 <span aria-label="필수">*</span></label>
-                <input
-                  id="registration-phone"
-                  name="phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  value={draft.phone}
-                  onChange={(event) => updateDraft('phone', event.target.value)}
-                  aria-invalid={Boolean(errors.phone)}
-                  aria-describedby={errors.phone ? 'registration-phone-error' : undefined}
-                />
-                {errors.phone ? <span className="field-error" id="registration-phone-error">{errors.phone}</span> : null}
-              </div>
-              {affiliationField ? (
-                <DynamicField
-                  field={affiliationField}
-                  value={answers[affiliationField.id]}
-                  error={errors[affiliationField.id]}
-                  onChange={(value) => updateAnswer(affiliationField.id, value)}
-                />
-              ) : null}
+              <p className="registration-required-note">* 별표가 표시된 항목만 필수 입력입니다.</p>
             </div>
 
             {fieldLoading ? <p className="registration-loading" aria-live="polite">추가 질문을 불러오고 있습니다.</p> : null}
@@ -417,8 +420,8 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
               <StepHeading number={3} title="세제 혜택 안내" />
             </div>
             <div className="tax-information">
-              <h3>📌 [지정기부금 세제 혜택 안내]</h3>
-              <p>동문님께서 후원해 주시는 발전기금은 전액 동국대학교 '지정기부금'으로 투명하게 처리됩니다.</p>
+              <h3>📌 [기부금 세제 혜택 안내]</h3>
+              <p>동문님께서 후원해 주시는 발전기금은 전액 동국대학교 '기부금'으로 투명하게 처리됩니다.</p>
               <p>추후 발급되는 기부금 영수증을 통해 법인세법상 법정 한도 내 전액 손금산입(법인) 또는 소득세법상 기부금 세액공제(개인) 등 완벽한 세무적 혜택을 받으실 수 있습니다. 회계학과 후배들의 든든한 버팀목이 되어주셔서 깊이 감사드립니다.</p>
             </div>
           </section>
