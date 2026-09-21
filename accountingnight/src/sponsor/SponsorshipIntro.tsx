@@ -3,25 +3,15 @@ import { SectionHeader } from '../components/SectionHeader';
 
 export function SponsorshipIntro() {
   return (
-    <RevealSection id="sponsor-intro" className="section--ivory sponsor-intro" label="50주년 후원 안내">
+    <RevealSection id="sponsor-intro" className="section--ivory sponsor-intro" label="참석 및 발전기금 약정 안내">
       <div className="section-inner">
-        <SectionHeader eyebrow="TOGETHER FOR THE NEXT 50" title="함께 만들어온 50년, 함께 이어갈 새로운 50년" />
+        <SectionHeader
+          eyebrow="50th ANNIVERSARY PLEDGE"
+          title={<>동국대학교 회계학과 창립 50주년<br />'회계인의 밤'<br />참석 및 발전기금 약정</>}
+        />
         <div className="sponsor-intro__copy">
-          <p>
-            1976년 시작된 동국대학교 회계학과가
-            <br />
-            뜻깊은 50주년을 맞이하였습니다.
-          </p>
-          <p>
-            지난 50년을 함께 만들어주신 분들과
-            <br />
-            새로운 50년의 시작을 함께하고자 합니다.
-          </p>
-          <p>
-            50주년 후원에 참여할 의향을 남겨주시면
-            <br />
-            담당자가 확인 후 개별적으로 연락드리겠습니다.
-          </p>
+          <p>지난 50년의 눈부신 성취를 넘어, 새로운 50년의 비전을 밝히는 뜻깊은 자리에 동문 여러분을 귀빈으로 모십니다.</p>
+          <p>본 약정서는 원활한 행사 준비를 위한 참석 여부 파악과 발전기금 후원 의사를 확인하기 위한 폼입니다. 실제 기부금 납부 계좌 및 세제 혜택(기부금 영수증 발급)을 위한 세부 절차는 약정 확인 후 학과사무실에서 개별적으로 친절히 안내해드릴 예정입니다. 부담 없이 작성 부탁드립니다.</p>
         </div>
       </div>
     </RevealSection>

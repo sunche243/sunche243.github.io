@@ -1,7 +1,14 @@
 import type { Cell, SheetData } from 'write-excel-file/browser';
 import type { FormField, Submission } from '../types/registration';
-import { attendanceLabels, submissionStatusLabels } from '../utils/registration';
-import { SPONSOR_UNIT_AMOUNT } from '../config/sponsorship';
+import {
+  attendanceLabels,
+  findSubmissionAnswerByLabel,
+  getPledgeOptionLabel,
+  getSubmissionPledgeAmount,
+  isAdmissionFieldLabel,
+  isAffiliationFieldLabel,
+  submissionStatusLabels,
+} from '../utils/registration';
 
 interface ExportField {
   id: string;
@@ -12,12 +19,13 @@ function getExportFields(submissions: Submission[], fields: FormField[]): Export
   const result = fields
     .slice()
     .sort((a, b) => a.sort_order - b.sort_order)
+    .filter(({ label }) => !isAdmissionFieldLabel(label) && !isAffiliationFieldLabel(label))
     .map(({ id, label }) => ({ id, label }));
   const knownIds = new Set(result.map(({ id }) => id));
 
   for (const submission of submissions) {
     for (const [id, answer] of Object.entries(submission.answers)) {
-      if (!knownIds.has(id)) {
+      if (!knownIds.has(id) && !isAdmissionFieldLabel(answer.label) && !isAffiliationFieldLabel(answer.label)) {
         result.push({ id, label: answer.label });
         knownIds.add(id);
       }
@@ -48,11 +56,12 @@ export function buildExcelSheet(submissions: Submission[], fields: FormField[]):
   const exportFields = getExportFields(submissions, fields);
   const headings = [
     '접수일시',
-    '이름',
+    '성명',
     '전화번호',
-    '후원의향',
-    '후원구좌',
-    '예상후원금',
+    '입학년도(학번)',
+    '현재 소속 및 직함',
+    '약정유형',
+    '약정금액',
     '참석여부',
     ...exportFields.map(({ label }) => label),
     '상태',
@@ -65,9 +74,10 @@ export function buildExcelSheet(submissions: Submission[], fields: FormField[]):
       { value: new Date(submission.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
       submission.name,
       submission.phone,
-      submission.wants_sponsorship ? '예' : '아니오',
-      submission.wants_sponsorship ? submission.sponsorship_units : 0,
-      submission.wants_sponsorship ? submission.sponsorship_units * SPONSOR_UNIT_AMOUNT : 0,
+      excelValue(findSubmissionAnswerByLabel(submission, isAdmissionFieldLabel)),
+      excelValue(findSubmissionAnswerByLabel(submission, isAffiliationFieldLabel)),
+      getPledgeOptionLabel(submission.pledge_option),
+      getSubmissionPledgeAmount(submission),
       submission.attendance_status ? attendanceLabels[submission.attendance_status] : '미입력',
       ...exportFields.map(({ id }) => excelValue(submission.answers[id]?.value)),
       submissionStatusLabels[submission.status],
@@ -83,11 +93,11 @@ export async function downloadSubmissionsExcel(submissions: Submission[], fields
   const columns = sheet[0].map((_, index) => ({ width: index === 0 ? 20 : index === 2 ? 18 : 16 }));
 
   await writeExcelFile(sheet, {
-    sheet: '후원 및 참석',
+    sheet: '약정 및 참석',
     columns,
     stickyRowsCount: 1,
   }, {
     fontFamily: '맑은 고딕',
     fontSize: 10,
-  }).toFile(`회계인의밤_후원및참석_${date}.xlsx`);
+  }).toFile(`회계인의밤_약정및참석_${date}.xlsx`);
 }

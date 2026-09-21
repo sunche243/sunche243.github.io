@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="veil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#111111" stop-opacity="0.35" />
+      <stop offset="0.5" stop-color="#090909" stop-opacity="0.64" />
+      <stop offset="1" stop-color="#090909" stop-opacity="0.48" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#111111" />
+  <image x="0" y="0" width="1200" height="630" xlink:href="og-accountingnight-bg.png" preserveAspectRatio="xMidYMid slice" />
+  <rect width="1200" height="630" fill="url(#veil)" />
+  <rect x="28" y="28" width="1144" height="574" fill="none" stroke="#c8aa70" stroke-width="1" opacity="0.72" />
+  <rect x="38" y="38" width="1124" height="554" fill="none" stroke="#c8aa70" stroke-width="0.6" opacity="0.28" />
+
+  <g text-anchor="middle">
+    <text x="600" y="78" fill="#dfc99c" font-family="Arial, sans-serif" font-size="17" font-weight="600" letter-spacing="5">DONGGUK UNIVERSITY</text>
+    <text x="600" y="105" fill="#dfc99c" font-family="Arial, sans-serif" font-size="15" font-weight="500" letter-spacing="4">DEPARTMENT OF ACCOUNTING</text>
+
+    <text x="600" y="238" fill="#f7f4ed" font-family="Baskerville, Georgia, serif" font-size="126" font-weight="600">50th</text>
+    <text x="600" y="287" fill="#c8aa70" font-family="Baskerville, Georgia, serif" font-size="38" font-weight="600" letter-spacing="7">ANNIVERSARY</text>
+
+    <line x1="554" y1="324" x2="646" y2="324" stroke="#c8aa70" stroke-width="1.3" />
+    <text x="600" y="399" fill="#f7f4ed" font-family="Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="58" font-weight="600">회계인의 밤</text>
+    <text x="600" y="444" fill="#dfc99c" font-family="Baskerville, Georgia, serif" font-size="23" font-weight="600" letter-spacing="5">1976 — 2026</text>
+
+    <text x="600" y="526" fill="#f7f4ed" font-family="Arial, sans-serif" font-size="22" font-weight="600" letter-spacing="2">2026. 11. 13</text>
+    <text x="600" y="558" fill="#dfc99c" font-family="Arial, sans-serif" font-size="17" font-weight="500" letter-spacing="4">THE SHILLA SEOUL</text>
+  </g>
+</svg>

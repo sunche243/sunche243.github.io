@@ -1,6 +1,15 @@
 import { useMemo, useState } from 'react';
 import type { AttendanceStatus, FormField, Submission, SubmissionStatus } from '../types/registration';
-import { attendanceLabels, calculateSponsorshipAmount, formatWon, submissionStatusLabels } from '../utils/registration';
+import {
+  attendanceLabels,
+  findSubmissionAnswerByLabel,
+  formatWon,
+  getPledgeOptionLabel,
+  getSubmissionPledgeAmount,
+  isAdmissionFieldLabel,
+  isAffiliationFieldLabel,
+  submissionStatusLabels,
+} from '../utils/registration';
 import { deleteSubmission, updateSubmission } from './adminService';
 import { filterSubmissions, formatAdminDate, type AdminFilters } from './adminUtils';
 import { AdminDialog } from './AdminDialog';
@@ -8,6 +17,12 @@ import { downloadSubmissionsExcel } from './excel';
 
 const statusOptions = Object.keys(submissionStatusLabels) as SubmissionStatus[];
 const attendanceOptions = Object.keys(attendanceLabels) as AttendanceStatus[];
+
+function displayAnswer(value: string | number | boolean | undefined): string {
+  if (typeof value === 'boolean') return value ? '예' : '아니오';
+  if (value === undefined || value === '') return '−';
+  return String(value);
+}
 
 interface SubmissionsPanelProps {
   submissions: Submission[];
@@ -30,6 +45,8 @@ function SubmissionDetail({
   const [status, setStatus] = useState(submission.status);
   const [memo, setMemo] = useState(submission.admin_memo);
   const [saving, setSaving] = useState(false);
+  const admission = findSubmissionAnswerByLabel(submission, isAdmissionFieldLabel);
+  const affiliation = findSubmissionAnswerByLabel(submission, isAffiliationFieldLabel);
 
   async function save() {
     setSaving(true);
@@ -70,9 +87,10 @@ function SubmissionDetail({
       <div className="submission-detail-grid">
         <dl>
           <div><dt>전화번호</dt><dd><a href={`tel:${submission.phone}`}>{submission.phone}</a></dd></div>
-          <div><dt>후원 의향</dt><dd>{submission.wants_sponsorship ? '있음' : '없음'}</dd></div>
-          <div><dt>후원 구좌</dt><dd>{submission.wants_sponsorship ? `${submission.sponsorship_units}구좌` : '−'}</dd></div>
-          <div><dt>예상 후원금</dt><dd>{submission.wants_sponsorship ? formatWon(calculateSponsorshipAmount(submission.sponsorship_units)) : '−'}</dd></div>
+          <div><dt>입학년도(학번)</dt><dd>{displayAnswer(admission)}</dd></div>
+          <div><dt>현재 소속 및 직함</dt><dd>{displayAnswer(affiliation)}</dd></div>
+          <div><dt>선택 약정 유형</dt><dd>{getPledgeOptionLabel(submission.pledge_option)}</dd></div>
+          <div><dt>약정 금액</dt><dd>{formatWon(getSubmissionPledgeAmount(submission))}</dd></div>
           <div><dt>참석 여부</dt><dd>{submission.attendance_status ? attendanceLabels[submission.attendance_status] : '미입력'}</dd></div>
           <div><dt>접수일</dt><dd>{formatAdminDate(submission.created_at)}</dd></div>
         </dl>
@@ -81,7 +99,7 @@ function SubmissionDetail({
           {Object.values(submission.answers).length ? (
             <dl>
               {Object.entries(submission.answers).map(([id, answer]) => (
-                <div key={id}><dt>{answer.label}</dt><dd>{typeof answer.value === 'boolean' ? (answer.value ? '예' : '아니오') : answer.value}</dd></div>
+                <div key={id}><dt>{answer.label}</dt><dd>{displayAnswer(answer.value)}</dd></div>
               ))}
             </dl>
           ) : <p>추가 답변이 없습니다.</p>}
@@ -153,7 +171,7 @@ export function SubmissionsPanel({ submissions, fields, onRefresh, onError }: Su
 
       <div className="admin-filters">
         <label className="admin-search">
-          <span>이름 또는 전화번호 검색</span>
+          <span>성명 또는 전화번호 검색</span>
           <input value={filters.query} onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))} placeholder="검색어 입력" />
         </label>
         <label>
@@ -172,11 +190,11 @@ export function SubmissionsPanel({ submissions, fields, onRefresh, onError }: Su
           </select>
         </label>
         <label>
-          <span>후원</span>
+          <span>발전기금 약정</span>
           <select value={filters.sponsorship} onChange={(event) => setFilters((current) => ({ ...current, sponsorship: event.target.value as AdminFilters['sponsorship'] }))}>
             <option value="all">전체</option>
-            <option value="yes">후원 의향 있음</option>
-            <option value="no">후원 의향 없음</option>
+            <option value="yes">약정 있음</option>
+            <option value="no">약정 없음</option>
           </select>
         </label>
       </div>
@@ -186,12 +204,15 @@ export function SubmissionsPanel({ submissions, fields, onRefresh, onError }: Su
         <table className="admin-table">
           <thead>
             <tr>
-              <th>등록일시</th><th>이름</th><th>전화번호</th><th>후원</th><th>구좌</th><th>예상 후원액</th><th>참석</th><th>상태</th>
+              <th>등록일시</th><th>성명</th><th>전화번호</th><th>입학년도(학번)</th><th>현재 소속 및 직함</th><th>선택 약정 유형</th><th>약정 금액</th><th>참석 여부</th><th>상태</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.map((submission) => (
-              <tr
+            {filtered.map((submission) => {
+              const admission = findSubmissionAnswerByLabel(submission, isAdmissionFieldLabel);
+              const affiliation = findSubmissionAnswerByLabel(submission, isAffiliationFieldLabel);
+              return (
+                <tr
                 key={submission.id}
                 tabIndex={0}
                 onClick={() => setSelected(submission)}
@@ -201,14 +222,16 @@ export function SubmissionsPanel({ submissions, fields, onRefresh, onError }: Su
                 <td>{formatAdminDate(submission.created_at)}</td>
                 <td><strong>{submission.name}</strong></td>
                 <td>{submission.phone}</td>
-                <td>{submission.wants_sponsorship ? '있음' : '없음'}</td>
-                <td>{submission.wants_sponsorship ? submission.sponsorship_units : '−'}</td>
-                <td>{submission.wants_sponsorship ? formatWon(calculateSponsorshipAmount(submission.sponsorship_units)) : '−'}</td>
+                <td>{displayAnswer(admission)}</td>
+                <td>{displayAnswer(affiliation)}</td>
+                <td>{getPledgeOptionLabel(submission.pledge_option)}</td>
+                <td>{formatWon(getSubmissionPledgeAmount(submission))}</td>
                 <td>{submission.attendance_status ? attendanceLabels[submission.attendance_status] : '미입력'}</td>
                 <td><span className={`admin-status admin-status--${submission.status}`}>{submissionStatusLabels[submission.status]}</span></td>
-              </tr>
-            ))}
-            {!filtered.length ? <tr><td className="admin-empty" colSpan={8}>조건에 맞는 신청 내역이 없습니다.</td></tr> : null}
+                </tr>
+              );
+            })}
+            {!filtered.length ? <tr><td className="admin-empty" colSpan={9}>조건에 맞는 신청 내역이 없습니다.</td></tr> : null}
           </tbody>
         </table>
       </div>

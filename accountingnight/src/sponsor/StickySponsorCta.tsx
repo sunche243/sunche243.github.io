@@ -36,7 +36,7 @@ export function StickySponsorCta({ completed }: { completed: boolean }) {
 
   return (
     <div className={`sponsor-sticky-cta ${visible ? 'is-visible' : ''}`} aria-hidden={!visible}>
-      <a className="button button--gold" href="#registration" tabIndex={visible ? 0 : -1}>후원 · 참석 등록하기</a>
+      <a className="button button--gold" href="#registration" tabIndex={visible ? 0 : -1}>약정 및 참석 수락하기</a>
     </div>
   );
 }

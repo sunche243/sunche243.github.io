@@ -32,17 +32,60 @@ create table if not exists public.submissions (
   phone text not null check (phone ~ '^\+?[0-9]{7,20}$'),
   wants_sponsorship boolean not null default false,
   sponsorship_units integer not null default 0,
+  pledge_option text not null,
+  pledge_amount bigint not null,
   attendance_status text check (attendance_status in ('attending', 'not_attending', 'undecided')),
   answers jsonb not null default '{}'::jsonb check (jsonb_typeof(answers) = 'object'),
   status text not null default 'new' check (status in ('new', 'contacted', 'confirmed', 'cancelled')),
   admin_memo text not null default '' check (char_length(admin_memo) <= 5000),
   privacy_consent_at timestamptz not null,
-  check (
-    (wants_sponsorship and sponsorship_units between 1 and 100)
-    or (not wants_sponsorship and sponsorship_units = 0)
+  constraint submissions_sponsorship_units_check check (sponsorship_units between 0 and 100),
+  constraint submissions_pledge_option_check check (
+    pledge_option in (
+      'century_100',
+      'guardian_50',
+      'free_attending',
+      'free_absent',
+      'absent_only',
+      'legacy_units',
+      'legacy_no_pledge'
+    )
   ),
-  check (wants_sponsorship or attendance_status is not null)
+  constraint submissions_pledge_consistency_check check (
+    (pledge_option = 'century_100' and pledge_amount = 1000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 2)
+    or (pledge_option = 'guardian_50' and pledge_amount = 500000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 1)
+    or (pledge_option = 'free_attending' and pledge_amount between 1 and 10000000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 0)
+    or (pledge_option = 'free_absent' and pledge_amount between 1 and 10000000000 and attendance_status = 'not_attending' and wants_sponsorship and sponsorship_units = 0)
+    or (pledge_option = 'absent_only' and pledge_amount = 0 and attendance_status = 'not_attending' and not wants_sponsorship and sponsorship_units = 0)
+    or (pledge_option = 'legacy_units' and pledge_amount = sponsorship_units::bigint * 500000 and wants_sponsorship and sponsorship_units between 1 and 100)
+    or (pledge_option = 'legacy_no_pledge' and pledge_amount = 0 and not wants_sponsorship and sponsorship_units = 0)
+  )
 );
+
+do $$
+begin
+  if not exists (
+    select 1
+    from public.form_fields
+    where regexp_replace(lower(label), '[[:space:]()（）·_/-]', '', 'g') in ('입학년도학번', '학번입학년도', '입학년도', '학번')
+  ) then
+    insert into public.form_fields (label, type, required, options, sort_order, active)
+    values ('입학년도(학번)', 'text', true, '[]'::jsonb, 10, true);
+  end if;
+
+  if not exists (
+    select 1
+    from public.form_fields
+    where regexp_replace(lower(label), '[[:space:]()（）·_/-]', '', 'g') in (
+      '현재소속및직함', '소속및직함', '현재소속직함', '소속직함',
+      '현재소속및직책', '소속및직책', '현재소속', '소속'
+    )
+  ) then
+    insert into public.form_fields (label, type, required, options, sort_order, active)
+    values ('현재 소속 및 직함', 'text', true, '[]'::jsonb, 20, true);
+  end if;
+end;
+$$;
 
 create index if not exists submissions_created_at_idx on public.submissions (created_at desc);
 create index if not exists submissions_status_idx on public.submissions (status);
@@ -84,11 +127,13 @@ as $$
   );
 $$;
 
+drop function if exists public.submit_sponsorship(text, text, boolean, integer, text, jsonb, boolean, text, timestamptz);
+
 create or replace function public.submit_sponsorship(
   p_name text,
   p_phone text,
-  p_wants_sponsorship boolean,
-  p_sponsorship_units integer,
+  p_pledge_option text,
+  p_pledge_amount bigint,
   p_attendance_status text,
   p_answers jsonb,
   p_privacy_consent boolean,
@@ -104,6 +149,10 @@ declare
   v_submission_id uuid;
   v_phone text;
   v_answers jsonb;
+  v_expected_amount bigint;
+  v_expected_attendance text;
+  v_wants_sponsorship boolean;
+  v_sponsorship_units integer;
 begin
   if coalesce(btrim(p_website), '') <> '' then
     raise exception 'Invalid request';
@@ -122,24 +171,47 @@ begin
     raise exception 'Invalid phone';
   end if;
 
-  if p_wants_sponsorship is null then
-    raise exception 'Invalid sponsorship choice';
+  case p_pledge_option
+    when 'century_100' then
+      v_expected_amount := 1000000;
+      v_expected_attendance := 'attending';
+      v_wants_sponsorship := true;
+      v_sponsorship_units := 2;
+    when 'guardian_50' then
+      v_expected_amount := 500000;
+      v_expected_attendance := 'attending';
+      v_wants_sponsorship := true;
+      v_sponsorship_units := 1;
+    when 'free_attending' then
+      v_expected_amount := p_pledge_amount;
+      v_expected_attendance := 'attending';
+      v_wants_sponsorship := true;
+      v_sponsorship_units := 0;
+    when 'free_absent' then
+      v_expected_amount := p_pledge_amount;
+      v_expected_attendance := 'not_attending';
+      v_wants_sponsorship := true;
+      v_sponsorship_units := 0;
+    when 'absent_only' then
+      v_expected_amount := 0;
+      v_expected_attendance := 'not_attending';
+      v_wants_sponsorship := false;
+      v_sponsorship_units := 0;
+    else
+      raise exception 'Invalid pledge option';
+  end case;
+
+  if p_pledge_amount is null or p_pledge_amount <> v_expected_amount then
+    raise exception 'Pledge option and amount do not match';
   end if;
 
-  if p_wants_sponsorship and (p_sponsorship_units is null or p_sponsorship_units not between 1 and 100) then
-    raise exception 'Invalid sponsorship units';
+  if p_pledge_option in ('free_attending', 'free_absent')
+    and p_pledge_amount not between 1 and 10000000000 then
+    raise exception 'Invalid custom pledge amount';
   end if;
 
-  if not p_wants_sponsorship and coalesce(p_sponsorship_units, 0) <> 0 then
-    raise exception 'Sponsorship units must be zero';
-  end if;
-
-  if p_attendance_status is not null and p_attendance_status not in ('attending', 'not_attending', 'undecided') then
-    raise exception 'Invalid attendance status';
-  end if;
-
-  if not p_wants_sponsorship and p_attendance_status is null then
-    raise exception 'Participation choice is required';
+  if p_attendance_status is null or p_attendance_status <> v_expected_attendance then
+    raise exception 'Pledge option and attendance do not match';
   end if;
 
   if p_privacy_consent is distinct from true then
@@ -208,6 +280,8 @@ begin
     phone,
     wants_sponsorship,
     sponsorship_units,
+    pledge_option,
+    pledge_amount,
     attendance_status,
     answers,
     status,
@@ -216,9 +290,11 @@ begin
   ) values (
     btrim(p_name),
     v_phone,
-    p_wants_sponsorship,
-    case when p_wants_sponsorship then p_sponsorship_units else 0 end,
-    p_attendance_status,
+    v_wants_sponsorship,
+    v_sponsorship_units,
+    p_pledge_option,
+    v_expected_amount,
+    v_expected_attendance,
     v_answers,
     'new',
     '',
@@ -247,8 +323,8 @@ grant update (status, admin_memo) on table public.submissions to authenticated;
 revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated;
 
-revoke all on function public.submit_sponsorship(text, text, boolean, integer, text, jsonb, boolean, text, timestamptz) from public;
-grant execute on function public.submit_sponsorship(text, text, boolean, integer, text, jsonb, boolean, text, timestamptz) to anon, authenticated;
+revoke all on function public.submit_sponsorship(text, text, text, bigint, text, jsonb, boolean, text, timestamptz) from public;
+grant execute on function public.submit_sponsorship(text, text, text, bigint, text, jsonb, boolean, text, timestamptz) to anon, authenticated;
 
 drop policy if exists admins_read_self on public.admins;
 create policy admins_read_self

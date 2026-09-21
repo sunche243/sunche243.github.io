@@ -11,6 +11,13 @@ export const FORM_FIELD_TYPES = [
 
 export type FormFieldType = (typeof FORM_FIELD_TYPES)[number];
 export type AttendanceStatus = 'attending' | 'not_attending' | 'undecided';
+export type PledgeOption =
+  | 'century_100'
+  | 'guardian_50'
+  | 'free_attending'
+  | 'free_absent'
+  | 'absent_only';
+export type StoredPledgeOption = PledgeOption | 'legacy_units' | 'legacy_no_pledge';
 export type SubmissionStatus = 'new' | 'contacted' | 'confirmed' | 'cancelled';
 export type DynamicAnswerValue = string | number | boolean;
 
@@ -41,6 +48,8 @@ export interface Submission {
   phone: string;
   wants_sponsorship: boolean;
   sponsorship_units: number;
+  pledge_option: StoredPledgeOption | null;
+  pledge_amount: number;
   attendance_status: AttendanceStatus | null;
   answers: SubmissionAnswers;
   status: SubmissionStatus;
@@ -51,9 +60,8 @@ export interface Submission {
 export interface RegistrationDraft {
   name: string;
   phone: string;
-  wantsSponsorship: boolean;
-  sponsorshipUnits: number;
-  attendanceStatus: AttendanceStatus | null;
+  pledgeOption: PledgeOption | null;
+  pledgeAmount: number;
   privacyConsent: boolean;
 }
 

@@ -127,9 +127,9 @@ export function AdminApp() {
         </div>
 
         <section className="admin-stats" aria-label="신청 통계">
-          <article><span>후원 의향</span><strong>{stats.sponsorCount}<small>명</small></strong></article>
-          <article><span>후원 구좌</span><strong>{stats.sponsorshipUnits}<small>구좌</small></strong></article>
-          <article><span>예상 후원액</span><strong>{formatWon(stats.expectedAmount)}</strong></article>
+          <article><span>전체 응답</span><strong>{stats.totalResponses}<small>명</small></strong></article>
+          <article><span>발전기금 약정 인원</span><strong>{stats.pledgeCount}<small>명</small></strong></article>
+          <article><span>총 약정액</span><strong>{formatWon(stats.totalPledgeAmount)}</strong></article>
           <article><span>참석 예정</span><strong>{stats.attendingCount}<small>명</small></strong></article>
         </section>
 

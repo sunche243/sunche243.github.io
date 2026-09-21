@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { RevealSection } from '../components/RevealSection';
-import { SectionHeader } from '../components/SectionHeader';
 import { privacyPolicy } from '../config/privacy';
-import { MAX_SPONSOR_UNITS, MIN_SPONSOR_UNITS } from '../config/sponsorship';
+import { pledgeOptionDetails, pledgeOptions } from '../config/sponsorship';
 import { fetchActiveFormFields, submitRegistration } from '../services/registration';
 import { isSupabaseConfigured, SupabaseConfigurationError } from '../services/supabase';
 import type {
-  AttendanceStatus,
   DynamicAnswers,
   DynamicAnswerValue,
   FormField,
@@ -14,10 +12,12 @@ import type {
 } from '../types/registration';
 import {
   attendanceLabels,
-  calculateSponsorshipAmount,
   formatWon,
+  getPledgeSelection,
+  isAdmissionFieldLabel,
+  isAffiliationFieldLabel,
   normalizePhone,
-  normalizeSponsorshipUnits,
+  normalizePledgeAmountInput,
   serializeDynamicAnswers,
   validateRegistration,
 } from '../utils/registration';
@@ -26,7 +26,11 @@ interface RegistrationFormProps {
   onComplete: () => void;
 }
 
-const attendanceOptions: AttendanceStatus[] = ['attending', 'not_attending', 'undecided'];
+function getFieldPlaceholder(field: FormField): string | undefined {
+  if (isAdmissionFieldLabel(field.label)) return '예: 98학번';
+  if (isAffiliationFieldLabel(field.label)) return '예: 삼일회계법인 파트너, OO기업 CFO 등';
+  return undefined;
+}
 
 function DynamicField({
   field,
@@ -105,6 +109,7 @@ function DynamicField({
         <textarea
           {...commonProps}
           value={String(value ?? '')}
+          placeholder={getFieldPlaceholder(field)}
           onChange={(event) => onChange(event.target.value)}
           rows={4}
         />
@@ -118,6 +123,7 @@ function DynamicField({
           {...commonProps}
           type={field.type}
           inputMode={field.type === 'tel' ? 'tel' : field.type === 'number' ? 'numeric' : undefined}
+          placeholder={getFieldPlaceholder(field)}
           value={String(value ?? '')}
           onChange={(event) => onChange(
             field.type === 'number' && event.target.value !== '' ? Number(event.target.value) : event.target.value,
@@ -129,6 +135,16 @@ function DynamicField({
   );
 }
 
+function StepHeading({ number, title, description }: { number: number; title: string; description?: string }) {
+  return (
+    <header className="registration-step__heading">
+      <p>STEP {number}</p>
+      <h2>{title}</h2>
+      {description ? <span>{description}</span> : null}
+    </header>
+  );
+}
+
 export function RegistrationForm({ onComplete }: RegistrationFormProps) {
   const formStartedAt = useRef(Date.now());
   const [fields, setFields] = useState<FormField[]>([]);
@@ -136,9 +152,8 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
   const [draft, setDraft] = useState<RegistrationDraft>({
     name: '',
     phone: '',
-    wantsSponsorship: false,
-    sponsorshipUnits: MIN_SPONSOR_UNITS,
-    attendanceStatus: null,
+    pledgeOption: null,
+    pledgeAmount: 0,
     privacyConsent: false,
   });
   const [honeypot, setHoneypot] = useState('');
@@ -173,7 +188,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
 
   function updateDraft<Key extends keyof RegistrationDraft>(key: Key, value: RegistrationDraft[Key]) {
     setDraft((current) => ({ ...current, [key]: value }));
-    setErrors((current) => ({ ...current, [key]: '', participation: '' }));
+    setErrors((current) => ({ ...current, [key]: '', pledgeOption: '', pledgeAmount: '' }));
   }
 
   function updateAnswer(fieldId: string, value: DynamicAnswerValue) {
@@ -211,6 +226,8 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
       return;
     }
 
+    if (!draft.pledgeOption) return;
+    const selection = getPledgeSelection(draft.pledgeOption, draft.pledgeAmount);
     setSubmitting(true);
     setErrors({});
 
@@ -218,9 +235,9 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
       await submitRegistration({
         name: draft.name.trim(),
         phone: normalizePhone(draft.phone),
-        wantsSponsorship: draft.wantsSponsorship,
-        sponsorshipUnits: draft.wantsSponsorship ? draft.sponsorshipUnits : 0,
-        attendanceStatus: draft.attendanceStatus,
+        pledgeOption: draft.pledgeOption,
+        pledgeAmount: selection.amount,
+        attendanceStatus: selection.attendanceStatus,
         answers: serializeDynamicAnswers(fields, answers),
         privacyConsent: draft.privacyConsent,
         honeypot,
@@ -239,139 +256,172 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
     }
   }
 
-  if (submitted) {
+  const admissionField = fields.find((field) => isAdmissionFieldLabel(field.label));
+  const affiliationField = fields.find((field) => isAffiliationFieldLabel(field.label));
+  const otherFields = fields.filter((field) => field !== admissionField && field !== affiliationField);
+
+  if (submitted && draft.pledgeOption) {
+    const selection = getPledgeSelection(draft.pledgeOption, draft.pledgeAmount);
     return (
       <RevealSection id="registration" className="section--paper registration-section" label="등록 완료">
         <div className="section-inner registration-success" role="status">
           <p className="registration-success__eyebrow">THANK YOU</p>
-          <h2>소중한 참여 의향이 등록되었습니다.</h2>
-          <p>담당자가 확인 후 입력하신 연락처로 안내드리겠습니다.</p>
+          <h2>약정 및 참석 여부가 정상적으로 등록되었습니다.</h2>
+          <p>학과사무실에서 확인 후<br />필요한 절차를 개별적으로 안내드리겠습니다.</p>
           <dl>
-            {draft.wantsSponsorship ? (
-              <div>
-                <dt>후원 의향</dt>
-                <dd>{draft.sponsorshipUnits}구좌 · {formatWon(calculateSponsorshipAmount(draft.sponsorshipUnits))}</dd>
-              </div>
-            ) : null}
-            {draft.attendanceStatus ? (
-              <div>
-                <dt>참석 여부</dt>
-                <dd>{attendanceLabels[draft.attendanceStatus]}</dd>
-              </div>
-            ) : null}
+            <div><dt>선택 옵션</dt><dd>{pledgeOptionDetails[draft.pledgeOption].label}</dd></div>
+            <div><dt>약정 금액</dt><dd>{formatWon(selection.amount)}</dd></div>
+            <div><dt>참석 여부</dt><dd>{attendanceLabels[selection.attendanceStatus]}</dd></div>
           </dl>
-          <p className="registration-success__note">이 화면은 결제 완료를 의미하지 않습니다.</p>
+          <p className="registration-success__note">본 등록은 기부금 납부 또는 결제 완료를 의미하지 않습니다.</p>
         </div>
       </RevealSection>
     );
   }
 
   return (
-    <RevealSection id="registration" className="section--paper registration-section" label="후원 및 참석 등록">
+    <RevealSection id="registration" className="section--paper registration-section" label="참석 및 발전기금 약정">
       <div className="section-inner registration-layout">
-        <SectionHeader eyebrow="SPONSORSHIP & ATTENDANCE" title="후원 · 참석 등록" align="left" />
-        <p className="registration-lead">후원 의향과 행사 참석 여부를 남겨주시면 담당자가 확인 후 연락드리겠습니다.</p>
-
         <form className="registration-form" onSubmit={handleSubmit} noValidate>
-          <div className="registration-core-fields">
-            <div className="registration-field">
-              <label htmlFor="registration-name">이름 <span aria-label="필수">*</span></label>
-              <input
-                id="registration-name"
-                name="name"
-                autoComplete="name"
-                value={draft.name}
-                onChange={(event) => updateDraft('name', event.target.value)}
-                aria-invalid={Boolean(errors.name)}
-                aria-describedby={errors.name ? 'registration-name-error' : undefined}
+          <section className="registration-step" aria-labelledby="registration-step-1-title">
+            <div id="registration-step-1-title">
+              <StepHeading
+                number={1}
+                title="동문 기본 정보"
+                description="행사 당일 원활한 의전과 네트워킹, 그리고 추후 기부금 약정 안내를 위해 정확한 기재를 부탁드립니다."
               />
-              {errors.name ? <span className="field-error" id="registration-name-error">{errors.name}</span> : null}
             </div>
-            <div className="registration-field">
-              <label htmlFor="registration-phone">전화번호 <span aria-label="필수">*</span></label>
-              <input
-                id="registration-phone"
-                name="phone"
-                type="tel"
-                inputMode="tel"
-                autoComplete="tel"
-                value={draft.phone}
-                onChange={(event) => updateDraft('phone', event.target.value)}
-                aria-invalid={Boolean(errors.phone)}
-                aria-describedby={errors.phone ? 'registration-phone-error' : undefined}
-              />
-              {errors.phone ? <span className="field-error" id="registration-phone-error">{errors.phone}</span> : null}
+            <div className="registration-core-fields">
+              <div className="registration-field">
+                <label htmlFor="registration-name">성명 <span aria-label="필수">*</span></label>
+                <input
+                  id="registration-name"
+                  name="name"
+                  autoComplete="name"
+                  value={draft.name}
+                  onChange={(event) => updateDraft('name', event.target.value)}
+                  aria-invalid={Boolean(errors.name)}
+                  aria-describedby={errors.name ? 'registration-name-error' : undefined}
+                />
+                {errors.name ? <span className="field-error" id="registration-name-error">{errors.name}</span> : null}
+              </div>
+              {admissionField ? (
+                <DynamicField
+                  field={admissionField}
+                  value={answers[admissionField.id]}
+                  error={errors[admissionField.id]}
+                  onChange={(value) => updateAnswer(admissionField.id, value)}
+                />
+              ) : null}
+              <div className="registration-field">
+                <label htmlFor="registration-phone">휴대전화 번호 <span aria-label="필수">*</span></label>
+                <input
+                  id="registration-phone"
+                  name="phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  value={draft.phone}
+                  onChange={(event) => updateDraft('phone', event.target.value)}
+                  aria-invalid={Boolean(errors.phone)}
+                  aria-describedby={errors.phone ? 'registration-phone-error' : undefined}
+                />
+                {errors.phone ? <span className="field-error" id="registration-phone-error">{errors.phone}</span> : null}
+              </div>
+              {affiliationField ? (
+                <DynamicField
+                  field={affiliationField}
+                  value={answers[affiliationField.id]}
+                  error={errors[affiliationField.id]}
+                  onChange={(value) => updateAnswer(affiliationField.id, value)}
+                />
+              ) : null}
             </div>
-          </div>
 
-          <fieldset className="registration-group sponsorship-choice">
-            <legend>후원 의향</legend>
-            <label className="registration-checkline">
-              <input
-                type="checkbox"
-                checked={draft.wantsSponsorship}
-                onChange={(event) => updateDraft('wantsSponsorship', event.target.checked)}
-              />
-              <span>50주년 후원에 참여할 의향이 있습니다.</span>
-            </label>
-            {draft.wantsSponsorship ? (
-              <div className="sponsorship-units">
-                <span>후원 구좌</span>
-                <div className="sponsorship-stepper" aria-label="후원 구좌 수">
-                  <button
-                    type="button"
-                    aria-label="후원 구좌 줄이기"
-                    onClick={() => updateDraft('sponsorshipUnits', normalizeSponsorshipUnits(draft.sponsorshipUnits - 1))}
-                    disabled={draft.sponsorshipUnits <= MIN_SPONSOR_UNITS}
-                  >−</button>
-                  <strong aria-live="polite">{draft.sponsorshipUnits}구좌</strong>
-                  <button
-                    type="button"
-                    aria-label="후원 구좌 늘리기"
-                    onClick={() => updateDraft('sponsorshipUnits', normalizeSponsorshipUnits(draft.sponsorshipUnits + 1))}
-                    disabled={draft.sponsorshipUnits >= MAX_SPONSOR_UNITS}
-                  >+</button>
-                </div>
-                <strong className="sponsorship-amount">{formatWon(calculateSponsorshipAmount(draft.sponsorshipUnits))}</strong>
-                <small>1구좌 = {formatWon(calculateSponsorshipAmount(1))}</small>
+            {fieldLoading ? <p className="registration-loading" aria-live="polite">추가 질문을 불러오고 있습니다.</p> : null}
+            {!fieldLoading && otherFields.length ? (
+              <div className="registration-dynamic-fields registration-dynamic-fields--additional">
+                {otherFields.map((field) => (
+                  <DynamicField
+                    key={field.id}
+                    field={field}
+                    value={answers[field.id]}
+                    error={errors[field.id]}
+                    onChange={(value) => updateAnswer(field.id, value)}
+                  />
+                ))}
               </div>
             ) : null}
-            {errors.sponsorshipUnits ? <span className="field-error">{errors.sponsorshipUnits}</span> : null}
-          </fieldset>
+          </section>
 
-          <fieldset className="registration-group registration-field--choices">
-            <legend>참석 여부</legend>
-            <div className="registration-choices">
-              {attendanceOptions.map((status) => (
-                <label key={status}>
-                  <input
-                    type="radio"
-                    name="attendance-status"
-                    checked={draft.attendanceStatus === status}
-                    onChange={() => updateDraft('attendanceStatus', status)}
-                    aria-invalid={Boolean(errors.participation)}
-                  />
-                  <span>{status === 'attending' ? '참석합니다' : status === 'not_attending' ? '참석하지 못합니다' : '아직 미정입니다'}</span>
-                </label>
-              ))}
+          <section className="registration-step" aria-labelledby="registration-step-2-title">
+            <div id="registration-step-2-title">
+              <StepHeading number={2} title="참석 수락 및 기부 약정 옵션" description="아래 항목 중 하나를 선택해 주십시오." />
             </div>
-            {errors.participation ? <span className="field-error">{errors.participation}</span> : null}
-          </fieldset>
+            <fieldset className="pledge-options">
+              <legend className="sr-only">참석 및 발전기금 약정 옵션</legend>
+              {pledgeOptions.map((option) => {
+                const detail = pledgeOptionDetails[option];
+                const selected = draft.pledgeOption === option;
+                const customAmount = detail.amount === null;
+                return (
+                  <div className={`pledge-option ${selected ? 'is-selected' : ''}`} key={option}>
+                    <label htmlFor={`pledge-option-${option}`}>
+                      <input
+                        id={`pledge-option-${option}`}
+                        type="radio"
+                        name="pledge-option"
+                        value={option}
+                        checked={selected}
+                        onChange={() => updateDraft('pledgeOption', option)}
+                        aria-invalid={Boolean(errors.pledgeOption)}
+                        aria-describedby={errors.pledgeOption ? 'pledge-option-error' : undefined}
+                      />
+                      <span className="pledge-option__body">
+                        <span className="pledge-option__number">OPTION {detail.optionNumber}</span>
+                        {detail.optionNumber <= 3 ? <strong>[{detail.label}]</strong> : null}
+                        <span className="pledge-option__title">{detail.title}</span>
+                        {detail.description ? <small>{detail.description}</small> : null}
+                      </span>
+                    </label>
+                    {selected && customAmount ? (
+                      <div className="pledge-amount-field">
+                        <label htmlFor={`pledge-amount-${option}`}>약정액 <span aria-label="필수">*</span></label>
+                        <div className="pledge-amount-input">
+                          <input
+                            id={`pledge-amount-${option}`}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9,]*"
+                            autoComplete="off"
+                            value={draft.pledgeAmount ? draft.pledgeAmount.toLocaleString('ko-KR') : ''}
+                            onChange={(event) => updateDraft('pledgeAmount', normalizePledgeAmountInput(event.target.value))}
+                            aria-invalid={Boolean(errors.pledgeAmount)}
+                            aria-describedby={errors.pledgeAmount ? 'pledge-amount-error' : undefined}
+                            placeholder="금액을 입력해주세요"
+                          />
+                          <span>원</span>
+                        </div>
+                        {errors.pledgeAmount ? <span className="field-error" id="pledge-amount-error">{errors.pledgeAmount}</span> : null}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+              {errors.pledgeOption ? <span className="field-error" id="pledge-option-error">{errors.pledgeOption}</span> : null}
+            </fieldset>
+          </section>
 
-          {fieldLoading ? <p className="registration-loading" aria-live="polite">추가 질문을 불러오고 있습니다.</p> : null}
-          {!fieldLoading && fields.length ? (
-            <div className="registration-dynamic-fields">
-              {fields.map((field) => (
-                <DynamicField
-                  key={field.id}
-                  field={field}
-                  value={answers[field.id]}
-                  error={errors[field.id]}
-                  onChange={(value) => updateAnswer(field.id, value)}
-                />
-              ))}
+          <section className="registration-step registration-step--tax" aria-labelledby="registration-step-3-title">
+            <div id="registration-step-3-title">
+              <StepHeading number={3} title="세제 혜택 안내" />
             </div>
-          ) : null}
+            <div className="tax-information">
+              <h3>📌 [지정기부금 세제 혜택 안내]</h3>
+              <p>동문님께서 후원해 주시는 발전기금은 전액 동국대학교 '지정기부금'으로 투명하게 처리됩니다.</p>
+              <p>추후 발급되는 기부금 영수증을 통해 법인세법상 법정 한도 내 전액 손금산입(법인) 또는 소득세법상 기부금 세액공제(개인) 등 완벽한 세무적 혜택을 받으실 수 있습니다. 회계학과 후배들의 든든한 버팀목이 되어주셔서 깊이 감사드립니다.</p>
+            </div>
+          </section>
 
           <div className="privacy-consent">
             <label className="registration-checkline">
@@ -412,16 +462,16 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
             />
           </div>
 
-          {Object.keys(errors).length ? (
+          {Object.keys(errors).some((key) => errors[key]) ? (
             <p className="registration-error-summary" role="alert" tabIndex={-1}>
               {errors.form ?? '입력한 내용을 다시 확인해주세요.'}
             </p>
           ) : null}
           {!isSupabaseConfigured() ? <p className="registration-configuration-note">현재 온라인 신청 기능을 준비하고 있습니다.</p> : null}
-          <button className="button button--dark registration-submit" type="submit" disabled={submitting || fieldLoading || fieldLoadFailed}>
-            {submitting ? '등록 중' : '후원 · 참석 의향 등록하기'}
+          <button className="button button--gold registration-submit" type="submit" disabled={submitting || fieldLoading || fieldLoadFailed}>
+            {submitting ? '등록 중' : '약정 및 참석 수락 완료하기'}
           </button>
-          <p className="registration-submit-note">후원 의향 등록은 결제 완료를 의미하지 않습니다.</p>
+          <p className="registration-submit-note">제출 후 학과사무실에서 납부 및 기부금 영수증 관련 절차를 개별 안내드립니다.</p>
         </form>
       </div>
     </RevealSection>

@@ -14,7 +14,7 @@ export function Sponsorship() {
           <br />
           동문 여러분의 소중한 뜻을 함께하고자 합니다.
         </p>
-        <a className="button button--gold" href={sponsorship.url} target="_blank" rel="noreferrer">
+        <a className="button button--gold" href={sponsorship.url}>
           50주년 행사 후원 참여하기
         </a>
       </div>

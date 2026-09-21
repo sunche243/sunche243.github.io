@@ -1,4 +1,4 @@
-import type { AttendanceStatus, DynamicAnswers, FormField } from '../types/registration';
+import type { AttendanceStatus, DynamicAnswers, FormField, PledgeOption } from '../types/registration';
 import { getSupabase, SupabaseConfigurationError } from './supabase';
 
 function normalizeField(row: Record<string, unknown>): FormField {
@@ -32,9 +32,9 @@ export async function fetchActiveFormFields(): Promise<FormField[]> {
 export interface SubmitRegistrationInput {
   name: string;
   phone: string;
-  wantsSponsorship: boolean;
-  sponsorshipUnits: number;
-  attendanceStatus: AttendanceStatus | null;
+  pledgeOption: PledgeOption;
+  pledgeAmount: number;
+  attendanceStatus: Exclude<AttendanceStatus, 'undecided'>;
   answers: DynamicAnswers;
   privacyConsent: boolean;
   honeypot: string;
@@ -48,8 +48,8 @@ export async function submitRegistration(input: SubmitRegistrationInput): Promis
   const { data, error } = await supabase.rpc('submit_sponsorship', {
     p_name: input.name,
     p_phone: input.phone,
-    p_wants_sponsorship: input.wantsSponsorship,
-    p_sponsorship_units: input.sponsorshipUnits,
+    p_pledge_option: input.pledgeOption,
+    p_pledge_amount: input.pledgeAmount,
     p_attendance_status: input.attendanceStatus,
     p_answers: input.answers,
     p_privacy_consent: input.privacyConsent,

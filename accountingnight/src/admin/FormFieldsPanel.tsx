@@ -213,8 +213,8 @@ export function FormFieldsPanel({ fields, onRefresh, onError }: FormFieldsPanelP
           <table className="admin-table admin-fields-table">
             <thead><tr><th>이름</th><th>유형</th><th>필수</th><th>상태</th><th>순서</th><th>관리</th></tr></thead>
             <tbody>
-              <tr><td><strong>이름</strong></td><td>기본</td><td>필수</td><td>활성</td><td>고정</td><td>고정</td></tr>
-              <tr><td><strong>전화번호</strong></td><td>기본</td><td>필수</td><td>활성</td><td>고정</td><td>고정</td></tr>
+              <tr><td><strong>성명</strong></td><td>기본</td><td>필수</td><td>활성</td><td>고정</td><td>고정</td></tr>
+              <tr><td><strong>휴대전화 번호</strong></td><td>기본</td><td>필수</td><td>활성</td><td>고정</td><td>고정</td></tr>
             </tbody>
           </table>
         </div>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Submission } from '../types/registration';
-import { submissionStatusLabels } from '../utils/registration';
+import { pledgeOptionLabels, submissionStatusLabels } from '../utils/registration';
 import { calculateAdminStats, filterSubmissions } from './adminUtils';
 
 const submission: Submission = {
@@ -10,6 +10,8 @@ const submission: Submission = {
   phone: '01012345678',
   wants_sponsorship: true,
   sponsorship_units: 2,
+  pledge_option: 'century_100',
+  pledge_amount: 1_000_000,
   attendance_status: 'attending',
   answers: {},
   status: 'new',
@@ -27,11 +29,21 @@ describe('admin utilities', () => {
     });
   });
 
-  it('calculates stats while excluding cancelled submissions', () => {
+  it('provides the requested admin labels for every current pledge option', () => {
+    expect(pledgeOptionLabels).toMatchObject({
+      century_100: '100주년 발전 구좌',
+      guardian_50: '50주년 수호 구좌',
+      free_attending: '마음으로 함께하기',
+      free_absent: '불참 · 발전기금 약정',
+      absent_only: '불참',
+    });
+  });
+
+  it('counts every response while excluding cancelled rows from pledge and attendance totals', () => {
     expect(calculateAdminStats([submission, { ...submission, id: 'cancelled', status: 'cancelled' }])).toEqual({
-      sponsorCount: 1,
-      sponsorshipUnits: 2,
-      expectedAmount: 1_000_000,
+      totalResponses: 2,
+      pledgeCount: 1,
+      totalPledgeAmount: 1_000_000,
       attendingCount: 1,
     });
   });
@@ -43,7 +55,7 @@ describe('admin utilities', () => {
       sponsorship_units: 75,
     }));
 
-    expect(calculateAdminStats(manyUnits).expectedAmount).toBe(75_000_000);
+    expect(calculateAdminStats(manyUnits.map((item) => ({ ...item, pledge_amount: 37_500_000 }))).totalPledgeAmount).toBe(75_000_000);
   });
 
   it('filters by normalized phone input', () => {

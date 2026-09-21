@@ -1,6 +1,7 @@
 import type { User } from '@supabase/supabase-js';
 import type { FormField, FormFieldType, Submission, SubmissionAnswers, SubmissionStatus } from '../types/registration';
 import { getSupabase, SupabaseConfigurationError } from '../services/supabase';
+import { calculateSponsorshipAmount } from '../utils/registration';
 
 function requireSupabase() {
   const supabase = getSupabase();
@@ -22,6 +23,7 @@ function normalizeAnswers(value: unknown): SubmissionAnswers {
 }
 
 function normalizeSubmission(row: Record<string, unknown>): Submission {
+  const sponsorshipUnits = Number(row.sponsorship_units);
   return {
     id: String(row.id),
     created_at: String(row.created_at),
@@ -29,7 +31,11 @@ function normalizeSubmission(row: Record<string, unknown>): Submission {
     name: String(row.name),
     phone: String(row.phone),
     wants_sponsorship: Boolean(row.wants_sponsorship),
-    sponsorship_units: Number(row.sponsorship_units),
+    sponsorship_units: sponsorshipUnits,
+    pledge_option: row.pledge_option ? row.pledge_option as Submission['pledge_option'] : null,
+    pledge_amount: row.pledge_amount === null || row.pledge_amount === undefined
+      ? calculateSponsorshipAmount(sponsorshipUnits)
+      : Number(row.pledge_amount),
     attendance_status: row.attendance_status as Submission['attendance_status'],
     answers: normalizeAnswers(row.answers),
     status: row.status as SubmissionStatus,

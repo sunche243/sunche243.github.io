@@ -4,7 +4,7 @@
 }
 
 .sponsor-intro .section-inner {
-  width: min(100%, 620px);
+  width: min(100%, 660px);
 }
 
 .sponsor-intro .section-header {
@@ -12,15 +12,15 @@
 }
 
 .sponsor-intro .section-header h2 {
-  max-width: 580px;
+  max-width: 630px;
   margin-inline: auto;
-  font-size: clamp(2.1rem, 5vh, 3.25rem);
-  line-height: 1.24;
+  font-size: clamp(2rem, 5vh, 3.15rem);
+  line-height: 1.23;
 }
 
 .sponsor-intro__copy {
   display: grid;
-  gap: 30px;
+  gap: 26px;
 }
 
 .sponsor-intro__copy p {
@@ -34,35 +34,68 @@
 
 .registration-section {
   padding-top: 104px;
-  padding-bottom: 116px;
+  padding-bottom: max(116px, calc(92px + env(safe-area-inset-bottom)));
 }
 
 .registration-layout {
-  width: min(100%, 720px);
+  width: min(100%, 760px);
 }
 
-.registration-layout .section-header {
-  margin-bottom: 20px;
+.registration-form {
+  display: grid;
+  gap: 58px;
 }
 
-.registration-lead {
-  max-width: 560px;
-  margin: 0 0 48px;
-  color: var(--gray-600);
-  font-size: 1rem;
-  line-height: 1.85;
-  word-break: keep-all;
-}
-
-.registration-form,
-.registration-dynamic-fields {
+.registration-step {
   display: grid;
   gap: 30px;
 }
 
-.registration-core-fields {
+.registration-step + .registration-step {
+  padding-top: 54px;
+  border-top: 1px solid var(--line-dark);
+}
+
+.registration-step__heading {
   display: grid;
-  gap: 24px;
+  gap: 9px;
+}
+
+.registration-step__heading > p {
+  margin: 0;
+  color: var(--gold-dark);
+  font-family: var(--serif);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.registration-step__heading h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2rem, 7.5vw, 2.8rem);
+  font-weight: 600;
+  line-height: 1.2;
+  word-break: keep-all;
+}
+
+.registration-step__heading > span {
+  max-width: 620px;
+  color: var(--gray-600);
+  font-size: 0.92rem;
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+.registration-core-fields,
+.registration-dynamic-fields {
+  display: grid;
+  gap: 26px;
+}
+
+.registration-dynamic-fields--additional {
+  padding-top: 30px;
+  border-top: 1px solid var(--line-dark);
 }
 
 .registration-field {
@@ -72,7 +105,7 @@
 }
 
 .registration-field > label,
-.registration-group > legend {
+.registration-field > legend {
   color: var(--gray-900);
   font-size: 0.92rem;
   font-weight: 700;
@@ -80,8 +113,9 @@
 }
 
 .registration-field > label span,
-.registration-group > legend span,
-.registration-checkline b {
+.registration-field > legend span,
+.registration-checkline b,
+.pledge-amount-field > label span {
   color: var(--gold-dark);
 }
 
@@ -102,6 +136,13 @@
   transition: border-color 180ms ease;
 }
 
+.registration-field input::placeholder,
+.registration-field textarea::placeholder,
+.pledge-amount-input input::placeholder {
+  color: rgba(41, 40, 38, 0.48);
+  opacity: 1;
+}
+
 .registration-field textarea {
   min-height: 118px;
   resize: vertical;
@@ -113,98 +154,24 @@
 
 .registration-field input:focus,
 .registration-field select:focus,
-.registration-field textarea:focus {
+.registration-field textarea:focus,
+.pledge-amount-input:focus-within {
   border-color: var(--gold-dark);
   outline: 0;
 }
 
 .registration-field input[aria-invalid='true'],
 .registration-field select[aria-invalid='true'],
-.registration-field textarea[aria-invalid='true'] {
+.registration-field textarea[aria-invalid='true'],
+.pledge-amount-input:has(input[aria-invalid='true']) {
   border-color: #9f3d30;
 }
 
-.registration-group {
+.registration-field--choices {
   min-width: 0;
   margin: 0;
-  padding: 28px 0 0;
+  padding: 0;
   border: 0;
-  border-top: 1px solid var(--line-dark);
-}
-
-.registration-group > legend {
-  padding: 0 0 16px;
-}
-
-.registration-checkline {
-  display: grid;
-  min-height: 48px;
-  grid-template-columns: 22px minmax(0, 1fr);
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-size: 0.98rem;
-  line-height: 1.65;
-  word-break: keep-all;
-}
-
-.registration-checkline input,
-.registration-choices input {
-  width: 19px;
-  height: 19px;
-  margin: 0;
-  accent-color: var(--gold-dark);
-}
-
-.sponsorship-units {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  margin-top: 24px;
-  padding: 27px 16px 25px;
-  border-block: 1px solid rgba(135, 108, 63, 0.34);
-  text-align: center;
-}
-
-.sponsorship-units > span,
-.sponsorship-units small {
-  color: var(--gray-600);
-  font-size: 0.78rem;
-  line-height: 1.5;
-}
-
-.sponsorship-stepper {
-  display: grid;
-  grid-template-columns: 48px minmax(92px, auto) 48px;
-  align-items: center;
-  gap: 8px;
-}
-
-.sponsorship-stepper button {
-  width: 48px;
-  height: 48px;
-  border: 1px solid var(--line-dark);
-  cursor: pointer;
-  background: transparent;
-  font-family: var(--serif);
-  font-size: 1.5rem;
-}
-
-.sponsorship-stepper button:disabled {
-  cursor: not-allowed;
-  opacity: 0.35;
-}
-
-.sponsorship-stepper strong {
-  font-size: 1rem;
-}
-
-.sponsorship-amount {
-  color: var(--gold-dark);
-  font-family: var(--serif);
-  font-size: clamp(2rem, 8vw, 2.75rem);
-  font-weight: 600;
-  line-height: 1;
 }
 
 .registration-choices {
@@ -224,11 +191,6 @@
   line-height: 1.5;
 }
 
-.registration-dynamic-fields {
-  padding-top: 30px;
-  border-top: 1px solid var(--line-dark);
-}
-
 .registration-field--checkbox > label {
   display: grid;
   min-height: 50px;
@@ -238,11 +200,170 @@
   cursor: pointer;
 }
 
-.registration-field--checkbox input {
-  width: 19px;
-  height: 19px;
+.registration-field--checkbox input,
+.registration-checkline input,
+.registration-choices input {
+  width: 20px;
+  height: 20px;
   margin: 0;
   accent-color: var(--gold-dark);
+}
+
+.pledge-options {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.pledge-option {
+  border: 1px solid rgba(17, 17, 17, 0.2);
+  background: rgba(247, 244, 237, 0.24);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.pledge-option:hover {
+  border-color: rgba(135, 108, 63, 0.58);
+}
+
+.pledge-option.is-selected {
+  border-color: var(--gold-dark);
+  background: rgba(247, 244, 237, 0.58);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.pledge-option > label {
+  display: grid;
+  min-height: 116px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  padding: 20px 18px;
+  cursor: pointer;
+}
+
+.pledge-option > label > input {
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--gold-dark);
+}
+
+.pledge-option__body {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.pledge-option__number {
+  color: var(--gold-dark);
+  font-family: var(--serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.pledge-option__body strong {
+  color: var(--gray-900);
+  font-size: 0.93rem;
+  line-height: 1.55;
+}
+
+.pledge-option__title {
+  color: var(--gray-900);
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.65;
+  white-space: pre-line;
+  word-break: keep-all;
+}
+
+.pledge-option__body small {
+  margin-top: 4px;
+  color: var(--gray-600);
+  font-size: 0.8rem;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.pledge-amount-field {
+  display: grid;
+  gap: 8px;
+  margin: 0 18px 22px 56px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(135, 108, 63, 0.28);
+}
+
+.pledge-amount-field > label {
+  color: var(--gray-900);
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
+.pledge-amount-input {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.34);
+  transition: border-color 180ms ease;
+}
+
+.pledge-amount-input input {
+  width: 100%;
+  min-height: 50px;
+  min-width: 0;
+  padding: 10px 0;
+  border: 0;
+  outline: 0;
+  color: var(--black);
+  background: transparent;
+  font: inherit;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.pledge-amount-input > span {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.tax-information {
+  padding: 24px 20px;
+  border: 1px solid rgba(135, 108, 63, 0.36);
+  background: rgba(247, 244, 237, 0.54);
+}
+
+.tax-information h3,
+.tax-information p {
+  margin: 0;
+  word-break: keep-all;
+}
+
+.tax-information h3 {
+  color: var(--gold-dark);
+  font-size: 0.98rem;
+  line-height: 1.7;
+}
+
+.tax-information p {
+  margin-top: 17px;
+  color: #393631;
+  font-size: 0.9rem;
+  line-height: 1.85;
 }
 
 .field-error,
@@ -265,8 +386,20 @@
 .privacy-consent {
   display: grid;
   gap: 12px;
-  padding-top: 28px;
+  padding-top: 30px;
   border-top: 1px solid var(--line-dark);
+}
+
+.registration-checkline {
+  display: grid;
+  min-height: 48px;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  word-break: keep-all;
 }
 
 .privacy-toggle {
@@ -327,8 +460,13 @@
 
 .registration-submit {
   width: 100%;
-  min-height: 52px;
+  min-height: 56px;
   margin-top: 2px;
+}
+
+.registration-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
 }
 
 .registration-success {
@@ -356,7 +494,7 @@
 }
 
 .registration-success > p:not(.registration-success__eyebrow, .registration-success__note) {
-  max-width: 410px;
+  max-width: 430px;
   margin: 24px 0 0;
   color: var(--gray-600);
   line-height: 1.8;
@@ -364,7 +502,7 @@
 }
 
 .registration-success dl {
-  width: min(100%, 430px);
+  width: min(100%, 460px);
   margin: 38px 0 0;
   border-top: 1px solid var(--line-dark);
 }
@@ -429,11 +567,20 @@
 @media (min-width: 640px) {
   .registration-core-fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 32px;
+    gap: 30px 36px;
   }
 
-  .registration-form {
-    gap: 34px;
+  .pledge-option > label {
+    padding: 23px 24px;
+  }
+
+  .pledge-amount-field {
+    margin-right: 24px;
+    margin-left: 62px;
+  }
+
+  .tax-information {
+    padding: 30px 32px;
   }
 }
 
@@ -453,6 +600,22 @@
   }
 
   .sponsor-sticky-cta .button {
-    width: 270px;
+    width: 280px;
+  }
+}
+
+@media (max-width: 389px) {
+  .pledge-option > label {
+    gap: 11px;
+    padding-inline: 14px;
+  }
+
+  .pledge-amount-field {
+    margin-right: 14px;
+    margin-left: 49px;
+  }
+
+  .tax-information {
+    padding-inline: 17px;
   }
 }

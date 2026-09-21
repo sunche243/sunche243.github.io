@@ -1,6 +1,5 @@
 import type { AttendanceStatus, Submission, SubmissionStatus } from '../types/registration';
-import { SPONSOR_UNIT_AMOUNT } from '../config/sponsorship';
-import { normalizePhone } from '../utils/registration';
+import { getSubmissionPledgeAmount, normalizePhone } from '../utils/registration';
 
 export interface AdminFilters {
   query: string;
@@ -10,9 +9,9 @@ export interface AdminFilters {
 }
 
 export interface AdminStats {
-  sponsorCount: number;
-  sponsorshipUnits: number;
-  expectedAmount: number;
+  totalResponses: number;
+  pledgeCount: number;
+  totalPledgeAmount: number;
   attendingCount: number;
 }
 
@@ -30,7 +29,9 @@ export function filterSubmissions(submissions: Submission[], filters: AdminFilte
         ? submission.attendance_status === null
         : submission.attendance_status === filters.attendance);
     const matchesSponsorship = filters.sponsorship === 'all' ||
-      (filters.sponsorship === 'yes' ? submission.wants_sponsorship : !submission.wants_sponsorship);
+      (filters.sponsorship === 'yes'
+        ? getSubmissionPledgeAmount(submission) > 0
+        : getSubmissionPledgeAmount(submission) === 0);
 
     return matchesQuery && matchesStatus && matchesAttendance && matchesSponsorship;
   });
@@ -38,13 +39,12 @@ export function filterSubmissions(submissions: Submission[], filters: AdminFilte
 
 export function calculateAdminStats(submissions: Submission[]): AdminStats {
   const active = submissions.filter((submission) => submission.status !== 'cancelled');
-  const sponsored = active.filter((submission) => submission.wants_sponsorship);
-  const sponsorshipUnits = sponsored.reduce((total, submission) => total + submission.sponsorship_units, 0);
+  const pledged = active.filter((submission) => getSubmissionPledgeAmount(submission) > 0);
 
   return {
-    sponsorCount: sponsored.length,
-    sponsorshipUnits,
-    expectedAmount: sponsorshipUnits * SPONSOR_UNIT_AMOUNT,
+    totalResponses: submissions.length,
+    pledgeCount: pledged.length,
+    totalPledgeAmount: pledged.reduce((total, submission) => total + getSubmissionPledgeAmount(submission), 0),
     attendingCount: active.filter((submission) => submission.attendance_status === 'attending').length,
   };
 }

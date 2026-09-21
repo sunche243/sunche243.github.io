@@ -1,10 +1,17 @@
-import { MAX_SPONSOR_UNITS, MIN_SPONSOR_UNITS, SPONSOR_UNIT_AMOUNT } from '../config/sponsorship';
+import {
+  MAX_PLEDGE_AMOUNT,
+  pledgeOptionDetails,
+  SPONSOR_UNIT_AMOUNT,
+} from '../config/sponsorship';
 import type {
   AttendanceStatus,
   DynamicAnswers,
   DynamicAnswerValue,
   FormField,
+  PledgeOption,
   RegistrationDraft,
+  StoredPledgeOption,
+  Submission,
   SubmissionStatus,
 } from '../types/registration';
 
@@ -21,27 +28,82 @@ export const submissionStatusLabels: Record<SubmissionStatus, string> = {
   cancelled: '취소',
 };
 
+export const pledgeOptionLabels: Record<StoredPledgeOption, string> = {
+  century_100: '100주년 발전 구좌',
+  guardian_50: '50주년 수호 구좌',
+  free_attending: '마음으로 함께하기',
+  free_absent: '불참 · 발전기금 약정',
+  absent_only: '불참',
+  legacy_units: '기존 구좌 약정',
+  legacy_no_pledge: '기존 무약정 응답',
+};
+
 export function normalizePhone(value: string): string {
   const trimmed = value.trim();
   const prefix = trimmed.startsWith('+') ? '+' : '';
   return `${prefix}${trimmed.replace(/\D/g, '')}`;
 }
 
-export function normalizeSponsorshipUnits(value: number): number {
-  if (!Number.isFinite(value)) return MIN_SPONSOR_UNITS;
-  return Math.min(MAX_SPONSOR_UNITS, Math.max(MIN_SPONSOR_UNITS, Math.trunc(value)));
-}
-
 export function calculateSponsorshipAmount(units: number): number {
-  return normalizeSponsorshipUnits(units) * SPONSOR_UNIT_AMOUNT;
+  if (!Number.isFinite(units)) return 0;
+  return Math.max(0, Math.trunc(units)) * SPONSOR_UNIT_AMOUNT;
 }
 
 export function formatWon(amount: number): string {
-  return new Intl.NumberFormat('ko-KR', {
-    style: 'currency',
-    currency: 'KRW',
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return `${new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 0 }).format(amount)}원`;
+}
+
+export function getPledgeSelection(option: PledgeOption, customAmount: number) {
+  const detail = pledgeOptionDetails[option];
+  return {
+    amount: detail.amount ?? customAmount,
+    attendanceStatus: detail.attendanceStatus,
+  };
+}
+
+export function normalizePledgeAmountInput(value: string): number {
+  const digits = value.replace(/\D/g, '').slice(0, 15);
+  if (!digits) return 0;
+  return Number(digits);
+}
+
+export function getSubmissionPledgeAmount(submission: Submission): number {
+  if (Number.isFinite(submission.pledge_amount)) return Math.max(0, submission.pledge_amount);
+  return calculateSponsorshipAmount(submission.sponsorship_units);
+}
+
+export function getPledgeOptionLabel(option: StoredPledgeOption | null): string {
+  return option ? pledgeOptionLabels[option] : '기존 응답';
+}
+
+function normalizedFieldLabel(label: string): string {
+  return label.toLocaleLowerCase('ko-KR').replace(/[\s()[\]·_\-/]/g, '');
+}
+
+export function isAdmissionFieldLabel(label: string): boolean {
+  const normalized = normalizedFieldLabel(label);
+  return ['입학년도학번', '학번입학년도', '입학년도', '학번'].includes(normalized);
+}
+
+export function isAffiliationFieldLabel(label: string): boolean {
+  const normalized = normalizedFieldLabel(label);
+  return [
+    '현재소속및직함',
+    '소속및직함',
+    '현재소속직함',
+    '소속직함',
+    '현재소속및직책',
+    '소속및직책',
+    '현재소속',
+    '소속',
+  ].includes(normalized);
+}
+
+export function findSubmissionAnswerByLabel(
+  submission: Submission,
+  matcher: (label: string) => boolean,
+): DynamicAnswerValue | undefined {
+  return Object.values(submission.answers).find((answer) => matcher(answer.label))?.value;
 }
 
 export function isAnswerEmpty(value: DynamicAnswerValue | undefined): boolean {
@@ -84,16 +146,17 @@ export function validateRegistration({
 
   if (!name || name.length > 80) errors.name = '이름을 80자 이내로 입력해주세요.';
   if (!/^\+?\d{7,20}$/.test(phone)) errors.phone = '연락 가능한 전화번호를 입력해주세요.';
-  if (!draft.wantsSponsorship && !draft.attendanceStatus) {
-    errors.participation = '후원 의향 또는 참석 여부 중 하나를 선택해주세요.';
-  }
-  if (
-    draft.wantsSponsorship &&
-    (!Number.isInteger(draft.sponsorshipUnits) ||
-      draft.sponsorshipUnits < MIN_SPONSOR_UNITS ||
-      draft.sponsorshipUnits > MAX_SPONSOR_UNITS)
-  ) {
-    errors.sponsorshipUnits = `후원 구좌는 ${MIN_SPONSOR_UNITS}에서 ${MAX_SPONSOR_UNITS} 사이로 선택해주세요.`;
+  if (!draft.pledgeOption) {
+    errors.pledgeOption = '참석 및 발전기금 약정 옵션을 선택해주세요.';
+  } else {
+    const detail = pledgeOptionDetails[draft.pledgeOption];
+    if (detail.amount === null && (
+      !Number.isSafeInteger(draft.pledgeAmount) ||
+      draft.pledgeAmount <= 0 ||
+      draft.pledgeAmount > MAX_PLEDGE_AMOUNT
+    )) {
+      errors.pledgeAmount = `약정액은 1원 이상 ${formatWon(MAX_PLEDGE_AMOUNT)} 이하로 입력해주세요.`;
+    }
   }
   if (!draft.privacyConsent) errors.privacy = '개인정보 수집 및 이용 동의가 필요합니다.';
 
