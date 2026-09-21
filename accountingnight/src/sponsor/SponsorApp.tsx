@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { CountdownCalendar } from '../sections/CountdownCalendar';
 import { ContactShare } from '../sections/ContactShare';
 import { FinalClosing } from '../sections/FinalClosing';
@@ -10,6 +10,13 @@ import { StickySponsorCta } from './StickySponsorCta';
 
 export function SponsorApp() {
   const [registrationComplete, setRegistrationComplete] = useState(false);
+
+  useLayoutEffect(() => {
+    const targetId = window.location.hash.slice(1);
+    if (!targetId) return;
+
+    document.getElementById(targetId)?.scrollIntoView({ block: 'start' });
+  }, []);
 
   return (
     <>
