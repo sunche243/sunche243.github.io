@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FloatingControls } from './components/FloatingControls';
 import { Toast } from './components/Toast';
 import { CountdownCalendar } from './sections/CountdownCalendar';
@@ -14,11 +14,20 @@ import { shareInvitation } from './utils/share';
 
 export function App() {
   const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = useRef<number | null>(null);
 
-  function toast(message: string) {
+  useEffect(() => () => {
+    if (toastTimeoutRef.current !== null) window.clearTimeout(toastTimeoutRef.current);
+  }, []);
+
+  const toast = useCallback((message: string) => {
+    if (toastTimeoutRef.current !== null) window.clearTimeout(toastTimeoutRef.current);
     setToastMessage(message);
-    window.setTimeout(() => setToastMessage(''), 2800);
-  }
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToastMessage('');
+      toastTimeoutRef.current = null;
+    }, 2800);
+  }, []);
 
   return (
     <>

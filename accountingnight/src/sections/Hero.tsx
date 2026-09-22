@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { event } from '../data/event';
 
 interface HeroProps {
@@ -12,28 +11,8 @@ export function Hero({
   scrollHref = '#invitation',
   scrollAriaLabel = '초대장 본문으로 이동',
 }: HeroProps) {
-  const [hasHeroImage, setHasHeroImage] = useState(false);
-
-  useEffect(() => {
-    const image = new Image();
-    image.onload = () => setHasHeroImage(true);
-    image.onerror = () => setHasHeroImage(false);
-    image.src = event.heroImage;
-  }, []);
-
   return (
-    <header className={`hero ${hasHeroImage ? 'has-hero-image' : ''}`}>
-      <div
-        className="hero__image"
-        aria-hidden="true"
-        style={
-          hasHeroImage
-            ? {
-                backgroundImage: `linear-gradient(rgba(17, 17, 17, 0.55), rgba(17, 17, 17, 0.72)), url("${event.heroImage}")`,
-              }
-            : undefined
-        }
-      />
+    <header className="hero">
       <div className="hero__fifty" aria-hidden="true">
         50
       </div>

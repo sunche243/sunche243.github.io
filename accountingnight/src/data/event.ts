@@ -1,14 +1,8 @@
-export type ContentStatus = 'draft' | 'final';
-
 export const event = {
-  status: 'draft' as ContentStatus,
   title: '회계학과 50주년 기념 회계인의 밤',
   host: '동국대학교 회계학과',
-  audience: '동문 · 교수 · 재학생',
-  dateLabel: '2026년 11월 13일 금요일',
   shortDateLabel: '2026. 11. 13 FRI',
   startTime: '17:30',
-  endTime: '21:00',
   timezone: 'Asia/Seoul',
   startIso: '2026-11-13T17:30:00+09:00',
   endIso: '2026-11-13T21:00:00+09:00',
@@ -16,11 +10,8 @@ export const event = {
   venueEnglish: 'THE SHILLA SEOUL · YEONG BIN GWAN',
   address: '서울특별시 중구 동호로 249',
   englishLines: ['DONGGUK UNIVERSITY', 'DEPARTMENT OF ACCOUNTING'],
-  anniversary: '50th ANNIVERSARY',
   years: '1976 — 2026',
   description: '동국대학교 회계학과 50주년 기념 회계인의 밤',
-  siteUrl: 'https://sunche.me/accountingnight/',
-  heroImage: `${import.meta.env.BASE_URL}images/hero.webp`,
   ogImage: `${import.meta.env.BASE_URL}images/og-accountingnight.png`,
 };
 
@@ -31,7 +22,5 @@ export const invitationCopy = [
 ];
 
 export const sponsorship = {
-  status: 'draft' as ContentStatus,
   url: `${import.meta.env.BASE_URL}sponsor/#registration`,
-  embedUrl: '',
 };

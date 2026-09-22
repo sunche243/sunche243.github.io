@@ -1,4 +1,5 @@
-import { useEffect, useRef, type MouseEvent, type PropsWithChildren } from 'react';
+import type { MouseEvent, PropsWithChildren } from 'react';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface AdminDialogProps extends PropsWithChildren {
   titleId: string;
@@ -7,40 +8,7 @@ interface AdminDialogProps extends PropsWithChildren {
 }
 
 export function AdminDialog({ titleId, onClose, wide = false, children }: AdminDialogProps) {
-  const dialogRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const previouslyFocused = document.activeElement as HTMLElement | null;
-    const dialog = dialogRef.current;
-    const focusable = dialog?.querySelector<HTMLElement>('[data-autofocus], button, input, select, textarea');
-    focusable?.focus();
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose();
-      if (event.key !== 'Tab' || !dialog) return;
-
-      const items = [...dialog.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href]',
-      )];
-      const first = items[0];
-      const last = items.at(-1);
-      if (!first || !last) return;
-
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      previouslyFocused?.focus();
-    };
-  }, [onClose]);
+  const dialogRef = useDialogFocus<HTMLDivElement>(true, onClose);
 
   function handleBackdrop(event: MouseEvent<HTMLDivElement>) {
     if (event.target === event.currentTarget) onClose();
@@ -54,6 +22,7 @@ export function AdminDialog({ titleId, onClose, wide = false, children }: AdminD
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
       >
         {children}
       </div>

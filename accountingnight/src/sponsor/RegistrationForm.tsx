@@ -298,6 +298,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                   <input
                     id="registration-name"
                     name="name"
+                    required
                     autoComplete="name"
                     value={draft.name}
                     onChange={(event) => updateDraft('name', event.target.value)}
@@ -321,6 +322,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                     name="phone"
                     type="tel"
                     inputMode="tel"
+                    required
                     autoComplete="tel"
                     value={draft.phone}
                     onChange={(event) => updateDraft('phone', event.target.value)}
@@ -377,6 +379,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                         value={option}
                         checked={selected}
                         onChange={() => updateDraft('pledgeOption', option)}
+                        required
                         aria-invalid={Boolean(errors.pledgeOption)}
                         aria-describedby={errors.pledgeOption ? 'pledge-option-error' : undefined}
                       />
@@ -396,6 +399,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9,]*"
+                            required
                             autoComplete="off"
                             value={draft.pledgeAmount ? draft.pledgeAmount.toLocaleString('ko-KR') : ''}
                             onChange={(event) => updateDraft('pledgeAmount', normalizePledgeAmountInput(event.target.value))}
@@ -429,10 +433,13 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
           <div className="privacy-consent">
             <label className="registration-checkline">
               <input
+                id="registration-privacy"
                 type="checkbox"
+                required
                 checked={draft.privacyConsent}
                 onChange={(event) => updateDraft('privacyConsent', event.target.checked)}
                 aria-invalid={Boolean(errors.privacy)}
+                aria-describedby={errors.privacy ? 'registration-privacy-error' : undefined}
               />
               <span>개인정보 수집 및 이용에 동의합니다. <b aria-label="필수">*</b></span>
             </label>
@@ -450,7 +457,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                 <div><dt>보유 기간</dt><dd>{privacyPolicy.retentionPeriod}</dd></div>
               </dl>
             ) : null}
-            {errors.privacy ? <span className="field-error">{errors.privacy}</span> : null}
+            {errors.privacy ? <span className="field-error" id="registration-privacy-error">{errors.privacy}</span> : null}
           </div>
 
           <div className="registration-honeypot" aria-hidden="true">

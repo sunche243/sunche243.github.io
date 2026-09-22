@@ -1,4 +1,5 @@
 import { event } from '../data/event';
+import { useDialogFocus } from '../hooks/useDialogFocus';
 import { createGoogleCalendarUrl, downloadIcs, type CalendarEventInput } from '../utils/calendar';
 
 interface CalendarModalProps {
@@ -8,18 +9,22 @@ interface CalendarModalProps {
 }
 
 export function CalendarModal({ open, input, onClose }: CalendarModalProps) {
+  const dialogRef = useDialogFocus<HTMLDivElement>(open, onClose);
+
   if (!open) return null;
 
   return (
     <div className="modal-backdrop" role="presentation" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="bottom-sheet"
         role="dialog"
         aria-modal="true"
         aria-labelledby="calendar-modal-title"
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sheet-handle" />
+        <div className="sheet-handle" aria-hidden="true" />
         <h3 id="calendar-modal-title">캘린더에 일정 추가</h3>
         <p>
           {event.shortDateLabel} · {event.startTime} · {event.venue}

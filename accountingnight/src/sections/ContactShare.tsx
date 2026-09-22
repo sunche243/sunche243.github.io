@@ -15,7 +15,6 @@ export function ContactShare({ toast, showShare = true }: ContactShareProps) {
   async function handleKakao() {
     if (!isKakaoConfigured()) {
       await shareInvitation(notify);
-      notify('Kakao JavaScript Key가 없어 주소 복사로 대신했습니다.');
       return;
     }
 
@@ -23,13 +22,12 @@ export function ContactShare({ toast, showShare = true }: ContactShareProps) {
       await shareToKakao();
     } catch {
       await shareInvitation(notify);
-      notify('카카오톡 공유 대신 초대장 주소를 복사했습니다.');
     }
   }
 
   async function handleCopy() {
-    await copyText(window.location.href);
-    notify('초대장 주소를 복사했습니다.');
+    const copied = await copyText(window.location.href);
+    notify(copied ? '초대장 주소를 복사했습니다.' : '주소를 복사하지 못했습니다. 다시 시도해주세요.');
   }
 
   return (

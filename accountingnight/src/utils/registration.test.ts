@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { pledgeOptionDetails } from '../config/sponsorship';
 import type { FormField, PledgeOption, RegistrationDraft } from '../types/registration';
 import {
   getPledgeSelection,
@@ -28,6 +29,12 @@ const draft: RegistrationDraft = {
 };
 
 describe('registration utilities', () => {
+  it('keeps the explanatory copy for the three sponsorship options that require it', () => {
+    expect(pledgeOptionDetails.century_100.description).toBeTruthy();
+    expect(pledgeOptionDetails.guardian_50.description).toBeTruthy();
+    expect(pledgeOptionDetails.free_attending.description).toBeTruthy();
+  });
+
   it.each([
     ['century_100', 0, 1_000_000, 'attending'],
     ['guardian_50', 0, 500_000, 'attending'],
@@ -96,6 +103,20 @@ describe('registration utilities', () => {
       privacy: expect.any(String),
       'field-1': expect.any(String),
     });
+  });
+
+  it('rejects an overlong name and an invalid phone number', () => {
+    const result = validateRegistration({
+      draft: { ...draft, name: '가'.repeat(81), phone: '123' },
+      fields: [],
+      answers: {},
+      honeypot: '',
+      formStartedAt: 1_000,
+      now: 5_000,
+    });
+
+    expect(result.errors.name).toBeTruthy();
+    expect(result.errors.phone).toBeTruthy();
   });
 
   it('allows the admission year and affiliation fields to be omitted when optional', () => {

@@ -1,7 +1,11 @@
 export async function copyText(text: string): Promise<boolean> {
   if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return true;
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Continue with the legacy selection fallback when clipboard permission is denied.
+    }
   }
 
   const input = document.createElement('textarea');
@@ -9,11 +13,15 @@ export async function copyText(text: string): Promise<boolean> {
   input.setAttribute('readonly', '');
   input.style.position = 'fixed';
   input.style.opacity = '0';
-  document.body.append(input);
-  input.select();
-  const ok = document.execCommand('copy');
-  input.remove();
-  return ok;
+  try {
+    document.body.append(input);
+    input.select();
+    return document.execCommand('copy');
+  } catch {
+    return false;
+  } finally {
+    input.remove();
+  }
 }
 
 export async function shareInvitation(toast: (message: string) => void): Promise<void> {
@@ -27,11 +35,11 @@ export async function shareInvitation(toast: (message: string) => void): Promise
     try {
       await navigator.share(shareData);
       return;
-    } catch {
-      // User cancellation falls back to copying the invitation URL.
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return;
     }
   }
 
-  await copyText(window.location.href);
-  toast('초대장 주소를 복사했습니다.');
+  const copied = await copyText(window.location.href);
+  toast(copied ? '초대장 주소를 복사했습니다.' : '주소를 복사하지 못했습니다. 다시 시도해주세요.');
 }
