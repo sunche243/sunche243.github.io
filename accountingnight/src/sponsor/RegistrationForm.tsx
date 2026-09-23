@@ -481,7 +481,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
           <button className="button button--gold registration-submit" type="submit" disabled={submitting || fieldLoading || fieldLoadFailed}>
             {submitting ? '등록 중' : '약정 및 참석 수락 완료하기'}
           </button>
-          <p className="registration-submit-note">제출 후 학과사무실에서 납부 및 기부금 영수증 관련 절차를 개별 안내드립니다.</p>
+          <p className="registration-submit-note">제출 후 동국대학교 대외협력실에서 납부 및 기부금 영수증 관련 절차를 개별 안내드립니다.</p>
         </form>
       </div>
     </RevealSection>

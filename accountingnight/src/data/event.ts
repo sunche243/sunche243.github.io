@@ -1,6 +1,6 @@
 export const event = {
   title: '회계학과 50주년 기념 회계인의 밤',
-  host: '동국대학교 회계학과',
+  host: '회계학과 50주년 준비위원회',
   shortDateLabel: '2026. 11. 13 FRI',
   startTime: '17:30',
   timezone: 'Asia/Seoul',
