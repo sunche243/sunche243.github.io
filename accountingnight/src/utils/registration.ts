@@ -44,6 +44,10 @@ export function normalizePhone(value: string): string {
   return `${prefix}${trimmed.replace(/\D/g, '')}`;
 }
 
+export function isValidMobilePhone(value: string): boolean {
+  return /^(?:010\d{8}|010-\d{4}-\d{4})$/.test(value.trim());
+}
+
 export function calculateSponsorshipAmount(units: number): number {
   if (!Number.isFinite(units)) return 0;
   return Math.max(0, Math.trunc(units)) * SPONSOR_UNIT_AMOUNT;
@@ -142,10 +146,12 @@ export function validateRegistration({
 }: RegistrationValidationInput): RegistrationValidationResult {
   const errors: Record<string, string> = {};
   const name = draft.name.trim();
-  const phone = normalizePhone(draft.phone);
+  const phone = draft.phone.trim();
 
   if (!name || name.length > 80) errors.name = '이름을 80자 이내로 입력해주세요.';
-  if (!/^\+?\d{7,20}$/.test(phone)) errors.phone = '연락 가능한 전화번호를 입력해주세요.';
+  if (!isValidMobilePhone(phone)) {
+    errors.phone = '01012345678 또는 010-1234-5678 형식으로 입력해주세요.';
+  }
   if (!draft.pledgeOption) {
     errors.pledgeOption = '참석 및 발전기금 약정 옵션을 선택해주세요.';
   } else {
@@ -168,6 +174,10 @@ export function validateRegistration({
     }
     if (isAnswerEmpty(value)) continue;
 
+    if (isAdmissionFieldLabel(field.label) && !/^\d{2}$/.test(String(value).trim())) {
+      errors[field.id] = '학번은 숫자 2자리로 입력해주세요. (예: 98)';
+      continue;
+    }
     if (field.type === 'email' && typeof value === 'string' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
       errors[field.id] = '올바른 이메일 형식으로 입력해주세요.';
     }

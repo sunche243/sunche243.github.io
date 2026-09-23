@@ -29,7 +29,7 @@ create table if not exists public.submissions (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   name text not null check (char_length(btrim(name)) between 1 and 80),
-  phone text not null check (phone ~ '^\+?[0-9]{7,20}$'),
+  phone text not null check (phone ~ '^010[0-9]{8}$'),
   wants_sponsorship boolean not null default false,
   sponsorship_units integer not null default 0,
   pledge_option text not null,
@@ -166,10 +166,10 @@ begin
     raise exception 'Invalid name';
   end if;
 
-  v_phone := regexp_replace(coalesce(btrim(p_phone), ''), '[^0-9+]', '', 'g');
-  if v_phone !~ '^\+?[0-9]{7,20}$' then
+  if coalesce(btrim(p_phone), '') !~ '^(010[0-9]{8}|010-[0-9]{4}-[0-9]{4})$' then
     raise exception 'Invalid phone';
   end if;
+  v_phone := replace(btrim(p_phone), '-', '');
 
   case p_pledge_option
     when 'century_100' then
@@ -253,6 +253,12 @@ begin
     from public.form_fields
     where active
       and p_answers ? id::text
+      and not (
+        p_answers -> id::text = 'null'::jsonb
+        and regexp_replace(lower(label), '[[:space:]()（）·_/-]', '', 'g') in (
+          '입학년도학번', '학번입학년도', '입학년도', '학번'
+        )
+      )
       and (
         (type = 'number' and jsonb_typeof(p_answers -> id::text) <> 'number')
         or (type = 'checkbox' and jsonb_typeof(p_answers -> id::text) <> 'boolean')
@@ -262,6 +268,21 @@ begin
       )
   ) then
     raise exception 'Invalid answer value';
+  end if;
+
+  if exists (
+    select 1
+    from public.form_fields
+    where active
+      and regexp_replace(lower(label), '[[:space:]()（）·_/-]', '', 'g') in (
+        '입학년도학번', '학번입학년도', '입학년도', '학번'
+      )
+      and p_answers ? id::text
+      and p_answers -> id::text <> 'null'::jsonb
+      and btrim(p_answers ->> id::text) <> ''
+      and btrim(p_answers ->> id::text) !~ '^[0-9]{2}$'
+  ) then
+    raise exception 'Invalid admission year';
   end if;
 
   select coalesce(

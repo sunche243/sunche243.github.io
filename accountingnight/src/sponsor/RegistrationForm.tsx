@@ -16,7 +16,6 @@ import {
   getPledgeSelection,
   isAdmissionFieldLabel,
   isAffiliationFieldLabel,
-  normalizePhone,
   normalizePledgeAmountInput,
   serializeDynamicAnswers,
   validateRegistration,
@@ -27,7 +26,7 @@ interface RegistrationFormProps {
 }
 
 function getFieldPlaceholder(field: FormField): string | undefined {
-  if (isAdmissionFieldLabel(field.label)) return '예: 98학번';
+  if (isAdmissionFieldLabel(field.label)) return '예: 98';
   if (isAffiliationFieldLabel(field.label)) return '예: OO기업 CFO 등';
   return undefined;
 }
@@ -45,6 +44,7 @@ function DynamicField({
 }) {
   const inputId = `custom-field-${field.id}`;
   const errorId = `${inputId}-error`;
+  const admissionField = isAdmissionFieldLabel(field.label);
   const commonProps = {
     id: inputId,
     name: field.id,
@@ -121,12 +121,16 @@ function DynamicField({
       ) : (
         <input
           {...commonProps}
-          type={field.type}
-          inputMode={field.type === 'tel' ? 'tel' : field.type === 'number' ? 'numeric' : undefined}
+          type={admissionField ? 'text' : field.type}
+          inputMode={admissionField ? 'numeric' : field.type === 'tel' ? 'tel' : field.type === 'number' ? 'numeric' : undefined}
+          pattern={admissionField ? '[0-9]{2}' : undefined}
+          maxLength={admissionField ? 2 : undefined}
           placeholder={getFieldPlaceholder(field)}
           value={String(value ?? '')}
           onChange={(event) => onChange(
-            field.type === 'number' && event.target.value !== '' ? Number(event.target.value) : event.target.value,
+            field.type === 'number' && !admissionField && event.target.value !== ''
+              ? Number(event.target.value)
+              : event.target.value,
           )}
         />
       )}
@@ -163,6 +167,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const successHeadingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     let active = true;
@@ -185,6 +190,21 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!submitted) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      document.getElementById('registration')?.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'start',
+      });
+      successHeadingRef.current?.focus({ preventScroll: true });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [submitted]);
 
   function updateDraft<Key extends keyof RegistrationDraft>(key: Key, value: RegistrationDraft[Key]) {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -234,7 +254,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
     try {
       await submitRegistration({
         name: draft.name.trim(),
-        phone: normalizePhone(draft.phone),
+        phone: draft.phone.trim(),
         pledgeOption: draft.pledgeOption,
         pledgeAmount: selection.amount,
         attendanceStatus: selection.attendanceStatus,
@@ -266,7 +286,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
       <RevealSection id="registration" className="section--paper registration-section" label="등록 완료">
         <div className="section-inner registration-success" role="status">
           <p className="registration-success__eyebrow">THANK YOU</p>
-          <h2>약정 및 참석 여부가 정상적으로 등록되었습니다.</h2>
+          <h2 ref={successHeadingRef} tabIndex={-1}>약정 및 참석 여부가 정상적으로 등록되었습니다.</h2>
           <p>학과사무실에서 확인 후<br />필요한 절차를 개별적으로 안내드리겠습니다.</p>
           <dl>
             <div><dt>선택 옵션</dt><dd>{pledgeOptionDetails[draft.pledgeOption].label}</dd></div>
@@ -322,8 +342,11 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                     name="phone"
                     type="tel"
                     inputMode="tel"
+                    pattern="(?:010[0-9]{8}|010-[0-9]{4}-[0-9]{4})"
+                    maxLength={13}
                     required
                     autoComplete="tel"
+                    placeholder="예: 010-1234-5678"
                     value={draft.phone}
                     onChange={(event) => updateDraft('phone', event.target.value)}
                     aria-invalid={Boolean(errors.phone)}

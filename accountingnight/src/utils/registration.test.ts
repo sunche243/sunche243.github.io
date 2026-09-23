@@ -3,6 +3,7 @@ import { pledgeOptionDetails } from '../config/sponsorship';
 import type { FormField, PledgeOption, RegistrationDraft } from '../types/registration';
 import {
   getPledgeSelection,
+  isValidMobilePhone,
   normalizePhone,
   normalizePledgeAmountInput,
   serializeDynamicAnswers,
@@ -45,10 +46,48 @@ describe('registration utilities', () => {
     expect(getPledgeSelection(option, customAmount)).toEqual({ amount, attendanceStatus });
   });
 
-  it('normalizes common phone number formatting without enforcing one carrier pattern', () => {
+  it('normalizes common phone number formatting for storage and admin search', () => {
     expect(normalizePhone(' 010-1234 5678 ')).toBe('01012345678');
     expect(normalizePhone('+82 (10) 1234-5678')).toBe('+821012345678');
   });
+
+  it.each(['01012345678', '010-1234-5678'])(
+    'accepts an explicitly supported primary phone format: %s',
+    (phone) => {
+      expect(isValidMobilePhone(phone)).toBe(true);
+      const result = validateRegistration({
+        draft: { ...draft, phone },
+        fields: [],
+        answers: {},
+        honeypot: '',
+        formStartedAt: 1_000,
+        now: 5_000,
+      });
+
+      expect(result.errors.phone).toBeUndefined();
+    },
+  );
+
+  it.each([
+    '01112345678',
+    '+821012345678',
+    '010 1234 5678',
+    '010.1234.5678',
+    '010-1234-5678abc',
+  ])('rejects an unsupported primary phone format: %s', (phone) => {
+    expect(isValidMobilePhone(phone)).toBe(false);
+    const result = validateRegistration({
+      draft: { ...draft, phone },
+      fields: [],
+      answers: {},
+      honeypot: '',
+      formStartedAt: 1_000,
+      now: 5_000,
+    });
+
+    expect(result.errors.phone).toBe('01012345678 또는 010-1234-5678 형식으로 입력해주세요.');
+  },
+  );
 
   it('keeps only numeric pledge input for thousand-separator formatting and validation', () => {
     expect(normalizePledgeAmountInput('1,250,000원')).toBe(1_250_000);
@@ -137,4 +176,48 @@ describe('registration utilities', () => {
     expect(result.errors['admission-field']).toBeUndefined();
     expect(result.errors['affiliation-field']).toBeUndefined();
   });
+
+  it.each(['', '  ', '98', '08'])(
+    'accepts an omitted or two-digit optional admission year: %j',
+    (admissionYear) => {
+      const admissionField: FormField = {
+        ...field,
+        id: 'admission-field',
+        label: '입학년도(학번)',
+        required: false,
+      };
+      const result = validateRegistration({
+        draft,
+        fields: [admissionField],
+        answers: { 'admission-field': admissionYear },
+        honeypot: '',
+        formStartedAt: 1_000,
+        now: 5_000,
+      });
+
+      expect(result.errors['admission-field']).toBeUndefined();
+    },
+  );
+
+  it.each(['8', '1998', '9a'])(
+    'rejects an optional admission year that is not exactly two digits: %s',
+    (admissionYear) => {
+      const admissionField: FormField = {
+        ...field,
+        id: 'admission-field',
+        label: '입학년도(학번)',
+        required: false,
+      };
+      const invalidResult = validateRegistration({
+        draft,
+        fields: [admissionField],
+        answers: { 'admission-field': admissionYear },
+        honeypot: '',
+        formStartedAt: 1_000,
+        now: 5_000,
+      });
+
+      expect(invalidResult.errors['admission-field']).toBe('학번은 숫자 2자리로 입력해주세요. (예: 98)');
+    },
+  );
 });
