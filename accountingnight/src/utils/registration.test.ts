@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { CUSTOM_PLEDGE_MINIMUM_NOTICE } from '../config/sponsorship';
-import type { FormField, PledgeOption, RegistrationDraft } from '../types/registration';
+import { pledgeOptionDetails } from '../config/sponsorship';
+import type { FormField, RegistrationDraft } from '../types/registration';
 import {
   getPledgeSelection,
   isValidMobilePhone,
@@ -94,39 +94,54 @@ describe('registration utilities', () => {
     });
   });
 
-  it.each(['free_attending', 'free_absent'] as PledgeOption[])(
-    'enforces the custom pledge range for %s',
-    (pledgeOption) => {
-      const cases = [
-        [-1, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
-        [0, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
-        [1, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
-        [500_000, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
-        [999_999, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
-        [1_000_000, undefined],
-        [1_000_001, undefined],
-        [5_000_000, undefined],
-        [10_000_000_000, undefined],
-        [10_000_000_001, '자유 후원금액은 10,000,000,000원 이하로 입력해 주세요.'],
-      ] as const;
+  it.each([
+    [999_999, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
+    [1_000_000, undefined],
+    [1_000_001, undefined],
+    [10_000_000_000, undefined],
+    [10_000_000_001, '자유 후원금액은 10,000,000,000원 이하로 입력해 주세요.'],
+  ] as const)('validates the free_attending amount boundary: %s', (pledgeAmount, expectedError) => {
+    const result = validateRegistration({
+      draft: { ...draft, pledgeOption: 'free_attending', pledgeAmount },
+      fields: [field],
+      answers: { 'field-1': '동국대학교' },
+      honeypot: '',
+      formStartedAt: 1_000,
+      now: 5_000,
+    });
 
-      for (const [pledgeAmount, expectedError] of cases) {
-        const result = validateRegistration({
-          draft: { ...draft, pledgeOption, pledgeAmount },
-          fields: [field],
-          answers: { 'field-1': '동국대학교' },
-          honeypot: '',
-          formStartedAt: 1_000,
-          now: 5_000,
-        });
+    expect(result.errors.pledgeAmount).toBe(expectedError);
+  });
 
-        expect(result.errors.pledgeAmount).toBe(expectedError);
-      }
-    },
-  );
+  it.each([
+    [-1, '후원금액은 1원 이상 입력해 주세요.'],
+    [0, '후원금액은 1원 이상 입력해 주세요.'],
+    [1, undefined],
+    [100, undefined],
+    [500_000, undefined],
+    [999_999, undefined],
+    [1_000_000, undefined],
+    [10_000_000_000, undefined],
+    [10_000_000_001, '자유 후원금액은 10,000,000,000원 이하로 입력해 주세요.'],
+  ] as const)('validates the free_absent amount boundary: %s', (pledgeAmount, expectedError) => {
+    const result = validateRegistration({
+      draft: { ...draft, pledgeOption: 'free_absent', pledgeAmount },
+      fields: [field],
+      answers: { 'field-1': '동국대학교' },
+      honeypot: '',
+      formStartedAt: 1_000,
+      now: 5_000,
+    });
 
-  it('keeps the custom pledge minimum visible as calm helper copy', () => {
-    expect(CUSTOM_PLEDGE_MINIMUM_NOTICE).toBe('자유 후원은 100만 원 이상부터 가능합니다.');
+    expect(result.errors.pledgeAmount).toBe(expectedError);
+  });
+
+  it('keeps distinct helper copy for OPTION 3 and OPTION 4', () => {
+    expect(pledgeOptionDetails.free_attending.minimumAmount).toBe(1_000_000);
+    expect(pledgeOptionDetails.free_attending.minimumNotice).toBe('자유 후원은 100만 원 이상부터 가능합니다.');
+    expect(pledgeOptionDetails.free_absent.minimumAmount).toBe(1);
+    expect(pledgeOptionDetails.free_absent.minimumNotice).toBe('원하시는 금액으로 자유롭게 마음을 전하실 수 있습니다.');
+    expect(pledgeOptionDetails.free_absent.minimumNotice).not.toContain('100만 원 이상');
   });
 
   it('requires a pledge option, privacy consent, and active required dynamic fields', () => {

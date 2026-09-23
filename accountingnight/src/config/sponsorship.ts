@@ -1,15 +1,15 @@
 import type { AttendanceStatus, PledgeOption } from '../types/registration';
 
 export const SPONSOR_UNIT_AMOUNT = 500_000;
-export const MIN_CUSTOM_PLEDGE_AMOUNT = 1_000_000;
 export const MAX_PLEDGE_AMOUNT = 10_000_000_000;
-export const CUSTOM_PLEDGE_MINIMUM_NOTICE = '자유 후원은 100만 원 이상부터 가능합니다.';
 
 export interface PledgeOptionDetail {
   optionNumber: number;
   label: string;
   title: string;
   amount: number | null;
+  minimumAmount?: number;
+  minimumNotice?: string;
   attendanceStatus: Exclude<AttendanceStatus, 'undecided'>;
 }
 
@@ -33,6 +33,8 @@ export const pledgeOptionDetails: Record<PledgeOption, PledgeOptionDetail> = {
     label: '마음으로 함께하기',
     title: '자유 금액 후원 + 행사 참석',
     amount: null,
+    minimumAmount: 1_000_000,
+    minimumNotice: '자유 후원은 100만 원 이상부터 가능합니다.',
     attendanceStatus: 'attending',
   },
   free_absent: {
@@ -40,6 +42,8 @@ export const pledgeOptionDetails: Record<PledgeOption, PledgeOptionDetail> = {
     label: '불참 · 발전기금 약정',
     title: '행사에는 아쉽게 불참하나,\n[50주년 발전기금]으로 마음을 전합니다.',
     amount: null,
+    minimumAmount: 1,
+    minimumNotice: '원하시는 금액으로 자유롭게 마음을 전하실 수 있습니다.',
     attendanceStatus: 'not_attending',
   },
   absent_only: {

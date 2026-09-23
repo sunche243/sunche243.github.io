@@ -1,6 +1,5 @@
 import {
   MAX_PLEDGE_AMOUNT,
-  MIN_CUSTOM_PLEDGE_AMOUNT,
   pledgeOptionDetails,
   SPONSOR_UNIT_AMOUNT,
 } from '../config/sponsorship';
@@ -158,8 +157,11 @@ export function validateRegistration({
   } else {
     const detail = pledgeOptionDetails[draft.pledgeOption];
     if (detail.amount === null) {
-      if (!Number.isSafeInteger(draft.pledgeAmount) || draft.pledgeAmount < MIN_CUSTOM_PLEDGE_AMOUNT) {
-        errors.pledgeAmount = '자유 후원금액은 100만 원 이상 입력해 주세요.';
+      const minimumAmount = detail.minimumAmount ?? 1;
+      if (!Number.isSafeInteger(draft.pledgeAmount) || draft.pledgeAmount < minimumAmount) {
+        errors.pledgeAmount = draft.pledgeOption === 'free_attending'
+          ? '자유 후원금액은 100만 원 이상 입력해 주세요.'
+          : '후원금액은 1원 이상 입력해 주세요.';
       } else if (draft.pledgeAmount > MAX_PLEDGE_AMOUNT) {
         errors.pledgeAmount = `자유 후원금액은 ${formatWon(MAX_PLEDGE_AMOUNT)} 이하로 입력해 주세요.`;
       }

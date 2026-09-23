@@ -2,9 +2,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { RevealSection } from '../components/RevealSection';
 import { privacyPolicy } from '../config/privacy';
 import {
-  CUSTOM_PLEDGE_MINIMUM_NOTICE,
   MAX_PLEDGE_AMOUNT,
-  MIN_CUSTOM_PLEDGE_AMOUNT,
   pledgeOptionDetails,
   pledgeOptions,
 } from '../config/sponsorship';
@@ -421,9 +419,9 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                         <span className="pledge-option__number">OPTION {detail.optionNumber}</span>
                         {detail.optionNumber <= 3 ? <strong>[{detail.label}]</strong> : null}
                         <span className="pledge-option__title">{detail.title}</span>
-                        {customAmount ? (
+                        {customAmount && detail.minimumNotice ? (
                           <span className="pledge-option__minimum" id={minimumNoticeId}>
-                            {CUSTOM_PLEDGE_MINIMUM_NOTICE}
+                            {detail.minimumNotice}
                           </span>
                         ) : null}
                       </span>
@@ -437,7 +435,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9,]*"
-                            min={MIN_CUSTOM_PLEDGE_AMOUNT}
+                            min={detail.minimumAmount}
                             max={MAX_PLEDGE_AMOUNT}
                             required
                             autoComplete="off"
