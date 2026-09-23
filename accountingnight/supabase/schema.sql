@@ -54,8 +54,8 @@ create table if not exists public.submissions (
   constraint submissions_pledge_consistency_check check (
     (pledge_option = 'century_100' and pledge_amount = 1000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 2)
     or (pledge_option = 'guardian_50' and pledge_amount = 500000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 1)
-    or (pledge_option = 'free_attending' and pledge_amount between 1 and 10000000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 0)
-    or (pledge_option = 'free_absent' and pledge_amount between 1 and 10000000000 and attendance_status = 'not_attending' and wants_sponsorship and sponsorship_units = 0)
+    or (pledge_option = 'free_attending' and pledge_amount between 1000000 and 10000000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 0)
+    or (pledge_option = 'free_absent' and pledge_amount between 1000000 and 10000000000 and attendance_status = 'not_attending' and wants_sponsorship and sponsorship_units = 0)
     or (pledge_option = 'absent_only' and pledge_amount = 0 and attendance_status = 'not_attending' and not wants_sponsorship and sponsorship_units = 0)
     or (pledge_option = 'legacy_units' and pledge_amount = sponsorship_units::bigint * 500000 and wants_sponsorship and sponsorship_units between 1 and 100)
     or (pledge_option = 'legacy_no_pledge' and pledge_amount = 0 and not wants_sponsorship and sponsorship_units = 0)
@@ -206,7 +206,7 @@ begin
   end if;
 
   if p_pledge_option in ('free_attending', 'free_absent')
-    and p_pledge_amount not between 1 and 10000000000 then
+    and p_pledge_amount not between 1000000 and 10000000000 then
     raise exception 'Invalid custom pledge amount';
   end if;
 

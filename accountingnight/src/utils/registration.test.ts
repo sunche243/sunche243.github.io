@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CUSTOM_PLEDGE_MINIMUM_NOTICE } from '../config/sponsorship';
 import type { FormField, PledgeOption, RegistrationDraft } from '../types/registration';
 import {
   getPledgeSelection,
@@ -93,30 +94,39 @@ describe('registration utilities', () => {
     });
   });
 
-  it.each(['free_attending', 'free_absent'] as PledgeOption[])('rejects an invalid custom amount for %s', (pledgeOption) => {
-    const result = validateRegistration({
-      draft: { ...draft, pledgeOption, pledgeAmount: 0 },
-      fields: [field],
-      answers: { 'field-1': '동국대학교' },
-      honeypot: '',
-      formStartedAt: 1_000,
-      now: 5_000,
-    });
+  it.each(['free_attending', 'free_absent'] as PledgeOption[])(
+    'enforces the custom pledge range for %s',
+    (pledgeOption) => {
+      const cases = [
+        [-1, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
+        [0, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
+        [1, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
+        [500_000, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
+        [999_999, '자유 후원금액은 100만 원 이상 입력해 주세요.'],
+        [1_000_000, undefined],
+        [1_000_001, undefined],
+        [5_000_000, undefined],
+        [10_000_000_000, undefined],
+        [10_000_000_001, '자유 후원금액은 10,000,000,000원 이하로 입력해 주세요.'],
+      ] as const;
 
-    expect(result.errors.pledgeAmount).toBeTruthy();
-  });
+      for (const [pledgeAmount, expectedError] of cases) {
+        const result = validateRegistration({
+          draft: { ...draft, pledgeOption, pledgeAmount },
+          fields: [field],
+          answers: { 'field-1': '동국대학교' },
+          honeypot: '',
+          formStartedAt: 1_000,
+          now: 5_000,
+        });
 
-  it('rejects an abnormally large custom pledge amount', () => {
-    const result = validateRegistration({
-      draft: { ...draft, pledgeOption: 'free_attending', pledgeAmount: 10_000_000_001 },
-      fields: [field],
-      answers: { 'field-1': '동국대학교' },
-      honeypot: '',
-      formStartedAt: 1_000,
-      now: 5_000,
-    });
+        expect(result.errors.pledgeAmount).toBe(expectedError);
+      }
+    },
+  );
 
-    expect(result.errors.pledgeAmount).toBeTruthy();
+  it('keeps the custom pledge minimum visible as calm helper copy', () => {
+    expect(CUSTOM_PLEDGE_MINIMUM_NOTICE).toBe('자유 후원은 100만 원 이상부터 가능합니다.');
   });
 
   it('requires a pledge option, privacy consent, and active required dynamic fields', () => {

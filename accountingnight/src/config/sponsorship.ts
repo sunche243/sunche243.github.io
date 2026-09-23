@@ -1,7 +1,9 @@
 import type { AttendanceStatus, PledgeOption } from '../types/registration';
 
 export const SPONSOR_UNIT_AMOUNT = 500_000;
+export const MIN_CUSTOM_PLEDGE_AMOUNT = 1_000_000;
 export const MAX_PLEDGE_AMOUNT = 10_000_000_000;
+export const CUSTOM_PLEDGE_MINIMUM_NOTICE = '자유 후원은 100만 원 이상부터 가능합니다.';
 
 export interface PledgeOptionDetail {
   optionNumber: number;

@@ -1,5 +1,6 @@
 import {
   MAX_PLEDGE_AMOUNT,
+  MIN_CUSTOM_PLEDGE_AMOUNT,
   pledgeOptionDetails,
   SPONSOR_UNIT_AMOUNT,
 } from '../config/sponsorship';
@@ -156,12 +157,12 @@ export function validateRegistration({
     errors.pledgeOption = '참석 및 발전기금 약정 옵션을 선택해주세요.';
   } else {
     const detail = pledgeOptionDetails[draft.pledgeOption];
-    if (detail.amount === null && (
-      !Number.isSafeInteger(draft.pledgeAmount) ||
-      draft.pledgeAmount <= 0 ||
-      draft.pledgeAmount > MAX_PLEDGE_AMOUNT
-    )) {
-      errors.pledgeAmount = `약정액은 1원 이상 ${formatWon(MAX_PLEDGE_AMOUNT)} 이하로 입력해주세요.`;
+    if (detail.amount === null) {
+      if (!Number.isSafeInteger(draft.pledgeAmount) || draft.pledgeAmount < MIN_CUSTOM_PLEDGE_AMOUNT) {
+        errors.pledgeAmount = '자유 후원금액은 100만 원 이상 입력해 주세요.';
+      } else if (draft.pledgeAmount > MAX_PLEDGE_AMOUNT) {
+        errors.pledgeAmount = `자유 후원금액은 ${formatWon(MAX_PLEDGE_AMOUNT)} 이하로 입력해 주세요.`;
+      }
     }
   }
   if (!draft.privacyConsent) errors.privacy = '개인정보 수집 및 이용 동의가 필요합니다.';

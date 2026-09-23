@@ -304,6 +304,13 @@
   word-break: keep-all;
 }
 
+.pledge-option__minimum {
+  color: var(--gold-dark);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+
 .pledge-amount-field {
   display: grid;
   gap: 8px;

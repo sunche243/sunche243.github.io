@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { RevealSection } from '../components/RevealSection';
 import { privacyPolicy } from '../config/privacy';
-import { pledgeOptionDetails, pledgeOptions } from '../config/sponsorship';
+import {
+  CUSTOM_PLEDGE_MINIMUM_NOTICE,
+  MAX_PLEDGE_AMOUNT,
+  MIN_CUSTOM_PLEDGE_AMOUNT,
+  pledgeOptionDetails,
+  pledgeOptions,
+} from '../config/sponsorship';
 import { fetchActiveFormFields, submitRegistration } from '../services/registration';
 import { isSupabaseConfigured, SupabaseConfigurationError } from '../services/supabase';
 import type {
@@ -396,6 +402,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                 const detail = pledgeOptionDetails[option];
                 const selected = draft.pledgeOption === option;
                 const customAmount = detail.amount === null;
+                const minimumNoticeId = `pledge-option-${option}-minimum`;
                 return (
                   <div className={`pledge-option ${selected ? 'is-selected' : ''}`} key={option}>
                     <label htmlFor={`pledge-option-${option}`}>
@@ -414,6 +421,11 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                         <span className="pledge-option__number">OPTION {detail.optionNumber}</span>
                         {detail.optionNumber <= 3 ? <strong>[{detail.label}]</strong> : null}
                         <span className="pledge-option__title">{detail.title}</span>
+                        {customAmount ? (
+                          <span className="pledge-option__minimum" id={minimumNoticeId}>
+                            {CUSTOM_PLEDGE_MINIMUM_NOTICE}
+                          </span>
+                        ) : null}
                       </span>
                     </label>
                     {selected && customAmount ? (
@@ -425,12 +437,16 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                             type="text"
                             inputMode="numeric"
                             pattern="[0-9,]*"
+                            min={MIN_CUSTOM_PLEDGE_AMOUNT}
+                            max={MAX_PLEDGE_AMOUNT}
                             required
                             autoComplete="off"
                             value={draft.pledgeAmount ? draft.pledgeAmount.toLocaleString('ko-KR') : ''}
                             onChange={(event) => updateDraft('pledgeAmount', normalizePledgeAmountInput(event.target.value))}
                             aria-invalid={Boolean(errors.pledgeAmount)}
-                            aria-describedby={errors.pledgeAmount ? 'pledge-amount-error' : undefined}
+                            aria-describedby={errors.pledgeAmount
+                              ? `${minimumNoticeId} pledge-amount-error`
+                              : minimumNoticeId}
                             placeholder="금액을 입력해주세요"
                           />
                           <span>원</span>
