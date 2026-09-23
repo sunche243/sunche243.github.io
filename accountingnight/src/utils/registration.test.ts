@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { pledgeOptionDetails } from '../config/sponsorship';
 import type { FormField, PledgeOption, RegistrationDraft } from '../types/registration';
 import {
   getPledgeSelection,
@@ -30,12 +29,6 @@ const draft: RegistrationDraft = {
 };
 
 describe('registration utilities', () => {
-  it('keeps the explanatory copy for the three sponsorship options that require it', () => {
-    expect(pledgeOptionDetails.century_100.description).toBeTruthy();
-    expect(pledgeOptionDetails.guardian_50.description).toBeTruthy();
-    expect(pledgeOptionDetails.free_attending.description).toBeTruthy();
-  });
-
   it.each([
     ['century_100', 0, 1_000_000, 'attending'],
     ['guardian_50', 0, 500_000, 'attending'],

@@ -282,13 +282,17 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
 
   if (submitted && draft.pledgeOption) {
     const selection = getPledgeSelection(draft.pledgeOption, draft.pledgeAmount);
+    const registrantName = draft.name.trim();
     return (
       <RevealSection id="registration" className="section--paper registration-section" label="등록 완료">
         <div className="section-inner registration-success" role="status">
           <p className="registration-success__eyebrow">THANK YOU</p>
-          <h2 ref={successHeadingRef} tabIndex={-1}>약정 및 참석 여부가 정상적으로 등록되었습니다.</h2>
-          <p>학과사무실에서 확인 후<br />필요한 절차를 개별적으로 안내드리겠습니다.</p>
+          <h2 ref={successHeadingRef} tabIndex={-1}>
+            {registrantName}님 약정 및 참석 여부가 정상적으로 등록되었습니다.
+          </h2>
+          <p>동국대학교 대외협력실에서 확인 후<br />필요한 절차를 개별적으로 안내드리겠습니다.</p>
           <dl>
+            <div><dt>성함</dt><dd>{registrantName}</dd></div>
             <div><dt>선택 옵션</dt><dd>{pledgeOptionDetails[draft.pledgeOption].label}</dd></div>
             <div><dt>약정 금액</dt><dd>{formatWon(selection.amount)}</dd></div>
             <div><dt>참석 여부</dt><dd>{attendanceLabels[selection.attendanceStatus]}</dd></div>
@@ -410,7 +414,6 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                         <span className="pledge-option__number">OPTION {detail.optionNumber}</span>
                         {detail.optionNumber <= 3 ? <strong>[{detail.label}]</strong> : null}
                         <span className="pledge-option__title">{detail.title}</span>
-                        {detail.description ? <small>{detail.description}</small> : null}
                       </span>
                     </label>
                     {selected && customAmount ? (
