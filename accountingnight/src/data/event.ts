@@ -6,7 +6,7 @@ export const event = {
   timezone: 'Asia/Seoul',
   startIso: '2026-11-13T17:30:00+09:00',
   endIso: '2026-11-13T21:00:00+09:00',
-  venue: '서울신라호텔 영빈관',
+  venue: '서울신라호텔 영빈관 · 루비홀',
   venueEnglish: 'THE SHILLA SEOUL · YEONG BIN GWAN',
   address: '서울특별시 중구 동호로 249',
   englishLines: ['DONGGUK UNIVERSITY', 'DEPARTMENT OF ACCOUNTING'],
