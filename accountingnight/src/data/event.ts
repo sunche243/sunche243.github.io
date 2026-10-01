@@ -24,3 +24,7 @@ export const invitationCopy = [
 export const sponsorship = {
   url: `${import.meta.env.BASE_URL}sponsor/#registration`,
 };
+
+export const attendance = {
+  url: `${import.meta.env.BASE_URL}attendance/`,
+};

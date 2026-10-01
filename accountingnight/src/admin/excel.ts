@@ -1,5 +1,7 @@
 import type { Cell, SheetData } from 'write-excel-file/browser';
+import type { AttendanceResponse } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
+import { attendanceResponseLabels } from '../utils/attendance';
 import {
   attendanceLabels,
   findSubmissionAnswerByLabel,
@@ -152,4 +154,40 @@ export async function downloadSubmissionsExcel(submissions: Submission[], fields
     fontFamily: '맑은 고딕',
     fontSize: 10,
   }).toFile(`회계인의밤_약정및참석_${date}.xlsx`);
+}
+
+export function buildAttendanceExcelSheet(responses: AttendanceResponse[]): SheetData {
+  return [
+    ['회신일시', '성명', '전화번호', '입학년도', '현재 소속 및 직함', '참석 여부'].map(header),
+    ...responses.map((response) => [
+      { value: new Date(response.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
+      response.name,
+      phoneCell(response.phone),
+      admissionYearCell(response.admission_year ?? undefined),
+      response.affiliation ?? '',
+      attendanceResponseLabels[response.attendance_status],
+    ]),
+  ];
+}
+
+export async function downloadAttendanceExcel(responses: AttendanceResponse[]): Promise<void> {
+  const { default: writeExcelFile } = await import('write-excel-file/browser');
+  const date = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }).replaceAll('-', '');
+  const sheet = buildAttendanceExcelSheet(responses);
+
+  await writeExcelFile(sheet, {
+    sheet: '참석 여부',
+    columns: [
+      { width: 20 },
+      { width: 14 },
+      { width: 18 },
+      { width: 12 },
+      { width: 30 },
+      { width: 12 },
+    ],
+    stickyRowsCount: 1,
+  }, {
+    fontFamily: '맑은 고딕',
+    fontSize: 10,
+  }).toFile(`회계인의밤_참석여부_${date}.xlsx`);
 }

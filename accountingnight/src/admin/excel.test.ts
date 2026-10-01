@@ -4,8 +4,9 @@ import { join } from 'node:path';
 import { strFromU8, unzipSync } from 'fflate';
 import { describe, expect, it } from 'vitest';
 import writeExcelFile from 'write-excel-file/node';
+import type { AttendanceResponse } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
-import { buildExcelSheet } from './excel';
+import { buildAttendanceExcelSheet, buildExcelSheet } from './excel';
 
 const field: FormField = {
   id: 'archived-field',
@@ -54,6 +55,17 @@ const guardianSubmission: Submission = {
   pledge_amount: 500_000,
 };
 
+const attendanceResponse: AttendanceResponse = {
+  id: 'attendance-1',
+  created_at: '2026-10-01T00:00:00Z',
+  name: '김동국',
+  phone: '01098765432',
+  admission_year: '08',
+  affiliation: '동국대학교',
+  attendance_status: 'not_attending',
+  privacy_consent_at: '2026-10-01T00:00:00Z',
+};
+
 interface XlsxCellXml {
   attributes: string;
   value: string;
@@ -91,6 +103,16 @@ function getCellNumberFormat(stylesXml: string, cell: XlsxCellXml): string | und
 }
 
 describe('Excel export rows', () => {
+  it('builds a separate attendance sheet with the requested columns and typed phone/year cells', () => {
+    const sheet = buildAttendanceExcelSheet([attendanceResponse]);
+    const headings = sheet[0].map((cell) => typeof cell === 'object' && cell && 'value' in cell ? cell.value : cell);
+
+    expect(headings).toEqual(['회신일시', '성명', '전화번호', '입학년도', '현재 소속 및 직함', '참석 여부']);
+    expect(sheet[1][2]).toMatchObject({ value: 1_098_765_432, type: Number, format: '00000000000' });
+    expect(sheet[1][3]).toMatchObject({ value: 8, type: Number, format: '00' });
+    expect(sheet[1][5]).toBe('불참');
+  });
+
   it('exports C, D, and G as typed number cells while preserving inactive fields', () => {
     const sheet = buildExcelSheet([submission], [field]);
     const headings = sheet[0].map((cell) => typeof cell === 'object' && cell && 'value' in cell ? cell.value : cell);

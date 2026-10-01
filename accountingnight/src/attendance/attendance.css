@@ -1,0 +1,109 @@
+.attendance-intro {
+  padding-block: 108px 116px;
+}
+
+.attendance-intro .section-inner {
+  width: min(100%, 640px);
+}
+
+.attendance-intro__copy {
+  display: grid;
+  gap: 24px;
+  text-align: center;
+}
+
+.attendance-intro__copy p {
+  margin: 0;
+  color: #2e2c28;
+  font-size: 1rem;
+  line-height: 1.95;
+  word-break: keep-all;
+}
+
+.attendance-intro__copy p:last-child {
+  color: var(--gray-600);
+  font-size: 0.86rem;
+}
+
+.attendance-options {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.attendance-option {
+  display: grid;
+  min-height: 104px;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 20px 18px;
+  border: 1px solid rgba(17, 17, 17, 0.2);
+  cursor: pointer;
+  background: rgba(247, 244, 237, 0.24);
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.attendance-option:hover {
+  border-color: rgba(135, 108, 63, 0.58);
+}
+
+.attendance-option.is-selected {
+  border-color: var(--gold-dark);
+  background: rgba(247, 244, 237, 0.58);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.attendance-option input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--gold-dark);
+}
+
+.attendance-option > span {
+  display: grid;
+  gap: 7px;
+}
+
+.attendance-option small {
+  color: var(--gold-dark);
+  font-family: var(--serif);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.attendance-option strong {
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.registration-success__message {
+  margin: 34px 0 0;
+  color: var(--gold-dark);
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.85;
+  word-break: keep-all;
+}
+
+@media (min-width: 640px) {
+  .attendance-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-option {
+    min-height: 128px;
+    padding-inline: 22px;
+  }
+}
+
+@media (min-width: 768px) {
+  .attendance-intro {
+    padding-block: 138px 144px;
+  }
+}

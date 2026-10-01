@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         invitation: `${projectRoot}index.html`,
         sponsor: `${projectRoot}sponsor/index.html`,
+        attendance: `${projectRoot}attendance/index.html`,
         admin: `${projectRoot}admin/index.html`,
       },
     },

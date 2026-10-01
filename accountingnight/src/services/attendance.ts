@@ -1,0 +1,32 @@
+import type { AttendanceResponseStatus } from '../types/attendance';
+import { getSupabase, SupabaseConfigurationError } from './supabase';
+
+export interface SubmitAttendanceResponseInput {
+  name: string;
+  phone: string;
+  admissionYear: string;
+  affiliation: string;
+  attendanceStatus: AttendanceResponseStatus;
+  privacyConsent: boolean;
+  honeypot: string;
+  formStartedAt: number;
+}
+
+export async function submitAttendanceResponse(input: SubmitAttendanceResponseInput): Promise<string> {
+  const supabase = getSupabase();
+  if (!supabase) throw new SupabaseConfigurationError();
+
+  const { data, error } = await supabase.rpc('submit_attendance_response', {
+    p_name: input.name,
+    p_phone: input.phone,
+    p_admission_year: input.admissionYear || null,
+    p_affiliation: input.affiliation || null,
+    p_attendance_status: input.attendanceStatus,
+    p_privacy_consent: input.privacyConsent,
+    p_website: input.honeypot,
+    p_started_at: new Date(input.formStartedAt).toISOString(),
+  });
+
+  if (error) throw new Error('참석 여부를 전달하지 못했습니다. 잠시 후 다시 시도해주세요.');
+  return String(data);
+}

@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js';
+import type { AttendanceResponse } from '../types/attendance';
 import type { FormField, FormFieldType, Submission, SubmissionAnswers, SubmissionStatus } from '../types/registration';
 import { getSupabase, SupabaseConfigurationError } from '../services/supabase';
 import { calculateSponsorshipAmount } from '../utils/registration';
@@ -95,6 +96,27 @@ export async function fetchSubmissions(): Promise<Submission[]> {
   const { data, error } = await supabase.from('submissions').select('*').order('created_at', { ascending: false });
   if (error) throw new Error('신청 내역을 불러오지 못했습니다.');
   return (data as Record<string, unknown>[]).map(normalizeSubmission);
+}
+
+export async function fetchAttendanceResponses(): Promise<AttendanceResponse[]> {
+  const supabase = requireSupabase();
+  const { data, error } = await supabase
+    .from('attendance_responses')
+    .select('id,created_at,updated_at,name,phone,admission_year,affiliation,attendance_status,privacy_consent_at')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error('참석 여부 회신을 불러오지 못했습니다. 새 migration 적용 여부를 확인해주세요.');
+
+  return (data as Record<string, unknown>[]).map((row) => ({
+    id: String(row.id),
+    created_at: String(row.created_at),
+    updated_at: row.updated_at ? String(row.updated_at) : undefined,
+    name: String(row.name),
+    phone: String(row.phone),
+    admission_year: row.admission_year === null ? null : String(row.admission_year),
+    affiliation: row.affiliation === null ? null : String(row.affiliation),
+    attendance_status: row.attendance_status as AttendanceResponse['attendance_status'],
+    privacy_consent_at: String(row.privacy_consent_at),
+  }));
 }
 
 export async function fetchAllFormFields(): Promise<FormField[]> {

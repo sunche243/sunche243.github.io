@@ -1,14 +1,23 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { isSupabaseConfigured } from '../services/supabase';
+import type { AttendanceResponse } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
 import { formatWon } from '../utils/registration';
-import { fetchAllFormFields, fetchSubmissions, restoreAdminSession, signInAdmin, signOutAdmin } from './adminService';
+import {
+  fetchAllFormFields,
+  fetchAttendanceResponses,
+  fetchSubmissions,
+  restoreAdminSession,
+  signInAdmin,
+  signOutAdmin,
+} from './adminService';
 import { calculateAdminStats } from './adminUtils';
+import { AttendanceResponsesPanel } from './AttendanceResponsesPanel';
 import { FormFieldsPanel } from './FormFieldsPanel';
 import { SubmissionsPanel } from './SubmissionsPanel';
 
 type AdminPhase = 'checking' | 'login' | 'ready';
-type AdminTab = 'submissions' | 'fields';
+type AdminTab = 'submissions' | 'attendance' | 'fields';
 
 function ConfigurationNotice() {
   return (
@@ -64,6 +73,7 @@ export function AdminApp() {
   const [phase, setPhase] = useState<AdminPhase>('checking');
   const [tab, setTab] = useState<AdminTab>('submissions');
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [attendanceResponses, setAttendanceResponses] = useState<AttendanceResponse[]>([]);
   const [fields, setFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -72,15 +82,27 @@ export function AdminApp() {
   const refresh = useCallback(async () => {
     setLoading(true);
     setError('');
-    try {
-      const [nextSubmissions, nextFields] = await Promise.all([fetchSubmissions(), fetchAllFormFields()]);
-      setSubmissions(nextSubmissions);
-      setFields(nextFields);
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : '관리자 데이터를 불러오지 못했습니다.');
-    } finally {
-      setLoading(false);
+    const [sponsorshipResult, attendanceResult] = await Promise.allSettled([
+      Promise.all([fetchSubmissions(), fetchAllFormFields()]),
+      fetchAttendanceResponses(),
+    ]);
+
+    const errors: string[] = [];
+    if (sponsorshipResult.status === 'fulfilled') {
+      setSubmissions(sponsorshipResult.value[0]);
+      setFields(sponsorshipResult.value[1]);
+    } else {
+      errors.push(sponsorshipResult.reason instanceof Error ? sponsorshipResult.reason.message : '신청 데이터를 불러오지 못했습니다.');
     }
+
+    if (attendanceResult.status === 'fulfilled') {
+      setAttendanceResponses(attendanceResult.value);
+    } else {
+      errors.push(attendanceResult.reason instanceof Error ? attendanceResult.reason.message : '참석 여부 회신을 불러오지 못했습니다.');
+    }
+
+    setError(errors.join(' '));
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -105,6 +127,7 @@ export function AdminApp() {
       await signOutAdmin();
     } finally {
       setSubmissions([]);
+      setAttendanceResponses([]);
       setFields([]);
       setPhase('login');
     }
@@ -126,22 +149,27 @@ export function AdminApp() {
           <button className="admin-refresh" type="button" onClick={() => void refresh()} disabled={loading}>{loading ? '불러오는 중' : '새로고침'}</button>
         </div>
 
-        <section className="admin-stats" aria-label="신청 통계">
-          <article><span>전체 응답</span><strong>{stats.totalResponses}<small>명</small></strong></article>
-          <article><span>발전기금 약정 인원</span><strong>{stats.pledgeCount}<small>명</small></strong></article>
-          <article><span>총 약정액</span><strong>{formatWon(stats.totalPledgeAmount)}</strong></article>
-          <article><span>참석 예정</span><strong>{stats.attendingCount}<small>명</small></strong></article>
-        </section>
+        {tab !== 'attendance' ? (
+          <section className="admin-stats" aria-label="기존 후원 및 약정 신청 통계">
+            <article><span>전체 응답</span><strong>{stats.totalResponses}<small>명</small></strong></article>
+            <article><span>발전기금 약정 인원</span><strong>{stats.pledgeCount}<small>명</small></strong></article>
+            <article><span>총 약정액</span><strong>{formatWon(stats.totalPledgeAmount)}</strong></article>
+            <article><span>참석 예정</span><strong>{stats.attendingCount}<small>명</small></strong></article>
+          </section>
+        ) : null}
 
         {error ? <div className="admin-banner" role="alert">{error}</div> : null}
 
         <nav className="admin-tabs" aria-label="관리자 메뉴">
           <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => setTab('submissions')}>신청 내역</button>
+          <button type="button" className={tab === 'attendance' ? 'is-active' : ''} aria-current={tab === 'attendance' ? 'page' : undefined} onClick={() => setTab('attendance')}>참석 여부</button>
           <button type="button" className={tab === 'fields' ? 'is-active' : ''} aria-current={tab === 'fields' ? 'page' : undefined} onClick={() => setTab('fields')}>폼 항목 관리</button>
         </nav>
 
         {tab === 'submissions' ? (
           <SubmissionsPanel submissions={submissions} fields={fields} onRefresh={refresh} onError={setError} />
+        ) : tab === 'attendance' ? (
+          <AttendanceResponsesPanel responses={attendanceResponses} onError={setError} />
         ) : (
           <FormFieldsPanel fields={fields} onRefresh={refresh} onError={setError} />
         )}
