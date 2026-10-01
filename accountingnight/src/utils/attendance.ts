@@ -58,14 +58,27 @@ export interface SuccessFocusTarget {
   focus(options?: FocusOptions): void;
 }
 
+export type AttendanceSuccessFrameScheduler = (callback: FrameRequestCallback) => number;
+
 export function moveToAttendanceSuccess(
   section: SuccessScrollTarget | null,
   heading: SuccessFocusTarget | null,
   reduceMotion: boolean,
 ): void {
+  heading?.focus({ preventScroll: true });
   section?.scrollIntoView({
     behavior: reduceMotion ? 'auto' : 'smooth',
     block: 'start',
   });
-  heading?.focus({ preventScroll: true });
+}
+
+export function scheduleAttendanceSuccessNavigation(
+  scheduleFrame: AttendanceSuccessFrameScheduler,
+  section: SuccessScrollTarget | null,
+  heading: SuccessFocusTarget | null,
+  reduceMotion: boolean,
+): number {
+  return scheduleFrame(() => {
+    moveToAttendanceSuccess(section, heading, reduceMotion);
+  });
 }

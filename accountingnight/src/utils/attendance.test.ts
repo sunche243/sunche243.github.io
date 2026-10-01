@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { AttendanceDraft } from '../types/attendance';
-import { moveToAttendanceSuccess, validateAttendanceResponse } from './attendance';
+import {
+  moveToAttendanceSuccess,
+  scheduleAttendanceSuccessNavigation,
+  validateAttendanceResponse,
+} from './attendance';
 
 const draft: AttendanceDraft = {
   name: '홍길동',
@@ -54,13 +58,53 @@ describe('attendance response validation', () => {
     expect(validate({ ...draft, privacyConsent: true }).errors.privacy).toBeUndefined();
   });
 
-  it('scrolls to the success section and focuses its heading after submission', () => {
-    const scrollIntoView = vi.fn();
-    const focus = vi.fn();
+  it('focuses with preventScroll and lets the attendance section own the scroll position', () => {
+    const calls: string[] = [];
+    const scrollIntoView = vi.fn(() => calls.push('section-scroll'));
+    const focus = vi.fn(() => calls.push('heading-focus'));
+    const documentScroll = vi.fn();
+    vi.stubGlobal('scrollTo', documentScroll);
 
     moveToAttendanceSuccess({ scrollIntoView }, { focus }, false);
 
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
     expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    expect(calls).toEqual(['heading-focus', 'section-scroll']);
+    expect(documentScroll).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
+  it('runs success navigation on the scheduled frame after the success DOM is rendered', () => {
+    const scrollIntoView = vi.fn();
+    const focus = vi.fn();
+    let frameCallback: FrameRequestCallback | undefined;
+    const scheduleFrame = vi.fn((callback: FrameRequestCallback) => {
+      frameCallback = callback;
+      return 17;
+    });
+
+    const frame = scheduleAttendanceSuccessNavigation(
+      scheduleFrame,
+      { scrollIntoView },
+      { focus },
+      false,
+    );
+
+    expect(frame).toBe(17);
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(focus).not.toHaveBeenCalled();
+
+    frameCallback?.(0);
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(focus).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses immediate section scrolling for reduced-motion users', () => {
+    const scrollIntoView = vi.fn();
+
+    moveToAttendanceSuccess({ scrollIntoView }, null, true);
+
+    expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'auto', block: 'start' });
   });
 });

@@ -1,4 +1,4 @@
-import { useLayoutEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { ContactShare } from '../sections/ContactShare';
 import { FinalClosing } from '../sections/FinalClosing';
 import { Hero } from '../sections/Hero';
@@ -7,6 +7,8 @@ import { AttendanceForm } from './AttendanceForm';
 import { AttendanceIntro } from './AttendanceIntro';
 
 export function AttendanceApp() {
+  const [responseComplete, setResponseComplete] = useState(false);
+
   useLayoutEffect(() => {
     const targetId = window.location.hash.slice(1);
     if (!targetId) return;
@@ -21,8 +23,8 @@ export function AttendanceApp() {
         scrollAriaLabel="참석 여부 회신 안내로 이동"
       />
       <main>
-        <AttendanceIntro />
-        <AttendanceForm />
+        {!responseComplete ? <AttendanceIntro /> : null}
+        <AttendanceForm onComplete={() => setResponseComplete(true)} />
         <Location />
         <ContactShare showShare={false} />
       </main>

@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { RevealSection } from '../components/RevealSection';
 import { attendancePrivacyPolicy } from '../config/privacy';
 import { submitAttendanceResponse } from '../services/attendance';
 import { isSupabaseConfigured, SupabaseConfigurationError } from '../services/supabase';
 import type { AttendanceDraft } from '../types/attendance';
 import {
-  attendanceResponseLabels,
-  moveToAttendanceSuccess,
+  scheduleAttendanceSuccessNavigation,
   validateAttendanceResponse,
 } from '../utils/attendance';
+import { AttendanceSuccess } from './AttendanceSuccess';
 
 const initialDraft: AttendanceDraft = {
   name: '',
@@ -19,10 +19,14 @@ const initialDraft: AttendanceDraft = {
   privacyConsent: false,
 };
 
-export function AttendanceForm() {
+interface AttendanceFormProps {
+  onComplete?: () => void;
+}
+
+export function AttendanceForm({ onComplete }: AttendanceFormProps) {
   const formStartedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
-  const successSectionRef = useRef<HTMLDivElement>(null);
+  const attendanceSectionRef = useRef<HTMLElement>(null);
   const successHeadingRef = useRef<HTMLHeadingElement>(null);
   const [draft, setDraft] = useState<AttendanceDraft>(initialDraft);
   const [honeypot, setHoneypot] = useState('');
@@ -30,17 +34,19 @@ export function AttendanceForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const setAttendanceSectionRef = useCallback((node: HTMLElement | null) => {
+    attendanceSectionRef.current = node;
+  }, []);
 
   useEffect(() => {
     if (!submitted) return;
 
-    const frame = window.requestAnimationFrame(() => {
-      moveToAttendanceSuccess(
-        successSectionRef.current,
-        successHeadingRef.current,
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-      );
-    });
+    const frame = scheduleAttendanceSuccessNavigation(
+      window.requestAnimationFrame.bind(window),
+      attendanceSectionRef.current,
+      successHeadingRef.current,
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+    );
 
     return () => window.cancelAnimationFrame(frame);
   }, [submitted]);
@@ -89,6 +95,7 @@ export function AttendanceForm() {
         formStartedAt: formStartedAt.current,
       });
       setSubmitted(true);
+      onComplete?.();
     } catch (error) {
       setErrors({
         form: error instanceof SupabaseConfigurationError
@@ -100,34 +107,24 @@ export function AttendanceForm() {
     }
   }
 
-  if (submitted && draft.attendanceStatus) {
-    return (
-      <RevealSection id="attendance-response" className="section--paper registration-section" label="참석 여부 회신 완료">
-        <div ref={successSectionRef} className="section-inner registration-success" role="status" aria-live="polite">
-          <p className="registration-success__eyebrow">THANK YOU</p>
-          <h2 ref={successHeadingRef} tabIndex={-1}>회신해 주셔서 감사합니다.</h2>
-          <p>참석 여부가 정상적으로 전달되었습니다.</p>
-          <dl>
-            <div><dt>성명</dt><dd>{draft.name.trim()}</dd></div>
-            <div><dt>참석 여부</dt><dd>{attendanceResponseLabels[draft.attendanceStatus]}</dd></div>
-          </dl>
-          <p className="registration-success__message">
-            {draft.attendanceStatus === 'attending' ? (
-              <>11월 13일 회계인의 밤에서<br />뵙기를 기대하겠습니다.</>
-            ) : (
-              <>소중한 회신에 감사드립니다.<br />다음 기회에 함께할 수 있기를 바랍니다.</>
-            )}
-          </p>
-        </div>
-      </RevealSection>
-    );
-  }
-
+  const completedStatus = submitted ? draft.attendanceStatus : null;
   const hasErrors = Object.values(errors).some(Boolean);
 
   return (
-    <RevealSection id="attendance-response" className="section--paper registration-section attendance-form-section" label="참석 여부 입력">
-      <div className="section-inner registration-layout">
+    <RevealSection
+      id="attendance-response"
+      className="section--paper registration-section attendance-response-section"
+      label={completedStatus ? '참석 여부 회신 완료' : '참석 여부 입력'}
+      sectionRef={setAttendanceSectionRef}
+    >
+      {completedStatus ? (
+        <AttendanceSuccess
+          name={draft.name.trim()}
+          status={completedStatus}
+          headingRef={successHeadingRef}
+        />
+      ) : (
+        <div className="section-inner registration-layout">
         <form ref={formRef} className="registration-form" onSubmit={handleSubmit} noValidate>
           <section className="registration-step" aria-labelledby="attendance-information-title">
             <header className="registration-step__heading">
@@ -293,7 +290,8 @@ export function AttendanceForm() {
           </button>
           <p className="registration-submit-note">응답을 변경해야 하는 경우 같은 정보로 다시 회신할 수 있습니다.</p>
         </form>
-      </div>
+        </div>
+      )}
     </RevealSection>
   );
 }
