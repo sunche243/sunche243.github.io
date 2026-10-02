@@ -1,5 +1,5 @@
 import type { User } from '@supabase/supabase-js';
-import type { AttendanceResponse } from '../types/attendance';
+import type { AttendanceResponse, AttendanceResponseEditableFields } from '../types/attendance';
 import type { FormField, FormFieldType, Submission, SubmissionAnswers, SubmissionStatus } from '../types/registration';
 import { getSupabase, SupabaseConfigurationError } from '../services/supabase';
 import { calculateSponsorshipAmount } from '../utils/registration';
@@ -117,6 +117,28 @@ export async function fetchAttendanceResponses(): Promise<AttendanceResponse[]> 
     attendance_status: row.attendance_status as AttendanceResponse['attendance_status'],
     privacy_consent_at: String(row.privacy_consent_at),
   }));
+}
+
+export async function updateAttendanceResponse(
+  id: string,
+  value: AttendanceResponseEditableFields,
+): Promise<void> {
+  const supabase = requireSupabase();
+  const { error } = await supabase.rpc('update_attendance_response', {
+    p_id: id,
+    p_name: value.name,
+    p_phone: value.phone,
+    p_admission_year: value.admission_year,
+    p_affiliation: value.affiliation,
+    p_attendance_status: value.attendance_status,
+  });
+  if (error) throw new Error('응답 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+}
+
+export async function deleteAttendanceResponse(id: string): Promise<void> {
+  const supabase = requireSupabase();
+  const { error } = await supabase.rpc('delete_attendance_response', { p_id: id });
+  if (error) throw new Error('응답 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.');
 }
 
 export async function fetchAllFormFields(): Promise<FormField[]> {

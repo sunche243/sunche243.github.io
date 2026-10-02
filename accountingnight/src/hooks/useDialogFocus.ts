@@ -29,7 +29,8 @@ export function useDialogFocus<T extends HTMLElement>(active: boolean, onClose: 
     document.body.style.overflow = 'hidden';
     document.documentElement.style.overflow = 'hidden';
 
-    const focusable = dialog?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    const autofocus = dialog?.querySelector<HTMLElement>('[data-autofocus]');
+    const focusable = autofocus ?? dialog?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
     (focusable ?? dialog)?.focus({ preventScroll: true });
 
     function handleKeyDown(event: KeyboardEvent) {

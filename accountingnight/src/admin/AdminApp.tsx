@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
+import { Toast } from '../components/Toast';
 import { isSupabaseConfigured } from '../services/supabase';
-import type { AttendanceResponse } from '../types/attendance';
+import type { AttendanceResponse, AttendanceResponseEditableFields } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
 import { formatWon } from '../utils/registration';
 import {
@@ -13,6 +14,7 @@ import {
 } from './adminService';
 import { calculateAdminStats } from './adminUtils';
 import { AttendanceResponsesPanel } from './AttendanceResponsesPanel';
+import { deleteAttendanceResponseFromList, updateAttendanceResponseInList } from './attendanceAdminUtils';
 import { FormFieldsPanel } from './FormFieldsPanel';
 import { SubmissionsPanel } from './SubmissionsPanel';
 
@@ -77,7 +79,22 @@ export function AdminApp() {
   const [fields, setFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
+  const toastTimeoutRef = useRef<number | null>(null);
   const stats = useMemo(() => calculateAdminStats(submissions), [submissions]);
+
+  const showToast = useCallback((message: string) => {
+    if (toastTimeoutRef.current !== null) window.clearTimeout(toastTimeoutRef.current);
+    setToastMessage(message);
+    toastTimeoutRef.current = window.setTimeout(() => {
+      setToastMessage('');
+      toastTimeoutRef.current = null;
+    }, 3_000);
+  }, []);
+
+  useEffect(() => () => {
+    if (toastTimeoutRef.current !== null) window.clearTimeout(toastTimeoutRef.current);
+  }, []);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -129,9 +146,18 @@ export function AdminApp() {
       setSubmissions([]);
       setAttendanceResponses([]);
       setFields([]);
+      setToastMessage('');
       setPhase('login');
     }
   }
+
+  const handleAttendanceUpdated = useCallback((id: string, value: AttendanceResponseEditableFields) => {
+    setAttendanceResponses((current) => updateAttendanceResponseInList(current, id, value));
+  }, []);
+
+  const handleAttendanceDeleted = useCallback((id: string) => {
+    setAttendanceResponses((current) => deleteAttendanceResponseFromList(current, id));
+  }, []);
 
   if (!configured) return <ConfigurationNotice />;
   if (phase === 'checking') return <main className="admin-centered"><p className="admin-loading">관리자 권한을 확인하고 있습니다.</p></main>;
@@ -169,11 +195,18 @@ export function AdminApp() {
         {tab === 'submissions' ? (
           <SubmissionsPanel submissions={submissions} fields={fields} onRefresh={refresh} onError={setError} />
         ) : tab === 'attendance' ? (
-          <AttendanceResponsesPanel responses={attendanceResponses} onError={setError} />
+          <AttendanceResponsesPanel
+            responses={attendanceResponses}
+            onUpdated={handleAttendanceUpdated}
+            onDeleted={handleAttendanceDeleted}
+            onError={setError}
+            onSuccess={showToast}
+          />
         ) : (
           <FormFieldsPanel fields={fields} onRefresh={refresh} onError={setError} />
         )}
       </main>
+      <Toast message={toastMessage} />
     </div>
   );
 }

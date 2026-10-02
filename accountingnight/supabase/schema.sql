@@ -224,6 +224,86 @@ begin
 end;
 $$;
 
+create or replace function public.update_attendance_response(
+  p_id uuid,
+  p_name text,
+  p_phone text,
+  p_admission_year text,
+  p_affiliation text,
+  p_attendance_status text
+)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_phone text;
+  v_admission_year text;
+  v_affiliation text;
+begin
+  if not public.is_admin() then
+    raise exception 'Not authorized' using errcode = '42501';
+  end if;
+
+  if p_name is null or char_length(btrim(p_name)) not between 1 and 80 then
+    raise exception 'Invalid name';
+  end if;
+
+  if coalesce(btrim(p_phone), '') !~ '^(010[0-9]{8}|010-[0-9]{4}-[0-9]{4})$' then
+    raise exception 'Invalid phone';
+  end if;
+  v_phone := replace(btrim(p_phone), '-', '');
+
+  v_admission_year := nullif(btrim(coalesce(p_admission_year, '')), '');
+  if v_admission_year is not null and v_admission_year !~ '^[0-9]{2}$' then
+    raise exception 'Invalid admission year';
+  end if;
+
+  v_affiliation := nullif(btrim(coalesce(p_affiliation, '')), '');
+  if v_affiliation is not null and char_length(v_affiliation) > 200 then
+    raise exception 'Invalid affiliation';
+  end if;
+
+  if p_attendance_status is null or p_attendance_status not in ('attending', 'not_attending') then
+    raise exception 'Invalid attendance status';
+  end if;
+
+  update public.attendance_responses
+  set
+    name = btrim(p_name),
+    phone = v_phone,
+    admission_year = v_admission_year,
+    affiliation = v_affiliation,
+    attendance_status = p_attendance_status
+  where id = p_id;
+
+  if not found then
+    raise exception 'Attendance response not found' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
+create or replace function public.delete_attendance_response(p_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Not authorized' using errcode = '42501';
+  end if;
+
+  delete from public.attendance_responses
+  where id = p_id;
+
+  if not found then
+    raise exception 'Attendance response not found' using errcode = 'P0002';
+  end if;
+end;
+$$;
+
 drop function if exists public.submit_sponsorship(text, text, boolean, integer, text, jsonb, boolean, text, timestamptz);
 
 create or replace function public.submit_sponsorship(
@@ -437,14 +517,14 @@ alter table public.attendance_responses enable row level security;
 revoke all on table public.admins from anon, authenticated;
 revoke all on table public.form_fields from anon, authenticated;
 revoke all on table public.submissions from anon, authenticated;
-revoke all on table public.attendance_responses from anon, authenticated;
+revoke all on table public.attendance_responses from public, anon, authenticated;
 
 grant select on table public.admins to authenticated;
 grant select on table public.form_fields to anon, authenticated;
 grant insert, update on table public.form_fields to authenticated;
 grant select, delete on table public.submissions to authenticated;
 grant update (status, admin_memo) on table public.submissions to authenticated;
-grant select, delete on table public.attendance_responses to authenticated;
+grant select on table public.attendance_responses to authenticated;
 
 revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated;
@@ -454,6 +534,12 @@ grant execute on function public.submit_sponsorship(text, text, text, bigint, te
 
 revoke all on function public.submit_attendance_response(text, text, text, text, text, boolean, text, timestamptz) from public;
 grant execute on function public.submit_attendance_response(text, text, text, text, text, boolean, text, timestamptz) to anon, authenticated;
+
+revoke all on function public.update_attendance_response(uuid, text, text, text, text, text) from public, anon, authenticated;
+grant execute on function public.update_attendance_response(uuid, text, text, text, text, text) to authenticated;
+
+revoke all on function public.delete_attendance_response(uuid) from public, anon, authenticated;
+grant execute on function public.delete_attendance_response(uuid) to authenticated;
 
 drop policy if exists admins_read_self on public.admins;
 create policy admins_read_self
@@ -511,13 +597,7 @@ on public.attendance_responses for select
 to authenticated
 using ((select public.is_admin()));
 
-drop policy if exists attendance_responses_admin_delete on public.attendance_responses;
-create policy attendance_responses_admin_delete
-on public.attendance_responses for delete
-to authenticated
-using ((select public.is_admin()));
-
 -- No direct INSERT grant or policy exists for submissions.
 -- Public visitors can only submit through submit_sponsorship(), which controls every writable column.
--- No direct INSERT, UPDATE, or public SELECT grant exists for attendance_responses.
--- Public visitors can only create a new row through submit_attendance_response().
+-- attendance_responses permits authenticated administrator reads only.
+-- Creates use submit_attendance_response(); mutations use the authenticated-only admin RPCs.

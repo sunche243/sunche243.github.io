@@ -12,6 +12,14 @@ export interface AttendanceResponse {
   privacy_consent_at: string;
 }
 
+export interface AttendanceResponseEditableFields {
+  name: string;
+  phone: string;
+  admission_year: string | null;
+  affiliation: string | null;
+  attendance_status: AttendanceResponseStatus;
+}
+
 export interface AttendanceDraft {
   name: string;
   phone: string;

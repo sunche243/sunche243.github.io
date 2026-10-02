@@ -78,6 +78,7 @@
 .admin-auth-panel input,
 .field-editor input:not([type='checkbox']),
 .field-editor select,
+.admin-edit-fields input,
 .admin-edit-fields select,
 .admin-edit-fields textarea,
 .admin-filters input,
@@ -110,6 +111,12 @@
   color: var(--black);
   border-color: rgba(17, 17, 17, 0.34);
   background: transparent;
+}
+
+.admin-button--danger {
+  border-color: #7f3128;
+  color: var(--ivory);
+  background: #7f3128;
 }
 
 .admin-button:disabled,
@@ -333,7 +340,21 @@
 }
 
 .attendance-admin-table {
-  min-width: 940px;
+  min-width: 1000px;
+}
+
+.attendance-admin-table .attendance-actions-cell {
+  position: sticky;
+  right: 0;
+  width: 102px;
+  min-width: 102px;
+  background: #f9f5ec;
+  box-shadow: -8px 0 14px rgba(17, 17, 17, 0.05);
+}
+
+.attendance-admin-table th.attendance-actions-cell {
+  z-index: 1;
+  background: #e6dfd2;
 }
 
 .attendance-status,
@@ -558,6 +579,50 @@
   resize: vertical;
 }
 
+.attendance-edit-fields {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.admin-field-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.admin-optional,
+.admin-field-help {
+  color: var(--gray-600);
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.admin-field-error {
+  color: #91372d;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.attendance-delete-copy {
+  color: var(--gray-800);
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.attendance-delete-copy p {
+  margin: 0;
+}
+
+.attendance-delete-copy p + p {
+  margin-top: 10px;
+  color: #7f3128;
+  font-size: 0.84rem;
+  font-weight: 700;
+}
+
 .admin-dialog__actions {
   display: flex;
   align-items: center;
@@ -613,6 +678,15 @@
   cursor: pointer;
   background: transparent;
   font-size: 0.72rem;
+}
+
+.admin-row-actions .admin-row-action--danger {
+  border-color: rgba(145, 55, 45, 0.34);
+  color: #7f3128;
+}
+
+.admin-page .toast {
+  bottom: calc(24px + env(safe-area-inset-bottom));
 }
 
 .field-editor {

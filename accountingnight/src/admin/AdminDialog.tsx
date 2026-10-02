@@ -3,11 +3,12 @@ import { useDialogFocus } from '../hooks/useDialogFocus';
 
 interface AdminDialogProps extends PropsWithChildren {
   titleId: string;
+  descriptionId?: string;
   onClose: () => void;
   wide?: boolean;
 }
 
-export function AdminDialog({ titleId, onClose, wide = false, children }: AdminDialogProps) {
+export function AdminDialog({ titleId, descriptionId, onClose, wide = false, children }: AdminDialogProps) {
   const dialogRef = useDialogFocus<HTMLDivElement>(true, onClose);
 
   function handleBackdrop(event: MouseEvent<HTMLDivElement>) {
@@ -22,6 +23,7 @@ export function AdminDialog({ titleId, onClose, wide = false, children }: AdminD
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        aria-describedby={descriptionId}
         tabIndex={-1}
       >
         {children}
