@@ -26,7 +26,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: accountingnight/package-lock.json
+          cache-dependency-path: |
+            accountingnight/package-lock.json
+            slideshow-player/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -47,6 +49,22 @@ jobs:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
 
+      - name: Install slideshow dependencies
+        run: npm ci
+        working-directory: slideshow-player
+
+      - name: Lint slideshow
+        run: npm run lint
+        working-directory: slideshow-player
+
+      - name: Test slideshow
+        run: npm run test
+        working-directory: slideshow-player
+
+      - name: Build slideshow
+        run: npm run build
+        working-directory: slideshow-player
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
@@ -59,9 +77,12 @@ jobs:
             --exclude='.gitignore' \
             --exclude='.DS_Store' \
             --exclude='accountingnight/' \
+            --exclude='slideshow-player/' \
             ./ _site/
           mkdir -p _site/accountingnight
           cp -R accountingnight/dist/. _site/accountingnight/
+          mkdir -p _site/slideshow-player
+          cp -R slideshow-player/dist/. _site/slideshow-player/
           touch _site/.nojekyll
 
       - name: Upload artifact
