@@ -1,18 +1,21 @@
 import { RevealSection } from '../components/RevealSection';
 import { SectionHeader } from '../components/SectionHeader';
-import { attendance } from '../data/event';
+import { sponsorship } from '../data/event';
 
 export function Sponsorship() {
   return (
-    <RevealSection className="section--dark sponsorship" label="참석 여부 회신 안내">
+    <RevealSection className="section--dark sponsorship" label="후원 안내">
       <div className="section-inner section-inner--narrow">
-        <SectionHeader eyebrow="RSVP" title="참석 여부를 알려주세요" />
+        <SectionHeader eyebrow="TOGETHER FOR THE NEXT 50 YEARS" title="새로운 50년을 함께 만들어주세요" />
         <p>
-          원활한 행사 준비와 좌석 배정을 위해
-          <br />회계인의 밤 참석 여부를 회신해 주시면 감사하겠습니다.
+          지난 50년의 발자취를 기념하고
+          <br />
+          앞으로 이어질 새로운 역사를 준비하는 자리에
+          <br />
+          동문 여러분의 소중한 뜻을 함께하고자 합니다.
         </p>
-        <a className="button button--gold" href={attendance.url}>
-          참석 여부 회신하기
+        <a className="button button--gold" href={sponsorship.url}>
+          참석 및 후원 확약하기
         </a>
       </div>
     </RevealSection>
