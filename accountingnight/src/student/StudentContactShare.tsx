@@ -5,6 +5,7 @@ import { copyText, shareInvitation } from '../utils/share';
 
 interface StudentContactShareProps {
   toast?: (message: string) => void;
+  showShare?: boolean;
 }
 
 const studentContact = {
@@ -14,7 +15,7 @@ const studentContact = {
   email: 'starcj7@naver.com',
 };
 
-export function StudentContactShare({ toast }: StudentContactShareProps) {
+export function StudentContactShare({ toast, showShare = true }: StudentContactShareProps) {
   const notify = toast ?? (() => undefined);
 
   async function handleKakao() {
@@ -36,7 +37,7 @@ export function StudentContactShare({ toast }: StudentContactShareProps) {
   }
 
   return (
-    <RevealSection className="section--ivory contact" label="문의와 공유">
+    <RevealSection className="section--ivory contact" label={showShare ? '문의와 공유' : '문의'}>
       <div className="section-inner">
         <SectionHeader eyebrow="CONTACT" />
         <p className="contact__intro">
@@ -55,18 +56,20 @@ export function StudentContactShare({ toast }: StudentContactShareProps) {
             <p className="contact__notice">※ 문의는 가급적 이메일로 부탁드립니다.</p>
           </article>
         </div>
-        <div className="share-panel">
-          <p className="share-panel__label">SHARE INVITATION</p>
-          <p>초대장을 함께 나누세요</p>
-          <div className="button-row">
-            <button className="button button--gold" type="button" onClick={handleKakao}>
-              카카오톡 공유
-            </button>
-            <button className="button button--outline-dark" type="button" onClick={handleCopy}>
-              URL 복사
-            </button>
+        {showShare ? (
+          <div className="share-panel">
+            <p className="share-panel__label">SHARE INVITATION</p>
+            <p>초대장을 함께 나누세요</p>
+            <div className="button-row">
+              <button className="button button--gold" type="button" onClick={handleKakao}>
+                카카오톡 공유
+              </button>
+              <button className="button button--outline-dark" type="button" onClick={handleCopy}>
+                URL 복사
+              </button>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </RevealSection>
   );

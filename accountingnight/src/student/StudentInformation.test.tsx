@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { StudentContactShare } from './StudentContactShare';
@@ -9,6 +10,20 @@ describe('student invitation information', () => {
 
     expect(markup).toContain('010-9678-4100');
     expect(markup).toContain('starcj7@naver.com');
+  });
+
+  it('uses the student-only contact without sharing controls on the attendance page', () => {
+    const markup = renderToStaticMarkup(<StudentContactShare showShare={false} />);
+
+    expect(markup).toContain('010-9678-4100');
+    expect(markup).toContain('starcj7@naver.com');
+    expect(markup).not.toContain('SHARE INVITATION');
+  });
+
+  it('keeps the student invitation entry path deployable on Linux', () => {
+    const html = readFileSync(new URL('../../student/index.html', import.meta.url), 'utf8');
+
+    expect(html).toContain('src="../src/student-main.tsx"');
   });
 
   it('shows the complete student event program', () => {

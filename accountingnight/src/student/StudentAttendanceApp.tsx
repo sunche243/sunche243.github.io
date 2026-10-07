@@ -1,9 +1,9 @@
 import { useLayoutEffect, useState } from 'react';
-import { ContactShare } from '../sections/ContactShare';
 import { Hero } from '../sections/Hero';
 import { Location } from '../sections/Location';
 import { StudentAttendanceForm } from './StudentAttendanceForm';
 import { StudentAttendanceIntro } from './StudentAttendanceIntro';
+import { StudentContactShare } from './StudentContactShare';
 import { StudentFinalClosing } from './StudentFinalClosing';
 
 export function StudentAttendanceApp() {
@@ -26,7 +26,7 @@ export function StudentAttendanceApp() {
         {!responseComplete ? <StudentAttendanceIntro /> : null}
         <StudentAttendanceForm onComplete={() => setResponseComplete(true)} />
         <Location />
-        <ContactShare showShare={false} />
+        <StudentContactShare showShare={false} />
       </main>
       <StudentFinalClosing />
     </>
