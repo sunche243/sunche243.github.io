@@ -39,6 +39,9 @@ describe('student attendance form', () => {
 
     expect(experienced).toContain('id="student-council-details"');
     expect(experienced).toContain('required=""');
+    expect(experienced).toContain('2024년 회계학과 학생회 총무부장');
+    expect(experienced).toContain('가장 최근 이력 1개만 작성해도 됩니다.');
+    expect(experienced).not.toContain('총무국장');
     expect(inexperienced).not.toContain('id="student-council-details"');
   });
 });

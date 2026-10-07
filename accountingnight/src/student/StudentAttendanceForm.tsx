@@ -74,13 +74,15 @@ export function StudentCouncilExperienceFields({
             rows={4}
             maxLength={500}
             required
-            placeholder="예: 2024년 회계학과 학생회 총무국장"
+            placeholder="예: 2024년 회계학과 학생회 총무부장"
             value={details}
             onChange={(event) => onDetailsChange(event.target.value)}
             aria-invalid={Boolean(errors.studentCouncilDetails)}
             aria-describedby={errors.studentCouncilDetails ? 'student-council-details-error' : 'student-council-details-help'}
           />
-          <span className="student-council-help" id="student-council-details-help">활동했던 연도와 직책을 자유롭게 작성해 주세요.</span>
+          <span className="student-council-help" id="student-council-details-help">
+            활동했던 연도와 직책을 자유롭게 작성해 주세요. 여러 활동 이력이 있는 경우 가장 최근 이력 1개만 작성해도 됩니다.
+          </span>
           {errors.studentCouncilDetails ? (
             <span className="field-error" id="student-council-details-error">{errors.studentCouncilDetails}</span>
           ) : null}
