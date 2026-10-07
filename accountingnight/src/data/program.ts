@@ -17,19 +17,31 @@ export const programItems: ProgramItem[] = [
     title: '개회',
   },
   {
-    time: '19:00',
-    title: '식사 시작',
+    time: '18:00',
+    title: '환영사',
   },
   {
-    time: '19:55',
+    time: '18:30',
+    title: '축사',
+  },
+  {
+    time: '19:00-19:55',
+    title: '식사',
+  },
+  {
+    time: '19:55-20:20',
     title: 'ACCORD 공연',
   },
   {
-    time: '20:10',
-    title: '레크레이션',
+    time: '20:20',
+    title: '2부 시작 및 레크레이션',
+  },
+  {
+    time: '20:40',
+    title: '럭키드로우',
   },
   {
     time: '21:00',
-    title: '폐회',
+    title: '폐회식',
   },
 ];
