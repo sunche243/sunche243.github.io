@@ -37,6 +37,38 @@
   margin: -2px 0 0;
 }
 
+.student-selection-consent {
+  margin-top: 14px;
+}
+
+.student-selection-criteria {
+  margin-top: 14px;
+  padding: 18px 20px;
+  border-left: 3px solid var(--gold);
+  background: rgba(247, 244, 237, 0.55);
+  color: var(--gray-700);
+  font-size: 0.82rem;
+  line-height: 1.75;
+}
+
+.student-selection-criteria strong {
+  color: var(--ink);
+  font-size: 0.88rem;
+}
+
+.student-selection-criteria p {
+  margin: 6px 0 8px;
+}
+
+.student-selection-criteria ol {
+  margin: 0;
+  padding-left: 1.35rem;
+}
+
+.student-selection-criteria li + li {
+  margin-top: 4px;
+}
+
 .student-program .program-list > li {
   grid-template-columns: minmax(108px, auto) minmax(0, 1fr);
 }

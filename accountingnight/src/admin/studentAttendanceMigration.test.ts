@@ -5,6 +5,10 @@ const migration = readFileSync(
   new URL('../../supabase/migrations/20261007150811_student_attendance_responses.sql', import.meta.url),
   'utf8',
 );
+const selectionCriteriaMigration = readFileSync(
+  new URL('../../supabase/migrations/20261007161112_student_selection_criteria_consent.sql', import.meta.url),
+  'utf8',
+);
 const schema = readFileSync(new URL('../../supabase/schema.sql', import.meta.url), 'utf8');
 
 describe('student attendance SQL contract', () => {
@@ -37,5 +41,15 @@ describe('student attendance SQL contract', () => {
     expect(schema).toContain('create or replace function public.submit_student_attendance_response(');
     expect(schema).toContain('create policy student_attendance_responses_admin_read');
     expect(schema).toContain('grant select on table public.student_attendance_responses to authenticated;');
+  });
+
+  it('requires and records selection criteria consent without discarding existing responses', () => {
+    expect(selectionCriteriaMigration).toContain('add column if not exists selection_criteria_consent_at timestamptz;');
+    expect(selectionCriteriaMigration).toContain('set selection_criteria_consent_at = privacy_consent_at');
+    expect(selectionCriteriaMigration).toContain('alter column selection_criteria_consent_at set not null;');
+    expect(selectionCriteriaMigration).toContain("raise exception 'Selection criteria consent is required';");
+    expect(selectionCriteriaMigration).toContain('selection_criteria_consent_at');
+    expect(schema).toContain('selection_criteria_consent_at timestamptz not null');
+    expect(schema).toContain('p_selection_criteria_consent boolean');
   });
 });

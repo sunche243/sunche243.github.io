@@ -149,7 +149,7 @@ export async function fetchStudentAttendanceResponses(): Promise<StudentAttendan
   const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('student_attendance_responses')
-    .select('id,created_at,updated_at,name,phone,admission_year,student_council_experience,student_council_details,attendance_status,privacy_consent_at')
+    .select('id,created_at,updated_at,name,phone,admission_year,student_council_experience,student_council_details,attendance_status,privacy_consent_at,selection_criteria_consent_at')
     .order('created_at', { ascending: false });
   if (error) throw new Error('학생 참석 회신을 불러오지 못했습니다. 새 migration 적용 여부를 확인해주세요.');
 
@@ -164,6 +164,7 @@ export async function fetchStudentAttendanceResponses(): Promise<StudentAttendan
     student_council_details: row.student_council_details === null ? null : String(row.student_council_details),
     attendance_status: row.attendance_status as StudentAttendanceResponse['attendance_status'],
     privacy_consent_at: String(row.privacy_consent_at),
+    selection_criteria_consent_at: String(row.selection_criteria_consent_at),
   }));
 }
 

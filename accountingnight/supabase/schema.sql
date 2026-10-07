@@ -85,6 +85,7 @@ create table if not exists public.student_attendance_responses (
   student_council_details text null,
   attendance_status text not null check (attendance_status in ('attending', 'not_attending')),
   privacy_consent_at timestamptz not null,
+  selection_criteria_consent_at timestamptz not null,
   constraint student_attendance_responses_council_details_check check (
     (
       student_council_experience
@@ -344,6 +345,7 @@ create or replace function public.submit_student_attendance_response(
   p_student_council_details text,
   p_attendance_status text,
   p_privacy_consent boolean,
+  p_selection_criteria_consent boolean,
   p_website text,
   p_started_at timestamptz
 )
@@ -401,6 +403,10 @@ begin
     raise exception 'Privacy consent is required';
   end if;
 
+  if p_selection_criteria_consent is distinct from true then
+    raise exception 'Selection criteria consent is required';
+  end if;
+
   insert into public.student_attendance_responses (
     name,
     phone,
@@ -408,7 +414,8 @@ begin
     student_council_experience,
     student_council_details,
     attendance_status,
-    privacy_consent_at
+    privacy_consent_at,
+    selection_criteria_consent_at
   ) values (
     btrim(p_name),
     v_phone,
@@ -416,6 +423,7 @@ begin
     p_student_council_experience,
     v_student_council_details,
     p_attendance_status,
+    now(),
     now()
   )
   returning id into v_response_id;
@@ -754,8 +762,8 @@ grant execute on function public.update_attendance_response(uuid, text, text, te
 revoke all on function public.delete_attendance_response(uuid) from public, anon, authenticated;
 grant execute on function public.delete_attendance_response(uuid) to authenticated;
 
-revoke all on function public.submit_student_attendance_response(text, text, text, boolean, text, text, boolean, text, timestamptz) from public, anon, authenticated;
-grant execute on function public.submit_student_attendance_response(text, text, text, boolean, text, text, boolean, text, timestamptz) to anon, authenticated;
+revoke all on function public.submit_student_attendance_response(text, text, text, boolean, text, text, boolean, boolean, text, timestamptz) from public, anon, authenticated;
+grant execute on function public.submit_student_attendance_response(text, text, text, boolean, text, text, boolean, boolean, text, timestamptz) to anon, authenticated;
 
 revoke all on function public.update_student_attendance_response(uuid, text, text, text, boolean, text, text) from public, anon, authenticated;
 grant execute on function public.update_student_attendance_response(uuid, text, text, text, boolean, text, text) to authenticated;

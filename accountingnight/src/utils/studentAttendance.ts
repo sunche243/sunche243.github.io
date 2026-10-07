@@ -44,6 +44,9 @@ export function validateStudentAttendanceResponse({
     errors.attendanceStatus = '참석 여부를 선택해주세요.';
   }
   if (!draft.privacyConsent) errors.privacy = '개인정보 수집 및 이용 동의가 필요합니다.';
+  if (!draft.selectionCriteriaConsent) {
+    errors.selectionCriteriaConsent = '참석자 선정 기준 동의가 필요합니다.';
+  }
   if (honeypot.trim()) errors.form = '요청을 처리할 수 없습니다.';
   if (now - formStartedAt < 2_000) errors.form = '잠시 후 다시 제출해주세요.';
 

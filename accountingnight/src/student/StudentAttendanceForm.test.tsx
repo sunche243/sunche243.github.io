@@ -9,6 +9,10 @@ describe('student attendance form', () => {
     expect(html).toContain('학생회 활동 여부');
     expect(html).toContain('활동 경험이 있습니다');
     expect(html).toContain('활동 경험이 없습니다');
+    expect(html).toContain('참석자 선정 기준에 동의합니다.');
+    expect(html).toContain('학생회 활동 경험이 확인된 신청자를 우선 선발합니다.');
+    expect(html).toContain('미경험 신청자를 대상으로 무작위 추첨하여 선정합니다.');
+    expect(html).toContain('참가비 30,000원');
     expect(html).not.toContain('현재 소속 및 직함');
   });
 

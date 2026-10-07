@@ -17,6 +17,7 @@ const input = {
   studentCouncilDetails: '2025년 학생회장',
   attendanceStatus: 'attending' as const,
   privacyConsent: true,
+  selectionCriteriaConsent: true,
   honeypot: '',
   formStartedAt: Date.parse('2026-10-07T00:00:00Z'),
 };
@@ -38,6 +39,7 @@ describe('student attendance submission service', () => {
       p_student_council_details: input.studentCouncilDetails,
       p_attendance_status: input.attendanceStatus,
       p_privacy_consent: true,
+      p_selection_criteria_consent: true,
       p_website: '',
       p_started_at: '2026-10-07T00:00:00.000Z',
     });

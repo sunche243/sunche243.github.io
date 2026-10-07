@@ -1,7 +1,7 @@
 import { RevealSection } from '../components/RevealSection';
 import { SectionHeader } from '../components/SectionHeader';
 
-const studentAttendanceUrl = `${import.meta.env.BASE_URL}student/attendance/`;
+const studentAttendanceUrl = `${import.meta.env.BASE_URL}student/attendance/#student-attendance-response`;
 
 export function StudentParticipation() {
   return (

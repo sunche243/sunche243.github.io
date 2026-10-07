@@ -18,6 +18,7 @@ const experienced: StudentAttendanceResponse = {
   student_council_details: '2025년 학생회장',
   attendance_status: 'attending',
   privacy_consent_at: '2026-10-07T00:00:00Z',
+  selection_criteria_consent_at: '2026-10-07T00:00:00Z',
 };
 
 const inexperienced: StudentAttendanceResponse = {

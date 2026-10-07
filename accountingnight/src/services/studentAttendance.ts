@@ -9,6 +9,7 @@ export interface SubmitStudentAttendanceResponseInput {
   studentCouncilDetails: string;
   attendanceStatus: AttendanceResponseStatus;
   privacyConsent: boolean;
+  selectionCriteriaConsent: boolean;
   honeypot: string;
   formStartedAt: number;
 }
@@ -29,6 +30,7 @@ export async function submitStudentAttendanceResponse(
       : null,
     p_attendance_status: input.attendanceStatus,
     p_privacy_consent: input.privacyConsent,
+    p_selection_criteria_consent: input.selectionCriteriaConsent,
     p_website: input.honeypot,
     p_started_at: new Date(input.formStartedAt).toISOString(),
   });

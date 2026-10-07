@@ -11,6 +11,7 @@ export interface StudentAttendanceResponse {
   student_council_details: string | null;
   attendance_status: AttendanceResponseStatus;
   privacy_consent_at: string;
+  selection_criteria_consent_at: string;
 }
 
 export interface StudentAttendanceResponseEditableFields {
@@ -30,4 +31,5 @@ export interface StudentAttendanceDraft {
   studentCouncilDetails: string;
   attendanceStatus: AttendanceResponseStatus | null;
   privacyConsent: boolean;
+  selectionCriteriaConsent: boolean;
 }

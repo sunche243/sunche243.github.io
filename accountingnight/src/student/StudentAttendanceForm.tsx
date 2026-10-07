@@ -16,6 +16,7 @@ const initialDraft: StudentAttendanceDraft = {
   studentCouncilDetails: '',
   attendanceStatus: null,
   privacyConsent: false,
+  selectionCriteriaConsent: false,
 };
 
 interface StudentCouncilExperienceFieldsProps {
@@ -175,6 +176,7 @@ export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps
         studentCouncilDetails: draft.studentCouncilDetails.trim(),
         attendanceStatus: draft.attendanceStatus,
         privacyConsent: draft.privacyConsent,
+        selectionCriteriaConsent: draft.selectionCriteriaConsent,
         honeypot,
         formStartedAt: formStartedAt.current,
       });
@@ -338,6 +340,33 @@ export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps
                 </dl>
               ) : null}
               {errors.privacy ? <span className="field-error" id="student-attendance-privacy-error">{errors.privacy}</span> : null}
+            </div>
+
+            <div className="privacy-consent student-selection-consent">
+              <label className="registration-checkline">
+                <input
+                  id="student-selection-criteria-consent"
+                  type="checkbox"
+                  required
+                  checked={draft.selectionCriteriaConsent}
+                  onChange={(event) => updateDraft('selectionCriteriaConsent', event.target.checked)}
+                  aria-invalid={Boolean(errors.selectionCriteriaConsent)}
+                  aria-describedby={`student-selection-criteria${errors.selectionCriteriaConsent ? ' student-selection-criteria-error' : ''}`}
+                />
+                <span>참석자 선정 기준에 동의합니다. <b aria-label="필수">*</b></span>
+              </label>
+              <div id="student-selection-criteria" className="student-selection-criteria">
+                <strong>참석자 선정 기준</strong>
+                <p>원활한 행사 운영을 위해 아래 기준에 따라 참석자를 선정합니다.</p>
+                <ol>
+                  <li>회계학과 학생회 활동 경험이 확인된 신청자를 우선 선발합니다.</li>
+                  <li>우선 선발 후 잔여 인원은 학생회 활동 미경험 신청자를 대상으로 무작위 추첨하여 선정합니다.</li>
+                  <li>최종 선정 안내 후 별도로 고지되는 납부 기한까지 참가비 30,000원의 납부가 확인되지 않을 경우, 선정 및 우선순위가 취소될 수 있으며 해당 기회는 차순위 신청자에게 이전될 수 있습니다.</li>
+                </ol>
+              </div>
+              {errors.selectionCriteriaConsent ? (
+                <span className="field-error" id="student-selection-criteria-error">{errors.selectionCriteriaConsent}</span>
+              ) : null}
             </div>
 
             <div className="registration-honeypot" aria-hidden="true">

@@ -10,6 +10,7 @@ const draft: StudentAttendanceDraft = {
   studentCouncilDetails: '2025년 회계학과 학생회 기획국장',
   attendanceStatus: 'attending',
   privacyConsent: true,
+  selectionCriteriaConsent: true,
 };
 
 function validate(nextDraft: StudentAttendanceDraft) {
@@ -50,8 +51,9 @@ describe('student attendance response validation', () => {
     expect(validate({ ...draft, phone }).errors.phone).toBeUndefined();
   });
 
-  it('validates the attendance status and privacy consent', () => {
+  it('validates the attendance status and required consents', () => {
     expect(validate({ ...draft, attendanceStatus: null }).errors.attendanceStatus).toBeTruthy();
     expect(validate({ ...draft, privacyConsent: false }).errors.privacy).toBeTruthy();
+    expect(validate({ ...draft, selectionCriteriaConsent: false }).errors.selectionCriteriaConsent).toBeTruthy();
   });
 });
