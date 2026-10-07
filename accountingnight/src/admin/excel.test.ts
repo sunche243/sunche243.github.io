@@ -6,7 +6,8 @@ import { describe, expect, it } from 'vitest';
 import writeExcelFile from 'write-excel-file/node';
 import type { AttendanceResponse } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
-import { buildAttendanceExcelSheet, buildExcelSheet } from './excel';
+import type { StudentAttendanceResponse } from '../types/studentAttendance';
+import { buildAttendanceExcelSheet, buildExcelSheet, buildStudentAttendanceExcelSheet } from './excel';
 
 const field: FormField = {
   id: 'archived-field',
@@ -66,6 +67,18 @@ const attendanceResponse: AttendanceResponse = {
   privacy_consent_at: '2026-10-01T00:00:00Z',
 };
 
+const studentAttendanceResponse: StudentAttendanceResponse = {
+  id: 'student-attendance-1',
+  created_at: '2026-10-07T00:00:00Z',
+  name: '박재학',
+  phone: '01011112222',
+  admission_year: '24',
+  student_council_experience: true,
+  student_council_details: '2025년 회계학과 학생회장',
+  attendance_status: 'attending',
+  privacy_consent_at: '2026-10-07T00:00:00Z',
+};
+
 interface XlsxCellXml {
   attributes: string;
   value: string;
@@ -111,6 +124,18 @@ describe('Excel export rows', () => {
     expect(sheet[1][2]).toMatchObject({ value: 1_098_765_432, type: Number, format: '00000000000' });
     expect(sheet[1][3]).toMatchObject({ value: 8, type: Number, format: '00' });
     expect(sheet[1][5]).toBe('불참');
+  });
+
+  it('builds a separate student attendance sheet with council activity fields', () => {
+    const sheet = buildStudentAttendanceExcelSheet([studentAttendanceResponse]);
+    const headings = sheet[0].map((cell) => typeof cell === 'object' && cell && 'value' in cell ? cell.value : cell);
+
+    expect(headings).toEqual(['회신일시', '성명', '전화번호', '입학년도', '학생회 활동 여부', '활동 연도 및 직책', '참석 여부']);
+    expect(sheet[1][2]).toMatchObject({ value: 1_011_112_222, type: Number, format: '00000000000' });
+    expect(sheet[1][3]).toMatchObject({ value: 24, type: Number, format: '00' });
+    expect(sheet[1][4]).toBe('경험 있음');
+    expect(sheet[1][5]).toBe('2025년 회계학과 학생회장');
+    expect(sheet[1][6]).toBe('참석');
   });
 
   it('exports C, D, and G as typed number cells while preserving inactive fields', () => {

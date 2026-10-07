@@ -1,0 +1,38 @@
+.student-council-fields {
+  display: grid;
+  gap: 22px;
+  margin-top: 28px;
+}
+
+.student-council-options legend {
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.student-council-options legend,
+.student-council-options > .student-council-help,
+.student-council-options > .field-error {
+  grid-column: 1 / -1;
+}
+
+.student-council-options legend span {
+  color: #9b3f34;
+}
+
+.student-council-help {
+  margin: 0 0 8px;
+  color: var(--gray-600);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+.student-council-details {
+  padding: 22px;
+  border-left: 3px solid var(--gold);
+  background: rgba(247, 244, 237, 0.45);
+}
+
+.student-council-details .student-council-help {
+  margin: -2px 0 0;
+}

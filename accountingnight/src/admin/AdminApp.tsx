@@ -3,10 +3,15 @@ import { Toast } from '../components/Toast';
 import { isSupabaseConfigured } from '../services/supabase';
 import type { AttendanceResponse, AttendanceResponseEditableFields } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
+import type {
+  StudentAttendanceResponse,
+  StudentAttendanceResponseEditableFields,
+} from '../types/studentAttendance';
 import { formatWon } from '../utils/registration';
 import {
   fetchAllFormFields,
   fetchAttendanceResponses,
+  fetchStudentAttendanceResponses,
   fetchSubmissions,
   restoreAdminSession,
   signInAdmin,
@@ -16,10 +21,15 @@ import { calculateAdminStats } from './adminUtils';
 import { AttendanceResponsesPanel } from './AttendanceResponsesPanel';
 import { deleteAttendanceResponseFromList, updateAttendanceResponseInList } from './attendanceAdminUtils';
 import { FormFieldsPanel } from './FormFieldsPanel';
+import { StudentAttendanceResponsesPanel } from './StudentAttendanceResponsesPanel';
 import { SubmissionsPanel } from './SubmissionsPanel';
+import {
+  deleteStudentAttendanceResponseFromList,
+  updateStudentAttendanceResponseInList,
+} from './studentAttendanceAdminUtils';
 
 type AdminPhase = 'checking' | 'login' | 'ready';
-type AdminTab = 'submissions' | 'attendance' | 'fields';
+type AdminTab = 'submissions' | 'attendance' | 'student' | 'fields';
 
 function ConfigurationNotice() {
   return (
@@ -76,6 +86,7 @@ export function AdminApp() {
   const [tab, setTab] = useState<AdminTab>('submissions');
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [attendanceResponses, setAttendanceResponses] = useState<AttendanceResponse[]>([]);
+  const [studentAttendanceResponses, setStudentAttendanceResponses] = useState<StudentAttendanceResponse[]>([]);
   const [fields, setFields] = useState<FormField[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -99,9 +110,10 @@ export function AdminApp() {
   const refresh = useCallback(async () => {
     setLoading(true);
     setError('');
-    const [sponsorshipResult, attendanceResult] = await Promise.allSettled([
+    const [sponsorshipResult, attendanceResult, studentAttendanceResult] = await Promise.allSettled([
       Promise.all([fetchSubmissions(), fetchAllFormFields()]),
       fetchAttendanceResponses(),
+      fetchStudentAttendanceResponses(),
     ]);
 
     const errors: string[] = [];
@@ -116,6 +128,12 @@ export function AdminApp() {
       setAttendanceResponses(attendanceResult.value);
     } else {
       errors.push(attendanceResult.reason instanceof Error ? attendanceResult.reason.message : '참석 여부 회신을 불러오지 못했습니다.');
+    }
+
+    if (studentAttendanceResult.status === 'fulfilled') {
+      setStudentAttendanceResponses(studentAttendanceResult.value);
+    } else {
+      errors.push(studentAttendanceResult.reason instanceof Error ? studentAttendanceResult.reason.message : '학생 참석 회신을 불러오지 못했습니다.');
     }
 
     setError(errors.join(' '));
@@ -145,6 +163,7 @@ export function AdminApp() {
     } finally {
       setSubmissions([]);
       setAttendanceResponses([]);
+      setStudentAttendanceResponses([]);
       setFields([]);
       setToastMessage('');
       setPhase('login');
@@ -157,6 +176,17 @@ export function AdminApp() {
 
   const handleAttendanceDeleted = useCallback((id: string) => {
     setAttendanceResponses((current) => deleteAttendanceResponseFromList(current, id));
+  }, []);
+
+  const handleStudentAttendanceUpdated = useCallback((
+    id: string,
+    value: StudentAttendanceResponseEditableFields,
+  ) => {
+    setStudentAttendanceResponses((current) => updateStudentAttendanceResponseInList(current, id, value));
+  }, []);
+
+  const handleStudentAttendanceDeleted = useCallback((id: string) => {
+    setStudentAttendanceResponses((current) => deleteStudentAttendanceResponseFromList(current, id));
   }, []);
 
   if (!configured) return <ConfigurationNotice />;
@@ -175,7 +205,7 @@ export function AdminApp() {
           <button className="admin-refresh" type="button" onClick={() => void refresh()} disabled={loading}>{loading ? '불러오는 중' : '새로고침'}</button>
         </div>
 
-        {tab !== 'attendance' ? (
+        {tab !== 'attendance' && tab !== 'student' ? (
           <section className="admin-stats" aria-label="기존 후원 및 약정 신청 통계">
             <article><span>전체 응답</span><strong>{stats.totalResponses}<small>명</small></strong></article>
             <article><span>발전기금 약정 인원</span><strong>{stats.pledgeCount}<small>명</small></strong></article>
@@ -187,8 +217,9 @@ export function AdminApp() {
         {error ? <div className="admin-banner" role="alert">{error}</div> : null}
 
         <nav className="admin-tabs" aria-label="관리자 메뉴">
-          <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => setTab('submissions')}>신청 내역</button>
+          <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => setTab('submissions')}>후원·확약</button>
           <button type="button" className={tab === 'attendance' ? 'is-active' : ''} aria-current={tab === 'attendance' ? 'page' : undefined} onClick={() => setTab('attendance')}>참석 여부</button>
+          <button type="button" className={tab === 'student' ? 'is-active' : ''} aria-current={tab === 'student' ? 'page' : undefined} onClick={() => setTab('student')}>학생 참석</button>
           <button type="button" className={tab === 'fields' ? 'is-active' : ''} aria-current={tab === 'fields' ? 'page' : undefined} onClick={() => setTab('fields')}>폼 항목 관리</button>
         </nav>
 
@@ -199,6 +230,14 @@ export function AdminApp() {
             responses={attendanceResponses}
             onUpdated={handleAttendanceUpdated}
             onDeleted={handleAttendanceDeleted}
+            onError={setError}
+            onSuccess={showToast}
+          />
+        ) : tab === 'student' ? (
+          <StudentAttendanceResponsesPanel
+            responses={studentAttendanceResponses}
+            onUpdated={handleStudentAttendanceUpdated}
+            onDeleted={handleStudentAttendanceDeleted}
             onError={setError}
             onSuccess={showToast}
           />

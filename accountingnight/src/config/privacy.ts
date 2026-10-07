@@ -10,3 +10,9 @@ export const attendancePrivacyPolicy = {
   collectedItems: '성명, 휴대전화 번호, 입학년도(선택), 현재 소속 및 직함(선택), 참석 여부',
   retentionPeriod: privacyPolicy.retentionPeriod,
 };
+
+export const studentAttendancePrivacyPolicy = {
+  purpose: '재학생 참석 인원 확인, 행사 운영 및 필요한 경우 참석 관련 안내',
+  collectedItems: '성명, 휴대전화 번호, 입학년도(선택), 학생회 활동 여부 및 활동 내용(해당 시), 참석 여부',
+  retentionPeriod: privacyPolicy.retentionPeriod,
+};

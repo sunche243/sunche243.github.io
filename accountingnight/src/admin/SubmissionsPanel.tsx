@@ -162,7 +162,7 @@ export function SubmissionsPanel({ submissions, fields, onRefresh, onError }: Su
       <div className="admin-panel__heading">
         <div>
           <p>REGISTRATIONS</p>
-          <h2 id="submissions-title">신청 내역</h2>
+          <h2 id="submissions-title">후원·확약 신청</h2>
         </div>
         <button className="admin-button admin-button--secondary" type="button" onClick={exportExcel} disabled={exporting || !submissions.length}>
           {exporting ? '생성 중' : 'Excel 다운로드'}

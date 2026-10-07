@@ -339,8 +339,16 @@
   grid-template-columns: minmax(220px, 3fr) minmax(150px, 1fr);
 }
 
+.student-attendance-admin-filters {
+  grid-template-columns: minmax(260px, 3fr) repeat(2, minmax(150px, 1fr));
+}
+
 .attendance-admin-table {
   min-width: 1000px;
+}
+
+.student-attendance-admin-table {
+  min-width: 1180px;
 }
 
 .attendance-admin-table .attendance-actions-cell {

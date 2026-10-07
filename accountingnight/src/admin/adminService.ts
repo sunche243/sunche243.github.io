@@ -1,6 +1,10 @@
 import type { User } from '@supabase/supabase-js';
 import type { AttendanceResponse, AttendanceResponseEditableFields } from '../types/attendance';
 import type { FormField, FormFieldType, Submission, SubmissionAnswers, SubmissionStatus } from '../types/registration';
+import type {
+  StudentAttendanceResponse,
+  StudentAttendanceResponseEditableFields,
+} from '../types/studentAttendance';
 import { getSupabase, SupabaseConfigurationError } from '../services/supabase';
 import { calculateSponsorshipAmount } from '../utils/registration';
 
@@ -139,6 +143,51 @@ export async function deleteAttendanceResponse(id: string): Promise<void> {
   const supabase = requireSupabase();
   const { error } = await supabase.rpc('delete_attendance_response', { p_id: id });
   if (error) throw new Error('응답 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+}
+
+export async function fetchStudentAttendanceResponses(): Promise<StudentAttendanceResponse[]> {
+  const supabase = requireSupabase();
+  const { data, error } = await supabase
+    .from('student_attendance_responses')
+    .select('id,created_at,updated_at,name,phone,admission_year,student_council_experience,student_council_details,attendance_status,privacy_consent_at')
+    .order('created_at', { ascending: false });
+  if (error) throw new Error('학생 참석 회신을 불러오지 못했습니다. 새 migration 적용 여부를 확인해주세요.');
+
+  return (data as Record<string, unknown>[]).map((row) => ({
+    id: String(row.id),
+    created_at: String(row.created_at),
+    updated_at: row.updated_at ? String(row.updated_at) : undefined,
+    name: String(row.name),
+    phone: String(row.phone),
+    admission_year: row.admission_year === null ? null : String(row.admission_year),
+    student_council_experience: Boolean(row.student_council_experience),
+    student_council_details: row.student_council_details === null ? null : String(row.student_council_details),
+    attendance_status: row.attendance_status as StudentAttendanceResponse['attendance_status'],
+    privacy_consent_at: String(row.privacy_consent_at),
+  }));
+}
+
+export async function updateStudentAttendanceResponse(
+  id: string,
+  value: StudentAttendanceResponseEditableFields,
+): Promise<void> {
+  const supabase = requireSupabase();
+  const { error } = await supabase.rpc('update_student_attendance_response', {
+    p_id: id,
+    p_name: value.name,
+    p_phone: value.phone,
+    p_admission_year: value.admission_year,
+    p_student_council_experience: value.student_council_experience,
+    p_student_council_details: value.student_council_details,
+    p_attendance_status: value.attendance_status,
+  });
+  if (error) throw new Error('학생 참석 응답 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+}
+
+export async function deleteStudentAttendanceResponse(id: string): Promise<void> {
+  const supabase = requireSupabase();
+  const { error } = await supabase.rpc('delete_student_attendance_response', { p_id: id });
+  if (error) throw new Error('학생 참석 응답 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.');
 }
 
 export async function fetchAllFormFields(): Promise<FormField[]> {

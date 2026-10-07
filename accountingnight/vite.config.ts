@@ -14,6 +14,8 @@ export default defineConfig({
         invitation: `${projectRoot}index.html`,
         sponsor: `${projectRoot}sponsor/index.html`,
         attendance: `${projectRoot}attendance/index.html`,
+        student: `${projectRoot}student/index.html`,
+        studentAttendance: `${projectRoot}student/attendance/index.html`,
         admin: `${projectRoot}admin/index.html`,
       },
     },
