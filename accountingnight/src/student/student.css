@@ -36,3 +36,11 @@
 .student-council-details .student-council-help {
   margin: -2px 0 0;
 }
+
+.student-program .program-list > li {
+  grid-template-columns: minmax(108px, auto) minmax(0, 1fr);
+}
+
+.student-program .program-list time {
+  white-space: nowrap;
+}

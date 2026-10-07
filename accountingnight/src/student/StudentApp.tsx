@@ -2,15 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FloatingControls } from '../components/FloatingControls';
 import { Toast } from '../components/Toast';
 import { CountdownCalendar } from '../sections/CountdownCalendar';
-import { ContactShare } from '../sections/ContactShare';
 import { Hero } from '../sections/Hero';
 import { History } from '../sections/History';
 import { Location } from '../sections/Location';
-import { Program } from '../sections/Program';
 import { shareInvitation } from '../utils/share';
+import { StudentContactShare } from './StudentContactShare';
 import { StudentFinalClosing } from './StudentFinalClosing';
 import { StudentInvitation } from './StudentInvitation';
 import { StudentParticipation } from './StudentParticipation';
+import { StudentProgram } from './StudentProgram';
 
 export function StudentApp() {
   const [toastMessage, setToastMessage] = useState('');
@@ -40,10 +40,10 @@ export function StudentApp() {
         <StudentInvitation />
         <CountdownCalendar />
         <History />
-        <Program />
+        <StudentProgram />
         <StudentParticipation />
         <Location />
-        <ContactShare toast={toast} />
+        <StudentContactShare toast={toast} />
       </main>
       <StudentFinalClosing />
       <FloatingControls onShare={() => void shareInvitation(toast)} toast={toast} />
