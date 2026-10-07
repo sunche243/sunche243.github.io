@@ -13,6 +13,7 @@ describe('student attendance form', () => {
     expect(html).toContain('학생회 활동 경험이 확인된 신청자를 우선 선발합니다.');
     expect(html).toContain('미경험 신청자를 대상으로 무작위 추첨하여 선정합니다.');
     expect(html).toContain('참가비 30,000원');
+    expect(html).toContain('대기 순서에 따라 차순위 신청자에게 개별 연락');
     expect(html).not.toContain('현재 소속 및 직함');
   });
 

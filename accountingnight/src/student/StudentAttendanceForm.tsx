@@ -362,6 +362,7 @@ export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps
                   <li>회계학과 학생회 활동 경험이 확인된 신청자를 우선 선발합니다.</li>
                   <li>우선 선발 후 잔여 인원은 학생회 활동 미경험 신청자를 대상으로 무작위 추첨하여 선정합니다.</li>
                   <li>최종 선정 안내 후 별도로 고지되는 납부 기한까지 참가비 30,000원의 납부가 확인되지 않을 경우, 선정 및 우선순위가 취소될 수 있으며 해당 기회는 차순위 신청자에게 이전될 수 있습니다.</li>
+                  <li>행사 전날까지 취소 또는 참가비 미납으로 결원이 발생하는 경우, 대기 순서에 따라 차순위 신청자에게 개별 연락을 드릴 수 있습니다.</li>
                 </ol>
               </div>
               {errors.selectionCriteriaConsent ? (
