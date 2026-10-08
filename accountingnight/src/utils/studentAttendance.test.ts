@@ -8,6 +8,7 @@ const draft: StudentAttendanceDraft = {
   admissionYear: '24',
   studentCouncilExperience: true,
   studentCouncilDetails: '2025년 회계학과 학생회 기획국장',
+  studentCouncilFeePaid: true,
   attendanceStatus: 'attending',
   privacyConsent: true,
   selectionCriteriaConsent: true,
@@ -39,6 +40,17 @@ describe('student attendance response validation', () => {
     expect(validate({ ...draft, studentCouncilExperience: null }).errors.studentCouncilExperience).toBeTruthy();
   });
 
+  it('requires admission year and council fee status for an attendance application', () => {
+    expect(validate({ ...draft, admissionYear: '' }).errors.admissionYear).toBeTruthy();
+    expect(validate({ ...draft, studentCouncilFeePaid: null }).errors.studentCouncilFeePaid).toBeTruthy();
+  });
+
+  it('rejects 26 admission year because first-year students are not eligible', () => {
+    expect(validate({ ...draft, admissionYear: '26' }).errors.admissionYear).toBe(
+      '이번 행사는 1학년(26학번) 대상 행사가 아닙니다.',
+    );
+  });
+
   it('requires details when council experience is selected', () => {
     expect(validate({ ...draft, studentCouncilDetails: ' ' }).errors.studentCouncilDetails).toBeTruthy();
   });
@@ -55,5 +67,17 @@ describe('student attendance response validation', () => {
     expect(validate({ ...draft, attendanceStatus: null }).errors.attendanceStatus).toBeTruthy();
     expect(validate({ ...draft, privacyConsent: false }).errors.privacy).toBeTruthy();
     expect(validate({ ...draft, selectionCriteriaConsent: false }).errors.selectionCriteriaConsent).toBeTruthy();
+  });
+
+  it('does not require application-only fields or selection consent for a non-attendee', () => {
+    expect(validate({
+      ...draft,
+      admissionYear: '',
+      studentCouncilExperience: null,
+      studentCouncilDetails: '',
+      studentCouncilFeePaid: null,
+      attendanceStatus: 'not_attending',
+      selectionCriteriaConsent: false,
+    })).toEqual({ valid: true, errors: {} });
   });
 });

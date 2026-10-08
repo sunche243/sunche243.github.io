@@ -12,8 +12,7 @@ interface FloatingControlsProps {
 export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeRef = useRef<number | null>(null);
-  const attemptPlaybackRef = useRef<((force?: boolean) => Promise<boolean>) | null>(null);
-  const removeInteractionListenersRef = useRef<(() => void) | null>(null);
+  const attemptPlaybackRef = useRef<(() => Promise<boolean>) | null>(null);
   const activeEffectRef = useRef<symbol | null>(null);
   const playingRef = useRef(false);
   const manualStopRef = useRef(false);
@@ -54,7 +53,7 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
     }
 
     audio.loop = true;
-    audio.preload = 'auto';
+    audio.preload = 'metadata';
     audio.volume = 0;
     manualStopRef.current = false;
     playingRef.current = false;
@@ -63,26 +62,11 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
     const effectId = Symbol('bgm-effect');
     activeEffectRef.current = effectId;
     let playbackAttemptInFlight = false;
-    let interactionListenersActive = false;
-    let wheelPlaybackAttempted = false;
-    const passiveListenerOptions = { passive: true } as const;
 
     const isActive = () => activeEffectRef.current === effectId;
 
-    const removeInteractionListeners = () => {
-      if (!interactionListenersActive) return;
-      document.removeEventListener('pointerdown', handleFirstInteraction);
-      document.removeEventListener('keydown', handleFirstInteraction);
-      document.removeEventListener('wheel', handleFirstWheel);
-      interactionListenersActive = false;
-
-      if (removeInteractionListenersRef.current === removeInteractionListeners) {
-        removeInteractionListenersRef.current = null;
-      }
-    };
-
-    const attemptPlayback = async (force = false) => {
-      if (!isActive() || (playbackAttemptInFlight && !force)) return false;
+    const attemptPlayback = async () => {
+      if (!isActive() || playbackAttemptInFlight) return false;
       playbackAttemptInFlight = true;
 
       try {
@@ -93,7 +77,6 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
           return false;
         }
 
-        removeInteractionListeners();
         setAudioAvailable(true);
         playingRef.current = true;
         setPlaying(true);
@@ -104,28 +87,6 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
       } finally {
         playbackAttemptInFlight = false;
       }
-    };
-
-    function handleFirstInteraction(event: Event) {
-      const target = event.target;
-
-      if (target instanceof Element && target.closest('[data-bgm-toggle]')) return;
-      void attemptPlayback();
-    }
-
-    function handleFirstWheel(event: WheelEvent) {
-      if (wheelPlaybackAttempted) return;
-      wheelPlaybackAttempted = true;
-      handleFirstInteraction(event);
-    }
-
-    const addInteractionListeners = () => {
-      if (!isActive() || interactionListenersActive) return;
-      document.addEventListener('pointerdown', handleFirstInteraction, passiveListenerOptions);
-      document.addEventListener('keydown', handleFirstInteraction);
-      document.addEventListener('wheel', handleFirstWheel, passiveListenerOptions);
-      interactionListenersActive = true;
-      removeInteractionListenersRef.current = removeInteractionListeners;
     };
 
     const handleCanPlay = () => setAudioAvailable(true);
@@ -146,13 +107,8 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
     audio.addEventListener('pause', handlePause);
     attemptPlaybackRef.current = attemptPlayback;
 
-    void attemptPlayback().then((started) => {
-      if (!started && isActive() && !manualStopRef.current && !playingRef.current) addInteractionListeners();
-    });
-
     return () => {
       activeEffectRef.current = null;
-      removeInteractionListeners();
       attemptPlaybackRef.current = null;
       audio.removeEventListener('canplaythrough', handleCanPlay);
       audio.removeEventListener('error', handleError);
@@ -168,7 +124,6 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
 
     if (playingRef.current) {
       manualStopRef.current = true;
-      removeInteractionListenersRef.current?.();
       playingRef.current = false;
       fade(0);
       setPlaying(false);
@@ -176,7 +131,7 @@ export function FloatingControls({ onShare, toast }: FloatingControlsProps) {
     }
 
     manualStopRef.current = false;
-    const started = await attemptPlaybackRef.current?.(true);
+    const started = await attemptPlaybackRef.current?.();
 
     if (!started && !playingRef.current) {
       toast(audio.error || !audioAvailable ? 'BGM 파일을 불러오지 못했습니다.' : 'BGM을 재생할 수 없습니다.');

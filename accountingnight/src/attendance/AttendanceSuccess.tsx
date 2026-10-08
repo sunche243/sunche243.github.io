@@ -49,7 +49,7 @@ export function AttendanceSuccess({ name, status, headingRef }: AttendanceSucces
       </dl>
 
       <p className="attendance-success__resubmit">
-        응답 내용을 변경하시려면 페이지를 새로고침한 뒤 다시 회신해 주세요.
+        응답을 변경하시려면 페이지를 새로고침한 뒤 같은 전화번호로 다시 제출해 주세요. 최신 응답으로 변경됩니다.
       </p>
     </div>
   );

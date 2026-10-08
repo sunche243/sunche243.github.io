@@ -15,6 +15,7 @@ const input = {
   admissionYear: '24',
   studentCouncilExperience: true,
   studentCouncilDetails: '2025년 학생회장',
+  studentCouncilFeePaid: true,
   attendanceStatus: 'attending' as const,
   privacyConsent: true,
   selectionCriteriaConsent: true,
@@ -37,6 +38,7 @@ describe('student attendance submission service', () => {
       p_admission_year: input.admissionYear,
       p_student_council_experience: true,
       p_student_council_details: input.studentCouncilDetails,
+      p_student_council_fee_paid: true,
       p_attendance_status: input.attendanceStatus,
       p_privacy_consent: true,
       p_selection_criteria_consent: true,
@@ -53,5 +55,21 @@ describe('student attendance submission service', () => {
     });
 
     expect(rpc.mock.calls[0][1].p_student_council_details).toBeNull();
+  });
+
+  it('drops application-only fields and selection consent for a non-attendee', async () => {
+    await submitStudentAttendanceResponse({
+      ...input,
+      attendanceStatus: 'not_attending',
+      selectionCriteriaConsent: true,
+    });
+
+    expect(rpc.mock.calls[0][1]).toMatchObject({
+      p_admission_year: null,
+      p_student_council_experience: null,
+      p_student_council_details: null,
+      p_student_council_fee_paid: null,
+      p_selection_criteria_consent: false,
+    });
   });
 });

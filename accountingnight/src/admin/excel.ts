@@ -2,6 +2,12 @@ import type { Cell, SheetData } from 'write-excel-file/browser';
 import type { AttendanceResponse } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
 import type { StudentAttendanceResponse } from '../types/studentAttendance';
+import {
+  getStudentSelectionPriority,
+  studentCouncilFeeStatusLabels,
+  studentParticipationFeeStatusLabels,
+  studentSelectionStatusLabels,
+} from './studentAttendanceAdminUtils';
 import { attendanceResponseLabels } from '../utils/attendance';
 import {
   attendanceLabels,
@@ -159,9 +165,9 @@ export async function downloadSubmissionsExcel(submissions: Submission[], fields
 
 export function buildAttendanceExcelSheet(responses: AttendanceResponse[]): SheetData {
   return [
-    ['회신일시', '성명', '전화번호', '입학년도', '현재 소속 및 직함', '참석 여부'].map(header),
+    ['최종 회신일시', '성명', '전화번호', '입학년도', '현재 소속 및 직함', '참석 여부'].map(header),
     ...responses.map((response) => [
-      { value: new Date(response.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
+      { value: new Date(response.updated_at ?? response.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
       response.name,
       phoneCell(response.phone),
       admissionYearCell(response.admission_year ?? undefined),
@@ -195,15 +201,22 @@ export async function downloadAttendanceExcel(responses: AttendanceResponse[]): 
 
 export function buildStudentAttendanceExcelSheet(responses: StudentAttendanceResponse[]): SheetData {
   return [
-    ['회신일시', '성명', '전화번호', '입학년도', '학생회 활동 여부', '활동 연도 및 직책', '참석 여부'].map(header),
+    ['최종 회신일시', '성명', '전화번호', '입학년도', '우선순위', '학생회 활동 여부', '활동 연도 및 직책', '학생회비', '참석 신청 여부', '선정 상태', '대기 순번', '행사 참가비', '개별 연락', '관리 메모'].map(header),
     ...responses.map((response) => [
-      { value: new Date(response.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
+      { value: new Date(response.updated_at ?? response.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
       response.name,
       phoneCell(response.phone),
       admissionYearCell(response.admission_year ?? undefined),
-      response.student_council_experience ? '경험 있음' : '경험 없음',
+      getStudentSelectionPriority(response) ? `${getStudentSelectionPriority(response)}순위` : '',
+      response.student_council_experience === null ? '' : response.student_council_experience ? '경험 있음' : '경험 없음',
       response.student_council_details ?? '',
+      studentCouncilFeeStatusLabels[response.student_council_fee_status],
       attendanceResponseLabels[response.attendance_status],
+      studentSelectionStatusLabels[response.selection_status],
+      response.waitlist_order ?? '',
+      studentParticipationFeeStatusLabels[response.participation_fee_status],
+      response.contacted_at ? '완료' : '미완료',
+      response.admin_memo,
     ]),
   ];
 }
@@ -223,8 +236,15 @@ export async function downloadStudentAttendanceExcel(
       { width: 18 },
       { width: 12 },
       { width: 16 },
+      { width: 16 },
       { width: 36 },
       { width: 12 },
+      { width: 14 },
+      { width: 12 },
+      { width: 12 },
+      { width: 14 },
+      { width: 12 },
+      { width: 30 },
     ],
     stickyRowsCount: 1,
   }, {

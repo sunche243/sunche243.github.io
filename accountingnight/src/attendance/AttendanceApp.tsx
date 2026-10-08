@@ -3,6 +3,7 @@ import { ContactShare } from '../sections/ContactShare';
 import { FinalClosing } from '../sections/FinalClosing';
 import { Hero } from '../sections/Hero';
 import { Location } from '../sections/Location';
+import { Program } from '../sections/Program';
 import { AttendanceForm } from './AttendanceForm';
 import { AttendanceIntro } from './AttendanceIntro';
 
@@ -24,6 +25,7 @@ export function AttendanceApp() {
       />
       <main>
         {!responseComplete ? <AttendanceIntro /> : null}
+        <Program />
         <AttendanceForm onComplete={() => setResponseComplete(true)} />
         <Location />
         <ContactShare showShare={false} />

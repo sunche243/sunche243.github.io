@@ -31,7 +31,7 @@ export const pledgeOptionDetails: Record<PledgeOption, PledgeOptionDetail> = {
   free_attending: {
     optionNumber: 3,
     label: '마음으로 함께하기',
-    title: '자유 금액 후원 + 행사 참석',
+    title: '100만 원 이상 자유 금액 후원 + 행사 참석',
     amount: null,
     minimumAmount: 1_000_000,
     minimumNotice: '자유 후원은 100만 원 이상부터 가능합니다.',

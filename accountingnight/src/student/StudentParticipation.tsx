@@ -13,8 +13,12 @@ export function StudentParticipation() {
           <br />
           재학생 여러분의 참석으로 새로운 50년의 시작을 빛내주세요.
         </p>
+        <p className="student-participation__notice">
+          참석은 신청 후 선정되며 결과는 개별 안내드립니다.<br />
+          이번 행사는 1학년(26학번) 대상 행사가 아닙니다.
+        </p>
         <a className="button button--gold" href={studentAttendanceUrl}>
-          재학생 참석 여부 회신하기
+          재학생 참석 신청 및 불참 회신하기
         </a>
       </div>
     </RevealSection>

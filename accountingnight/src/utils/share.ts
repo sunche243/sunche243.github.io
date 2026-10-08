@@ -1,3 +1,19 @@
+import { event } from '../data/event';
+
+export type InvitationShareVariant = 'general' | 'student';
+
+export function getInvitationShareContent(variant: InvitationShareVariant = 'general') {
+  const student = variant === 'student';
+
+  return {
+    title: student ? `[재학생 초대장] ${event.title}` : `동국대학교 ${event.title}`,
+    text: student
+      ? `재학생 여러분을 초대합니다 · ${event.shortDateLabel} · ${event.venue}`
+      : `${event.shortDateLabel} · ${event.venue}`,
+    buttonTitle: student ? '재학생 초대장 보기' : '초대장 보기',
+  };
+}
+
 export async function copyText(text: string): Promise<boolean> {
   if (navigator.clipboard?.writeText) {
     try {
@@ -24,10 +40,14 @@ export async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export async function shareInvitation(toast: (message: string) => void): Promise<void> {
+export async function shareInvitation(
+  toast: (message: string) => void,
+  variant: InvitationShareVariant = 'general',
+): Promise<void> {
+  const content = getInvitationShareContent(variant);
   const shareData = {
-    title: '동국대학교 회계학과 50주년 기념 회계인의 밤',
-    text: '2026.11.13 FRI · 서울신라호텔 영빈관',
+    title: content.title,
+    text: content.text,
     url: window.location.href,
   };
 

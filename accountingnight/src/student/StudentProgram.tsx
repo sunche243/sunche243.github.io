@@ -13,6 +13,7 @@ export function StudentProgram() {
               <time>{item.time}</time>
               <div>
                 <h3>{item.title}</h3>
+                {item.description ? <p>{item.description}</p> : null}
               </div>
             </li>
           ))}

@@ -6,6 +6,10 @@ const migration = readFileSync(
   'utf8',
 );
 const schema = readFileSync(new URL('../../supabase/schema.sql', import.meta.url), 'utf8');
+const upsertMigration = readFileSync(
+  new URL('../../supabase/migrations/20261008090000_response_upsert_student_operations.sql', import.meta.url),
+  'utf8',
+);
 
 describe('attendance admin mutation SQL contract', () => {
   it('wraps the migration in one transaction', () => {
@@ -42,5 +46,12 @@ describe('attendance admin mutation SQL contract', () => {
     expect(schema).toContain('create or replace function public.delete_attendance_response(p_id uuid)');
     expect(schema).toContain('grant select on table public.attendance_responses to authenticated;');
     expect(schema).not.toContain('create policy attendance_responses_admin_delete');
+  });
+
+  it('keeps historical duplicates while exposing one current response per phone', () => {
+    expect(upsertMigration).toContain('attendance_responses_current_phone_uidx');
+    expect(upsertMigration).toContain('set superseded_at = now()');
+    expect(upsertMigration).toContain('on conflict (phone) where superseded_at is null do update');
+    expect(schema).toContain('attendance_responses_current_phone_uidx');
   });
 });

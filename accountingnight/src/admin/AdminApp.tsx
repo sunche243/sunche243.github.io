@@ -5,7 +5,7 @@ import type { AttendanceResponse, AttendanceResponseEditableFields } from '../ty
 import type { FormField, Submission } from '../types/registration';
 import type {
   StudentAttendanceResponse,
-  StudentAttendanceResponseEditableFields,
+  StudentSelectionManagementFields,
 } from '../types/studentAttendance';
 import { formatWon } from '../utils/registration';
 import {
@@ -25,7 +25,7 @@ import { StudentAttendanceResponsesPanel } from './StudentAttendanceResponsesPan
 import { SubmissionsPanel } from './SubmissionsPanel';
 import {
   deleteStudentAttendanceResponseFromList,
-  updateStudentAttendanceResponseInList,
+  updateStudentSelectionManagementInList,
 } from './studentAttendanceAdminUtils';
 
 type AdminPhase = 'checking' | 'login' | 'ready';
@@ -178,15 +178,19 @@ export function AdminApp() {
     setAttendanceResponses((current) => deleteAttendanceResponseFromList(current, id));
   }, []);
 
-  const handleStudentAttendanceUpdated = useCallback((
-    id: string,
-    value: StudentAttendanceResponseEditableFields,
-  ) => {
-    setStudentAttendanceResponses((current) => updateStudentAttendanceResponseInList(current, id, value));
-  }, []);
+  const handleStudentAttendanceUpdated = useCallback(() => {
+    void refresh();
+  }, [refresh]);
 
   const handleStudentAttendanceDeleted = useCallback((id: string) => {
     setStudentAttendanceResponses((current) => deleteStudentAttendanceResponseFromList(current, id));
+  }, []);
+
+  const handleStudentSelectionManagementUpdated = useCallback((
+    id: string,
+    value: StudentSelectionManagementFields,
+  ) => {
+    setStudentAttendanceResponses((current) => updateStudentSelectionManagementInList(current, id, value));
   }, []);
 
   if (!configured) return <ConfigurationNotice />;
@@ -217,7 +221,7 @@ export function AdminApp() {
         {error ? <div className="admin-banner" role="alert">{error}</div> : null}
 
         <nav className="admin-tabs" aria-label="관리자 메뉴">
-          <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => setTab('submissions')}>후원·확약</button>
+          <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => setTab('submissions')}>발전기금·참석 회신</button>
           <button type="button" className={tab === 'attendance' ? 'is-active' : ''} aria-current={tab === 'attendance' ? 'page' : undefined} onClick={() => setTab('attendance')}>참석 여부</button>
           <button type="button" className={tab === 'student' ? 'is-active' : ''} aria-current={tab === 'student' ? 'page' : undefined} onClick={() => setTab('student')}>학생 참석</button>
           <button type="button" className={tab === 'fields' ? 'is-active' : ''} aria-current={tab === 'fields' ? 'page' : undefined} onClick={() => setTab('fields')}>폼 항목 관리</button>
@@ -237,6 +241,7 @@ export function AdminApp() {
           <StudentAttendanceResponsesPanel
             responses={studentAttendanceResponses}
             onUpdated={handleStudentAttendanceUpdated}
+            onManagementUpdated={handleStudentSelectionManagementUpdated}
             onDeleted={handleStudentAttendanceDeleted}
             onError={setError}
             onSuccess={showToast}

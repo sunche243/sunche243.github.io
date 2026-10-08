@@ -472,6 +472,22 @@ img {
   gap: 10px;
 }
 
+.invitation-return-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 32px;
+  color: var(--gray-600);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.invitation-return-link:hover {
+  color: var(--gold-dark);
+}
+
 /* History */
 
 .history {
@@ -807,6 +823,25 @@ img {
   width: 82%;
   max-width: 320px;
   min-height: 52px;
+}
+
+.sponsorship__secondary-links {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  margin-top: 24px;
+}
+
+.sponsorship__secondary-links a {
+  color: rgba(247, 244, 237, 0.82);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.sponsorship__secondary-links a:hover {
+  color: var(--gold-light);
 }
 
 /* Location */

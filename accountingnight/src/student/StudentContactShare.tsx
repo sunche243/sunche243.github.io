@@ -20,14 +20,14 @@ export function StudentContactShare({ toast, showShare = true }: StudentContactS
 
   async function handleKakao() {
     if (!isKakaoConfigured()) {
-      await shareInvitation(notify);
+      await shareInvitation(notify, 'student');
       return;
     }
 
     try {
-      await shareToKakao();
+      await shareToKakao('student');
     } catch {
-      await shareInvitation(notify);
+      await shareInvitation(notify, 'student');
     }
   }
 

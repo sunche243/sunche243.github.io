@@ -1,10 +1,12 @@
 import { RevealSection } from '../components/RevealSection';
+import { InvitationReturnLink } from '../sections/InvitationReturnLink';
 import { SectionHeader } from '../components/SectionHeader';
 
 export function AttendanceIntro() {
   return (
     <RevealSection id="attendance-intro" className="section--ivory attendance-intro" label="참석 여부 회신 안내">
       <div className="section-inner">
+        <InvitationReturnLink />
         <SectionHeader eyebrow="RSVP" title="참석 여부를 알려주세요" />
         <div className="attendance-intro__copy">
           <p>

@@ -4,6 +4,7 @@ import { ContactShare } from '../sections/ContactShare';
 import { FinalClosing } from '../sections/FinalClosing';
 import { Hero } from '../sections/Hero';
 import { Location } from '../sections/Location';
+import { Program } from '../sections/Program';
 import { RegistrationForm } from './RegistrationForm';
 import { SponsorshipIntro } from './SponsorshipIntro';
 import { StickySponsorCta } from './StickySponsorCta';
@@ -28,6 +29,7 @@ export function SponsorApp() {
       <main>
         <CountdownCalendar />
         <SponsorshipIntro />
+        <Program />
         <RegistrationForm onComplete={() => setRegistrationComplete(true)} />
         <Location />
         <ContactShare showShare={false} />

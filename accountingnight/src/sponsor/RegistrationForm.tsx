@@ -24,6 +24,7 @@ import {
   serializeDynamicAnswers,
   validateRegistration,
 } from '../utils/registration';
+import { clearFormErrors } from '../utils/formErrors';
 
 interface RegistrationFormProps {
   onComplete: () => void;
@@ -155,6 +156,7 @@ function StepHeading({ number, title, description }: { number: number; title: st
 
 export function RegistrationForm({ onComplete }: RegistrationFormProps) {
   const formStartedAt = useRef(Date.now());
+  const formRef = useRef<HTMLFormElement>(null);
   const [fields, setFields] = useState<FormField[]>([]);
   const [answers, setAnswers] = useState<DynamicAnswers>({});
   const [draft, setDraft] = useState<RegistrationDraft>({
@@ -212,12 +214,14 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
 
   function updateDraft<Key extends keyof RegistrationDraft>(key: Key, value: RegistrationDraft[Key]) {
     setDraft((current) => ({ ...current, [key]: value }));
-    setErrors((current) => ({ ...current, [key]: '', pledgeOption: '', pledgeAmount: '' }));
+    const errorKey = key === 'privacyConsent' ? 'privacy' : key;
+    const relatedKeys = key === 'pledgeOption' ? [errorKey, 'pledgeAmount'] : [errorKey];
+    setErrors((current) => clearFormErrors(current, ...relatedKeys));
   }
 
   function updateAnswer(fieldId: string, value: DynamicAnswerValue) {
     setAnswers((current) => ({ ...current, [fieldId]: value }));
-    setErrors((current) => ({ ...current, [fieldId]: '' }));
+    setErrors((current) => clearFormErrors(current, fieldId));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -235,7 +239,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
     if (!validation.valid) {
       setErrors(validation.errors);
       window.requestAnimationFrame(() => {
-        document.querySelector<HTMLElement>('[aria-invalid="true"], .registration-error-summary')?.focus();
+        formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"], .registration-error-summary')?.focus();
       });
       return;
     }
@@ -310,7 +314,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
   return (
     <RevealSection id="registration" className="section--paper registration-section" label="참석 및 발전기금 약정">
       <div className="section-inner registration-layout">
-        <form className="registration-form" onSubmit={handleSubmit} noValidate>
+        <form ref={formRef} className="registration-form" onSubmit={handleSubmit} noValidate>
           <section className="registration-step" aria-labelledby="registration-step-1-title">
             <div id="registration-step-1-title">
               <StepHeading
@@ -392,7 +396,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
 
           <section className="registration-step" aria-labelledby="registration-step-2-title">
             <div id="registration-step-2-title">
-              <StepHeading number={2} title="참석 수락 및 기부 약정 옵션" description="아래 항목 중 하나를 선택해 주십시오." />
+              <StepHeading number={2} title="참석 여부 및 발전기금 약정" description="아래 항목 중 하나를 선택해 주십시오." />
             </div>
             <fieldset className="pledge-options">
               <legend className="sr-only">참석 및 발전기금 약정 옵션</legend>
@@ -465,8 +469,8 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
             </div>
             <div className="tax-information">
               <h3>📌 [기부금 세제 혜택 안내]</h3>
-              <p>동문님께서 후원해 주시는 발전기금은 전액 동국대학교 '기부금'으로 투명하게 처리됩니다.</p>
-              <p>추후 발급되는 기부금 영수증을 통해 법인세법상 법정 한도 내 전액 손금산입(법인) 또는 소득세법상 기부금 세액공제(개인) 등 완벽한 세무적 혜택을 받으실 수 있습니다. 회계학과 후배들의 든든한 버팀목이 되어주셔서 깊이 감사드립니다.</p>
+              <p>후원하신 발전기금은 동국대학교 기부금으로 처리되며, 납부 확인 후 기부금 영수증 발급 절차를 안내드립니다.</p>
+              <p>세제 혜택의 적용 여부와 범위는 관련 법령, 개인·법인별 요건 및 공제 한도에 따라 달라질 수 있으므로 국세청 안내 또는 세무 전문가를 통해 확인해 주세요.</p>
             </div>
           </section>
 
@@ -495,6 +499,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                 <div><dt>목적</dt><dd>{privacyPolicy.purpose}</dd></div>
                 <div><dt>수집 항목</dt><dd>{privacyPolicy.collectedItems}</dd></div>
                 <div><dt>보유 기간</dt><dd>{privacyPolicy.retentionPeriod}</dd></div>
+                <div><dt>동의 거부</dt><dd>{privacyPolicy.refusalNotice}</dd></div>
               </dl>
             ) : null}
             {errors.privacy ? <span className="field-error" id="registration-privacy-error">{errors.privacy}</span> : null}
@@ -519,7 +524,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
           ) : null}
           {!isSupabaseConfigured() ? <p className="registration-configuration-note">현재 온라인 신청 기능을 준비하고 있습니다.</p> : null}
           <button className="button button--gold registration-submit" type="submit" disabled={submitting || fieldLoading || fieldLoadFailed}>
-            {submitting ? '등록 중' : '약정 및 참석 수락 완료하기'}
+            {submitting ? '등록 중' : '응답 제출하기'}
           </button>
           <p className="registration-submit-note">제출 후 동국대학교 대외협력실에서 납부 및 기부금 영수증 관련 절차를 개별 안내드립니다.</p>
         </form>

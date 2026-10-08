@@ -46,7 +46,7 @@ export function StudentApp() {
         <StudentContactShare toast={toast} />
       </main>
       <StudentFinalClosing />
-      <FloatingControls onShare={() => void shareInvitation(toast)} toast={toast} />
+      <FloatingControls onShare={() => void shareInvitation(toast, 'student')} toast={toast} />
       <Toast message={toastMessage} />
     </>
   );

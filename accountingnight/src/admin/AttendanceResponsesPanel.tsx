@@ -311,7 +311,7 @@ export function AttendanceResponsesPanel({
         <table className="admin-table attendance-admin-table">
           <thead>
             <tr>
-              <th>회신일시</th><th>성명</th><th>전화번호</th><th>입학년도</th><th>현재 소속 및 직함</th><th>참석 여부</th><th className="attendance-actions-cell">관리</th>
+              <th>최종 회신일시</th><th>성명</th><th>전화번호</th><th>입학년도</th><th>현재 소속 및 직함</th><th>참석 여부</th><th className="attendance-actions-cell">관리</th>
             </tr>
           </thead>
           <tbody>
@@ -319,7 +319,7 @@ export function AttendanceResponsesPanel({
               const duplicateCount = phoneCounts.get(response.phone) ?? 1;
               return (
                 <tr key={response.id}>
-                  <td>{formatAdminDate(response.created_at)}</td>
+                  <td>{formatAdminDate(response.updated_at ?? response.created_at)}</td>
                   <td><strong>{response.name}</strong></td>
                   <td>
                     {response.phone}

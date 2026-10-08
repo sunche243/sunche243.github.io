@@ -8,6 +8,7 @@ import {
   scheduleAttendanceSuccessNavigation,
   validateAttendanceResponse,
 } from '../utils/attendance';
+import { clearFormErrors } from '../utils/formErrors';
 import { AttendanceSuccess } from './AttendanceSuccess';
 
 const initialDraft: AttendanceDraft = {
@@ -53,7 +54,8 @@ export function AttendanceForm({ onComplete }: AttendanceFormProps) {
 
   function updateDraft<Key extends keyof AttendanceDraft>(key: Key, value: AttendanceDraft[Key]) {
     setDraft((current) => ({ ...current, [key]: value }));
-    setErrors((current) => ({ ...current, [key]: '', privacy: '', form: '' }));
+    const errorKey = key === 'privacyConsent' ? 'privacy' : key;
+    setErrors((current) => clearFormErrors(current, errorKey));
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -262,6 +264,7 @@ export function AttendanceForm({ onComplete }: AttendanceFormProps) {
                 <div><dt>목적</dt><dd>{attendancePrivacyPolicy.purpose}</dd></div>
                 <div><dt>수집 항목</dt><dd>{attendancePrivacyPolicy.collectedItems}</dd></div>
                 <div><dt>보유 기간</dt><dd>{attendancePrivacyPolicy.retentionPeriod}</dd></div>
+                <div><dt>동의 거부</dt><dd>{attendancePrivacyPolicy.refusalNotice}</dd></div>
               </dl>
             ) : null}
             {errors.privacy ? <span className="field-error" id="attendance-privacy-error">{errors.privacy}</span> : null}
@@ -288,7 +291,7 @@ export function AttendanceForm({ onComplete }: AttendanceFormProps) {
           <button className="button button--gold registration-submit" type="submit" disabled={submitting}>
             {submitting ? '회신 중...' : '참석 여부 회신하기'}
           </button>
-          <p className="registration-submit-note">응답을 변경해야 하는 경우 같은 정보로 다시 회신할 수 있습니다.</p>
+          <p className="registration-submit-note">같은 전화번호로 다시 제출하면 최신 응답으로 변경됩니다.</p>
         </form>
         </div>
       )}

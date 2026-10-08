@@ -1,6 +1,6 @@
 import { RevealSection } from '../components/RevealSection';
 import { SectionHeader } from '../components/SectionHeader';
-import { sponsorship } from '../data/event';
+import { attendance, sponsorship, studentInvitation } from '../data/event';
 
 export function Sponsorship() {
   return (
@@ -17,6 +17,10 @@ export function Sponsorship() {
         <a className="button button--gold" href={sponsorship.url}>
           참석 및 후원 확약하기
         </a>
+        <nav className="sponsorship__secondary-links" aria-label="대상별 회신 경로">
+          <a href={attendance.url}>후원 없이 참석 여부만 회신하기</a>
+          <a href={studentInvitation.url}>재학생 전용 초대장 보기</a>
+        </nav>
       </div>
     </RevealSection>
   );

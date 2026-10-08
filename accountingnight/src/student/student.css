@@ -37,6 +37,34 @@
   margin: -2px 0 0;
 }
 
+.student-admission-year-field {
+  margin-bottom: 28px;
+}
+
+.student-fee-options {
+  margin-top: 28px;
+}
+
+.student-fee-options a,
+.student-selection-criteria a {
+  color: var(--gold-dark);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+
+.student-participation__notice {
+  color: var(--gold-light);
+  font-size: 0.84rem;
+  line-height: 1.8;
+}
+
+.student-attendance-back {
+  display: flex;
+  justify-content: center;
+  padding: 36px 24px 0;
+  background: var(--ivory);
+}
+
 .student-selection-consent {
   margin-top: 14px;
 }
@@ -63,6 +91,16 @@
 .student-selection-criteria ol {
   margin: 0;
   padding-left: 1.35rem;
+}
+
+.student-selection-priorities {
+  padding-left: 0 !important;
+  list-style: none;
+}
+
+.student-selection-criteria ul {
+  margin: 12px 0 0;
+  padding-left: 20px;
 }
 
 .student-selection-criteria li + li {

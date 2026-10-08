@@ -1,10 +1,12 @@
 import { RevealSection } from '../components/RevealSection';
+import { InvitationReturnLink } from '../sections/InvitationReturnLink';
 import { SectionHeader } from '../components/SectionHeader';
 
 export function SponsorshipIntro() {
   return (
     <RevealSection id="sponsor-intro" className="section--ivory sponsor-intro" label="참석 및 발전기금 약정 안내">
       <div className="section-inner">
+        <InvitationReturnLink />
         <SectionHeader
           eyebrow="50th ANNIVERSARY PLEDGE"
           title={<>동국대학교 회계학과 창립 50주년<br />'회계인의 밤'<br />참석 및 발전기금 약정</>}

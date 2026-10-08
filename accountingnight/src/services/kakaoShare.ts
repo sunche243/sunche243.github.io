@@ -1,4 +1,5 @@
 import { event } from '../data/event';
+import { getInvitationShareContent, type InvitationShareVariant } from '../utils/share';
 
 declare global {
   interface Window {
@@ -34,19 +35,20 @@ function loadKakaoSdk(): Promise<void> {
   return scriptPromise;
 }
 
-export async function shareToKakao(): Promise<void> {
+export async function shareToKakao(variant: InvitationShareVariant = 'general'): Promise<void> {
   const key = import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY;
   if (!key) throw new Error('Kakao JavaScript Key가 설정되어 있지 않습니다.');
 
   await loadKakaoSdk();
   if (!window.Kakao) throw new Error('Kakao SDK를 사용할 수 없습니다.');
   if (!window.Kakao.isInitialized()) window.Kakao.init(key);
+  const content = getInvitationShareContent(variant);
 
   window.Kakao.Share?.sendDefault({
     objectType: 'feed',
     content: {
-      title: '동국대학교 회계학과 50주년 기념 회계인의 밤',
-      description: '2026.11.13 FRI · 서울신라호텔 영빈관',
+      title: content.title,
+      description: content.text,
       imageUrl: new URL(event.ogImage, window.location.origin).toString(),
       link: {
         mobileWebUrl: window.location.href,
@@ -55,7 +57,7 @@ export async function shareToKakao(): Promise<void> {
     },
     buttons: [
       {
-        title: '초대장 보기',
+        title: content.buttonTitle,
         link: {
           mobileWebUrl: window.location.href,
           webUrl: window.location.href,

@@ -59,6 +59,7 @@ const guardianSubmission: Submission = {
 const attendanceResponse: AttendanceResponse = {
   id: 'attendance-1',
   created_at: '2026-10-01T00:00:00Z',
+  updated_at: '2026-10-02T00:00:00Z',
   name: '김동국',
   phone: '01098765432',
   admission_year: '08',
@@ -70,14 +71,22 @@ const attendanceResponse: AttendanceResponse = {
 const studentAttendanceResponse: StudentAttendanceResponse = {
   id: 'student-attendance-1',
   created_at: '2026-10-07T00:00:00Z',
+  updated_at: '2026-10-08T00:00:00Z',
   name: '박재학',
   phone: '01011112222',
   admission_year: '24',
   student_council_experience: true,
   student_council_details: '2025년 회계학과 학생회장',
+  student_council_fee_status: 'paid',
   attendance_status: 'attending',
   privacy_consent_at: '2026-10-07T00:00:00Z',
   selection_criteria_consent_at: '2026-10-07T00:00:00Z',
+  selection_status: 'selected',
+  waitlist_order: null,
+  participation_fee_status: 'paid',
+  contacted_at: '2026-10-08T00:00:00Z',
+  admin_memo: '선정 안내 완료',
+  superseded_at: null,
 };
 
 interface XlsxCellXml {
@@ -121,7 +130,7 @@ describe('Excel export rows', () => {
     const sheet = buildAttendanceExcelSheet([attendanceResponse]);
     const headings = sheet[0].map((cell) => typeof cell === 'object' && cell && 'value' in cell ? cell.value : cell);
 
-    expect(headings).toEqual(['회신일시', '성명', '전화번호', '입학년도', '현재 소속 및 직함', '참석 여부']);
+    expect(headings).toEqual(['최종 회신일시', '성명', '전화번호', '입학년도', '현재 소속 및 직함', '참석 여부']);
     expect(sheet[1][2]).toMatchObject({ value: 1_098_765_432, type: Number, format: '00000000000' });
     expect(sheet[1][3]).toMatchObject({ value: 8, type: Number, format: '00' });
     expect(sheet[1][5]).toBe('불참');
@@ -131,12 +140,15 @@ describe('Excel export rows', () => {
     const sheet = buildStudentAttendanceExcelSheet([studentAttendanceResponse]);
     const headings = sheet[0].map((cell) => typeof cell === 'object' && cell && 'value' in cell ? cell.value : cell);
 
-    expect(headings).toEqual(['회신일시', '성명', '전화번호', '입학년도', '학생회 활동 여부', '활동 연도 및 직책', '참석 여부']);
+    expect(headings).toEqual(['최종 회신일시', '성명', '전화번호', '입학년도', '우선순위', '학생회 활동 여부', '활동 연도 및 직책', '학생회비', '참석 신청 여부', '선정 상태', '대기 순번', '행사 참가비', '개별 연락', '관리 메모']);
     expect(sheet[1][2]).toMatchObject({ value: 1_011_112_222, type: Number, format: '00000000000' });
     expect(sheet[1][3]).toMatchObject({ value: 24, type: Number, format: '00' });
-    expect(sheet[1][4]).toBe('경험 있음');
-    expect(sheet[1][5]).toBe('2025년 회계학과 학생회장');
-    expect(sheet[1][6]).toBe('참석');
+    expect(sheet[1][4]).toBe('1순위');
+    expect(sheet[1][5]).toBe('경험 있음');
+    expect(sheet[1][6]).toBe('2025년 회계학과 학생회장');
+    expect(sheet[1][7]).toBe('납부');
+    expect(sheet[1][9]).toBe('선정');
+    expect(sheet[1][11]).toBe('납부');
   });
 
   it('exports C, D, and G as typed number cells while preserving inactive fields', () => {
