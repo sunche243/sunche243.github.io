@@ -80,6 +80,8 @@ describe('student attendance form', () => {
     expect(html).toContain('학생회비 납부가 확인된 신청자');
     expect(html).toContain('3순위');
     expect(html).toContain('학생회비 미납 신청자');
+    expect(html).toContain('동일 순위 내 추첨');
+    expect(html).toContain('해당 순위 신청자를 대상으로 무작위 추첨');
     expect(html).toContain('참가비 30,000원');
     expect(html).toContain('대기 순서에 따라 차순위 신청자에게 개별 연락');
   });
