@@ -1,12 +1,31 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
 
 const projectRoot = fileURLToPath(new URL('.', import.meta.url));
+const base = '/accountingnight/';
+
+const attendanceTrailingSlashRedirect = {
+  name: 'attendance-trailing-slash-redirect',
+  configureServer(server: ViteDevServer) {
+    server.middlewares.use((request, response, next) => {
+      const requestUrl = request.url ?? '';
+      const pathname = requestUrl.split('?')[0];
+      if (pathname !== `${base}attendance`) {
+        next();
+        return;
+      }
+
+      response.statusCode = 302;
+      response.setHeader('Location', `${base}attendance/${requestUrl.slice(pathname.length)}`);
+      response.end();
+    });
+  },
+};
 
 export default defineConfig({
-  plugins: [react()],
-  base: '/accountingnight/',
+  plugins: [attendanceTrailingSlashRedirect, react()],
+  base,
   build: {
     assetsDir: 'assets',
     rollupOptions: {

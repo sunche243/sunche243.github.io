@@ -8,8 +8,8 @@ describe('invitation sponsorship CTA', () => {
 
     expect(html).toContain('참석 및 후원 확약하기');
     expect(html).toContain('href="/accountingnight/sponsor/#registration"');
-    expect(html).toContain('후원 없이 참석 여부만 회신하기');
-    expect(html).toContain('href="/accountingnight/attendance/"');
+    expect(html).not.toContain('후원 없이 참석 여부만 회신하기');
+    expect(html).not.toContain('href="/accountingnight/attendance/"');
     expect(html).toContain('재학생 전용 초대장 보기');
     expect(html).toContain('href="/accountingnight/student/"');
   });
