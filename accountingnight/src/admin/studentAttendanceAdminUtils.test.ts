@@ -5,6 +5,7 @@ import {
   deleteStudentAttendanceResponseFromList,
   filterStudentAttendanceResponses,
   getStudentSelectionPriority,
+  sortStudentAttendanceResponses,
   updateStudentAttendanceResponseInList,
   validateStudentAttendanceAdminEdit,
   validateStudentSelectionManagement,
@@ -55,6 +56,27 @@ describe('student attendance admin utilities', () => {
     expect(filterStudentAttendanceResponses([experienced, inexperienced], {
       query: '', status: 'all', priority: '3', selectionStatus: 'waitlisted', participationFeeStatus: 'all',
     })).toEqual([inexperienced]);
+  });
+
+  it('sorts by priority and then by Korean name within the same priority', () => {
+    const priorityTwoKim = {
+      ...inexperienced,
+      id: 'student-3',
+      name: '김회계',
+      student_council_fee_status: 'paid' as const,
+    };
+    const priorityTwoPark = {
+      ...inexperienced,
+      id: 'student-4',
+      name: '박회계',
+      student_council_fee_status: 'paid' as const,
+    };
+    const sorted = sortStudentAttendanceResponses(
+      [inexperienced, priorityTwoPark, experienced, priorityTwoKim],
+      'priority',
+    );
+
+    expect(sorted.map((item) => item.name)).toEqual(['김동국', '김회계', '박회계', '이회계']);
   });
 
   it('validates applicant fields and rejects 26 admission year', () => {

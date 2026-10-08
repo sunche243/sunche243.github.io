@@ -103,7 +103,7 @@ export function StudentAdmissionYearField({ value, error, onChange }: StudentAdm
         aria-describedby={visibleError ? 'student-admission-year-error' : 'student-admission-year-help'}
       />
       <span className="student-council-help" id="student-admission-year-help">
-        입학년도 앞 두 자리를 입력해 주세요. 26학번은 이번 행사 참석 대상이 아닙니다.
+        입학년도 뒤 두 자리를 입력해 주세요. 26학번은 이번 행사 참석 대상이 아닙니다.
       </span>
       {visibleError ? (
         <span className="field-error" id="student-admission-year-error" role={isFirstYear ? 'alert' : undefined}>

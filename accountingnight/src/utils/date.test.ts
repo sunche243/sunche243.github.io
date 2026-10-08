@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { getCountdownParts, getEventPhase } from './date';
 
-const start = new Date('2026-11-13T17:00:00+09:00');
+const start = new Date('2026-11-13T17:30:00+09:00');
 const end = new Date('2026-11-13T21:00:00+09:00');
 
 describe('date utilities', () => {
   it('calculates countdown before the event', () => {
-    const parts = getCountdownParts(new Date('2026-11-12T17:00:00+09:00'), start, end);
+    const parts = getCountdownParts(new Date('2026-11-12T17:30:00+09:00'), start, end);
     expect(parts.phase).toBe('before');
     expect(parts.days).toBe(1);
     expect(parts.hours).toBe(0);

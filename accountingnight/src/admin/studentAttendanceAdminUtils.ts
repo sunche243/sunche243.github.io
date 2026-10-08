@@ -34,6 +34,7 @@ export const studentParticipationFeeStatusLabels: Record<StudentParticipationFee
 };
 
 export type StudentSelectionPriority = 1 | 2 | 3 | null;
+export type StudentAttendanceAdminSort = 'latest' | 'priority';
 
 export interface StudentAttendanceAdminFilters {
   query: string;
@@ -260,5 +261,28 @@ export function filterStudentAttendanceResponses(
       || response.participation_fee_status === filters.participationFeeStatus;
 
     return matchesQuery && matchesStatus && matchesPriority && matchesSelection && matchesParticipationFee;
+  });
+}
+
+export function sortStudentAttendanceResponses(
+  responses: StudentAttendanceResponse[],
+  sort: StudentAttendanceAdminSort,
+): StudentAttendanceResponse[] {
+  return [...responses].sort((left, right) => {
+    if (sort === 'priority') {
+      const leftPriority = getStudentSelectionPriority(left);
+      const rightPriority = getStudentSelectionPriority(right);
+      const leftGroup = leftPriority ?? (left.attendance_status === 'attending' ? 4 : 5);
+      const rightGroup = rightPriority ?? (right.attendance_status === 'attending' ? 4 : 5);
+      if (leftGroup !== rightGroup) return leftGroup - rightGroup;
+
+      const nameOrder = left.name.localeCompare(right.name, 'ko-KR');
+      if (nameOrder !== 0) return nameOrder;
+    }
+
+    const leftTime = Date.parse(left.updated_at ?? left.created_at);
+    const rightTime = Date.parse(right.updated_at ?? right.created_at);
+    if (leftTime !== rightTime) return rightTime - leftTime;
+    return left.id.localeCompare(right.id);
   });
 }

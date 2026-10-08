@@ -23,11 +23,13 @@ import {
   studentCouncilFeeStatusLabels,
   studentParticipationFeeStatusLabels,
   studentSelectionStatusLabels,
+  sortStudentAttendanceResponses,
   validateStudentAttendanceAdminEdit,
   validateStudentSelectionManagement,
   type StudentAttendanceAdminEditDraft,
   type StudentAttendanceAdminEditErrors,
   type StudentAttendanceAdminFilters,
+  type StudentAttendanceAdminSort,
   type StudentSelectionManagementDraft,
 } from './studentAttendanceAdminUtils';
 
@@ -296,11 +298,13 @@ export function StudentAttendanceDeleteDialog({ response, onClose, onDeleted, on
 
 export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManagementUpdated, onDeleted, onError, onSuccess }: StudentAttendanceResponsesPanelProps) {
   const [filters, setFilters] = useState<StudentAttendanceAdminFilters>({ query: '', status: 'all', priority: 'all', selectionStatus: 'all', participationFeeStatus: 'all' });
+  const [sort, setSort] = useState<StudentAttendanceAdminSort>('latest');
   const [editing, setEditing] = useState<StudentAttendanceResponse | null>(null);
   const [managing, setManaging] = useState<StudentAttendanceResponse | null>(null);
   const [deleting, setDeleting] = useState<StudentAttendanceResponse | null>(null);
   const [exporting, setExporting] = useState(false);
   const filtered = useMemo(() => filterStudentAttendanceResponses(responses, filters), [responses, filters]);
+  const sorted = useMemo(() => sortStudentAttendanceResponses(filtered, sort), [filtered, sort]);
   const stats = useMemo(() => calculateStudentAttendanceAdminStats(responses), [responses]);
 
   async function exportExcel() {
@@ -326,21 +330,22 @@ export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManage
         <label><span>우선순위</span><select value={filters.priority} onChange={(event) => setFilters((current) => ({ ...current, priority: event.target.value as StudentAttendanceAdminFilters['priority'] }))}><option value="all">전체</option><option value="1">1순위</option><option value="2">2순위</option><option value="3">3순위</option><option value="unverified">확인 필요</option></select></label>
         <label><span>선정 상태</span><select value={filters.selectionStatus} onChange={(event) => setFilters((current) => ({ ...current, selectionStatus: event.target.value as StudentAttendanceAdminFilters['selectionStatus'] }))}><option value="all">전체</option>{Object.entries(studentSelectionStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <label><span>참가비 상태</span><select value={filters.participationFeeStatus} onChange={(event) => setFilters((current) => ({ ...current, participationFeeStatus: event.target.value as StudentAttendanceAdminFilters['participationFeeStatus'] }))}><option value="all">전체</option>{Object.entries(studentParticipationFeeStatusLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+        <label><span>정렬</span><select value={sort} onChange={(event) => setSort(event.target.value as StudentAttendanceAdminSort)}><option value="latest">최신 회신순</option><option value="priority">우선순위순</option></select></label>
       </div>
       <p className="admin-result-count">총 {filtered.length}건</p>
       <div className="admin-table-wrap"><table className="admin-table attendance-admin-table student-attendance-admin-table">
-        <thead><tr><th>최종 회신일시</th><th>성명</th><th>전화번호</th><th>학번</th><th>우선순위</th><th>학생회 활동</th><th>학생회비</th><th>선정</th><th>대기순번</th><th>참가비</th><th>연락</th><th>참석 응답</th><th className="attendance-actions-cell">관리</th></tr></thead>
-        <tbody>{filtered.map((response) => {
+        <thead><tr><th className="admin-sequence-cell">순번</th><th>최종 회신일시</th><th>성명</th><th>전화번호</th><th>학번</th><th>우선순위</th><th>학생회 활동</th><th>학생회비</th><th>선정</th><th>대기순번</th><th>참가비</th><th>연락</th><th>참석 응답</th><th className="attendance-actions-cell">관리</th></tr></thead>
+        <tbody>{sorted.map((response, index) => {
           const priority = getStudentSelectionPriority(response);
           return <tr key={response.id}>
-            <td>{formatAdminDate(response.updated_at ?? response.created_at)}</td><td><strong>{response.name}</strong></td><td>{response.phone}</td><td>{response.admission_year || '−'}</td>
+            <td className="admin-sequence-cell">{index + 1}</td><td>{formatAdminDate(response.updated_at ?? response.created_at)}</td><td><strong>{response.name}</strong></td><td>{response.phone}</td><td>{response.admission_year || '−'}</td>
             <td>{response.attendance_status === 'attending' ? priority ? `${priority}순위` : '확인 필요' : '−'}</td>
             <td>{response.student_council_experience === null ? '−' : response.student_council_experience ? `경험 있음${response.student_council_details ? ` · ${response.student_council_details}` : ''}` : '경험 없음'}</td>
             <td>{studentCouncilFeeStatusLabels[response.student_council_fee_status]}</td><td>{studentSelectionStatusLabels[response.selection_status]}</td><td>{response.waitlist_order ?? '−'}</td><td>{studentParticipationFeeStatusLabels[response.participation_fee_status]}</td><td>{response.contacted_at ? '완료' : '미완료'}</td>
             <td><span className={`attendance-status attendance-status--${response.attendance_status}`}>{attendanceResponseLabels[response.attendance_status]}</span></td>
             <td className="attendance-actions-cell"><div className="admin-row-actions"><button type="button" onClick={() => setEditing(response)} aria-label={`${response.name}님의 학생 참석 응답 수정`}>응답</button><button type="button" onClick={() => setManaging(response)} aria-label={`${response.name}님의 학생 선정 관리`}>선정</button><button className="admin-row-action--danger" type="button" onClick={() => setDeleting(response)} aria-label={`${response.name}님의 학생 참석 응답 삭제`}>삭제</button></div></td>
           </tr>;
-        })}{!filtered.length ? <tr><td className="admin-empty" colSpan={13}>조건에 맞는 학생 참석 회신이 없습니다.</td></tr> : null}</tbody>
+        })}{!sorted.length ? <tr><td className="admin-empty" colSpan={14}>조건에 맞는 학생 참석 회신이 없습니다.</td></tr> : null}</tbody>
       </table></div>
       {editing ? <StudentAttendanceEditDialog response={editing} onClose={() => setEditing(null)} onUpdated={onUpdated} onError={onError} onSuccess={onSuccess} /> : null}
       {managing ? <StudentSelectionManagementDialog response={managing} onClose={() => setManaging(null)} onUpdated={onManagementUpdated} onError={onError} onSuccess={onSuccess} /> : null}
