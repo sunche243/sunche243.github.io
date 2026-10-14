@@ -21,6 +21,13 @@ describe('student attendance form', () => {
     expect(html).not.toContain('현재 소속 및 직함');
   });
 
+  it('links graduates and guests to the general attendance response form', () => {
+    const html = renderToStaticMarkup(<StudentAttendanceForm />);
+
+    expect(html).toContain('졸업생 및 내외빈 참석 여부 회신하기');
+    expect(html).toContain('href="/accountingnight/attendance/"');
+  });
+
   it('shows an immediate ineligibility alert for 26 admission year', () => {
     const html = renderToStaticMarkup(
       <StudentAdmissionYearField value="26" onChange={vi.fn()} />,

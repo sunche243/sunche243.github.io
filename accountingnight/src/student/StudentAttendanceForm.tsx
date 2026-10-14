@@ -503,16 +503,21 @@ export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps
               </p>
             ) : null}
             {!isSupabaseConfigured() ? <p className="registration-configuration-note">현재 온라인 회신 기능을 준비하고 있습니다.</p> : null}
-            <button className="button button--gold registration-submit" type="submit" disabled={submitting}>
-              {submitting
-                ? '전송 중...'
-                : isAttending
-                  ? '재학생 참석 신청하기'
-                  : draft.attendanceStatus === 'not_attending'
-                    ? '불참 회신하기'
-                    : '응답 제출하기'}
-            </button>
-            <p className="registration-submit-note">동일한 전화번호로 다시 제출하면 최신 응답으로 반영됩니다.</p>
+            <div className="student-attendance-actions">
+              <button className="button button--gold registration-submit" type="submit" disabled={submitting}>
+                {submitting
+                  ? '전송 중...'
+                  : isAttending
+                    ? '재학생 참석 신청하기'
+                    : draft.attendanceStatus === 'not_attending'
+                      ? '불참 회신하기'
+                      : '응답 제출하기'}
+              </button>
+              <a className="button button--outline-dark student-attendance-audience-link" href={`${import.meta.env.BASE_URL}attendance/`}>
+                졸업생 및 내외빈 참석 여부 회신하기
+              </a>
+              <p className="registration-submit-note">동일한 전화번호로 다시 제출하면 최신 응답으로 반영됩니다.</p>
+            </div>
           </form>
         </div>
       )}

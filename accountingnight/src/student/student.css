@@ -66,6 +66,16 @@
   background: var(--ivory);
 }
 
+.student-attendance-actions {
+  display: grid;
+  gap: 12px;
+}
+
+.student-attendance-audience-link {
+  width: 100%;
+  min-height: 56px;
+}
+
 .student-selection-consent {
   margin-top: 14px;
 }
