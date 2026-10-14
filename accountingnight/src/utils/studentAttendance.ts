@@ -26,7 +26,11 @@ export function validateStudentAttendanceResponse({
   const studentCouncilDetails = draft.studentCouncilDetails.trim();
   const attending = draft.attendanceStatus === 'attending';
 
-  if (!name || name.length > 80) errors.name = '이름을 80자 이내로 입력해주세요.';
+  if (!name) {
+    errors.name = '이름을 입력해 주세요.';
+  } else if (name.length > 10) {
+    errors.name = '이름을 10자 이내로 입력해주세요.';
+  }
   if (!isValidMobilePhone(phone)) {
     errors.phone = '01012345678 또는 010-1234-5678 형식으로 입력해주세요.';
   }

@@ -28,6 +28,13 @@ describe('student attendance form', () => {
     expect(html).toContain('href="/accountingnight/attendance/"');
   });
 
+  it('limits the student name field to 10 characters', () => {
+    const html = renderToStaticMarkup(<StudentAttendanceForm />);
+
+    expect(html).toContain('id="student-name"');
+    expect(html).toContain('maxLength="10"');
+  });
+
   it('shows an immediate ineligibility alert for 26 admission year', () => {
     const html = renderToStaticMarkup(
       <StudentAdmissionYearField value="26" onChange={vi.fn()} />,

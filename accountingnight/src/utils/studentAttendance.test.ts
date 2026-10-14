@@ -36,6 +36,12 @@ describe('student attendance response validation', () => {
     })).toEqual({ valid: true, errors: {} });
   });
 
+  it('shows distinct messages for an empty name and a name over 10 characters', () => {
+    expect(validate({ ...draft, name: '   ' }).errors.name).toBe('이름을 입력해 주세요.');
+    expect(validate({ ...draft, name: '가'.repeat(11) }).errors.name).toBe('이름을 10자 이내로 입력해주세요.');
+    expect(validate({ ...draft, name: '가'.repeat(10) }).errors.name).toBeUndefined();
+  });
+
   it('requires a council experience choice', () => {
     expect(validate({ ...draft, studentCouncilExperience: null }).errors.studentCouncilExperience).toBeTruthy();
   });

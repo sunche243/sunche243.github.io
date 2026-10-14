@@ -375,6 +375,7 @@ export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps
                     name="name"
                     required
                     autoComplete="name"
+                    maxLength={10}
                     value={draft.name}
                     onChange={(event) => updateDraft('name', event.target.value)}
                     aria-invalid={Boolean(errors.name)}
