@@ -13,6 +13,10 @@ const operationsMigration = readFileSync(
   new URL('../../supabase/migrations/20261008090000_response_upsert_student_operations.sql', import.meta.url),
   'utf8',
 );
+const adminAdmissionYearMigration = readFileSync(
+  new URL('../../supabase/migrations/20261014063552_allow_admin_26_admission_year.sql', import.meta.url),
+  'utf8',
+);
 const schema = readFileSync(new URL('../../supabase/schema.sql', import.meta.url), 'utf8');
 
 describe('student attendance SQL contract', () => {
@@ -73,5 +77,14 @@ describe('student attendance SQL contract', () => {
     expect(operationsMigration).toContain('grant execute on function public.update_student_selection_management(');
     expect(schema).toContain("student_council_fee_status in ('unverified', 'paid', 'unpaid', 'not_applicable')");
     expect(schema).toContain('create or replace function public.update_student_selection_management(');
+  });
+
+  it('keeps public 26 admission-year rejection while allowing admin corrections', () => {
+    expect(adminAdmissionYearMigration).toContain('drop constraint if exists student_attendance_responses_attending_contract_check');
+    expect(adminAdmissionYearMigration).toContain('create or replace function public.update_student_attendance_response(');
+    expect(adminAdmissionYearMigration).not.toContain("admission_year <> '26'");
+    expect(adminAdmissionYearMigration).not.toContain('First-year students are not eligible');
+    expect(schema).not.toContain("admission_year <> '26'");
+    expect(schema.match(/First-year students are not eligible/g)).toHaveLength(1);
   });
 });

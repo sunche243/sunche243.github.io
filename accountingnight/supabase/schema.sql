@@ -129,7 +129,6 @@ create table if not exists public.student_attendance_responses (
     attendance_status <> 'attending'
     or (
       admission_year is not null
-      and admission_year <> '26'
       and student_council_experience is not null
       and student_council_fee_status in ('unverified', 'paid', 'unpaid')
       and selection_criteria_consent_at is not null
@@ -758,9 +757,6 @@ begin
     v_admission_year := nullif(btrim(coalesce(p_admission_year, '')), '');
     if v_admission_year is null or v_admission_year !~ '^[0-9]{2}$' then
       raise exception 'Admission year is required';
-    end if;
-    if v_admission_year = '26' then
-      raise exception 'First-year students are not eligible';
     end if;
     if p_student_council_experience is null then
       raise exception 'Student council experience is required';

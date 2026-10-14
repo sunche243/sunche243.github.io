@@ -113,7 +113,6 @@ export function validateStudentAttendanceAdminEdit(
 
   if (attending) {
     if (!/^\d{2}$/.test(admissionYear)) errors.admissionYear = '학번은 숫자 2자리로 입력해주세요. (예: 24)';
-    else if (admissionYear === '26') errors.admissionYear = '26학번은 이번 행사 참석 대상이 아닙니다.';
     if (draft.studentCouncilExperience === null) errors.studentCouncilExperience = '학생회 활동 여부를 선택해주세요.';
     if (draft.studentCouncilExperience === true && !details) {
       errors.studentCouncilDetails = '활동 연도와 직책을 입력해주세요.';

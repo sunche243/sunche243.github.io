@@ -79,9 +79,11 @@ describe('student attendance admin utilities', () => {
     expect(sorted.map((item) => item.name)).toEqual(['김동국', '김회계', '박회계', '이회계']);
   });
 
-  it('validates applicant fields and rejects 26 admission year', () => {
+  it('validates applicant fields and allows an admin to set admission year 26', () => {
     expect(validateStudentAttendanceAdminEdit({ ...validDraft, studentCouncilDetails: '' }).errors.studentCouncilDetails).toBeTruthy();
-    expect(validateStudentAttendanceAdminEdit({ ...validDraft, admissionYear: '26' }).errors.admissionYear).toBeTruthy();
+    const firstYear = validateStudentAttendanceAdminEdit({ ...validDraft, admissionYear: '26' });
+    expect(firstYear.valid).toBe(true);
+    expect(firstYear.value?.admission_year).toBe('26');
     const noExperience = validateStudentAttendanceAdminEdit({ ...validDraft, studentCouncilExperience: false, studentCouncilDetails: 'discarded' });
     expect(noExperience.valid).toBe(true);
     expect(noExperience.value?.student_council_details).toBeNull();
