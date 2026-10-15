@@ -34,7 +34,7 @@ export const studentParticipationFeeStatusLabels: Record<StudentParticipationFee
 };
 
 export type StudentSelectionPriority = 1 | 2 | 3 | null;
-export type StudentAttendanceAdminSort = 'latest' | 'priority';
+export type StudentAttendanceAdminSort = 'latest' | 'priority' | 'admission_year';
 export type StudentBulkSelectionPriority = 1 | 2;
 
 export interface StudentBulkSelectionSnapshot {
@@ -335,6 +335,19 @@ export function sortStudentAttendanceResponses(
       const leftGroup = leftPriority ?? (left.attendance_status === 'attending' ? 4 : 5);
       const rightGroup = rightPriority ?? (right.attendance_status === 'attending' ? 4 : 5);
       if (leftGroup !== rightGroup) return leftGroup - rightGroup;
+
+      const nameOrder = left.name.localeCompare(right.name, 'ko-KR');
+      if (nameOrder !== 0) return nameOrder;
+    }
+
+    if (sort === 'admission_year') {
+      const leftAdmissionYear = left.admission_year === null
+        ? Number.POSITIVE_INFINITY
+        : Number.parseInt(left.admission_year, 10);
+      const rightAdmissionYear = right.admission_year === null
+        ? Number.POSITIVE_INFINITY
+        : Number.parseInt(right.admission_year, 10);
+      if (leftAdmissionYear !== rightAdmissionYear) return leftAdmissionYear - rightAdmissionYear;
 
       const nameOrder = left.name.localeCompare(right.name, 'ko-KR');
       if (nameOrder !== 0) return nameOrder;

@@ -123,6 +123,25 @@ describe('student attendance admin utilities', () => {
     expect(sorted.map((item) => item.name)).toEqual(['김동국', '김회계', '박회계', '이회계']);
   });
 
+  it('sorts by admission year and then by Korean name, with missing years last', () => {
+    const student05 = { ...inexperienced, id: 'student-05', name: '박오번', admission_year: '05' };
+    const student24Kim = { ...inexperienced, id: 'student-24-kim', name: '김이사', admission_year: '24' };
+    const student24Lee = { ...inexperienced, id: 'student-24-lee', name: '이이사', admission_year: '24' };
+    const noAdmissionYear = { ...inexperienced, id: 'student-no-year', name: '미입력', admission_year: null };
+
+    const sorted = sortStudentAttendanceResponses(
+      [student24Lee, noAdmissionYear, student24Kim, student05],
+      'admission_year',
+    );
+
+    expect(sorted.map((item) => item.id)).toEqual([
+      'student-05',
+      'student-24-kim',
+      'student-24-lee',
+      'student-no-year',
+    ]);
+  });
+
   it('validates applicant fields and allows an admin to set admission year 26', () => {
     expect(validateStudentAttendanceAdminEdit({ ...validDraft, studentCouncilDetails: '' }).errors.studentCouncilDetails).toBeTruthy();
     const firstYear = validateStudentAttendanceAdminEdit({ ...validDraft, admissionYear: '26' });
