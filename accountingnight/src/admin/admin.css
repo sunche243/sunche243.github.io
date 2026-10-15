@@ -258,6 +258,7 @@
   display: flex;
   gap: 26px;
   margin-bottom: 36px;
+  overflow-x: auto;
   border-bottom: 1px solid rgba(17, 17, 17, 0.2);
 }
 
@@ -271,6 +272,7 @@
   background: transparent;
   font-size: 0.9rem;
   font-weight: 700;
+  flex: 0 0 auto;
 }
 
 .admin-tabs button.is-active {
@@ -306,6 +308,135 @@
   line-height: 1.7;
 }
 
+.admin-statistics-panel {
+  display: grid;
+  gap: 42px;
+}
+
+.admin-statistics-panel > .admin-panel__heading {
+  margin-bottom: 0;
+}
+
+.admin-statistics-panel > .admin-panel__description {
+  margin: -28px 0 -8px;
+}
+
+.admin-statistics-section {
+  display: grid;
+  gap: 18px;
+}
+
+.admin-statistics-section__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 11px;
+  border-bottom: 1px solid rgba(17, 17, 17, 0.2);
+}
+
+.admin-statistics-section__heading p,
+.admin-statistics-section__heading h3,
+.admin-statistics-section__heading > span {
+  margin: 0;
+}
+
+.admin-statistics-section__heading p {
+  color: var(--gold-dark);
+  font-family: var(--serif);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.admin-statistics-section__heading h3 {
+  margin-top: 5px;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.admin-statistics-section__heading > span {
+  color: var(--gray-600);
+  font-size: 0.72rem;
+}
+
+.admin-statistics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.admin-statistic-card {
+  display: grid;
+  min-height: 126px;
+  align-content: space-between;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid rgba(17, 17, 17, 0.14);
+  border-radius: 4px;
+  background: var(--ivory);
+}
+
+.admin-statistic-card--emphasis {
+  border-color: rgba(135, 108, 63, 0.5);
+  background: #ede4d2;
+}
+
+.admin-statistic-card > span {
+  color: var(--gray-600);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.admin-statistic-card strong {
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 4vw, 2.3rem);
+  font-weight: 600;
+  line-height: 1;
+}
+
+.admin-statistic-card small {
+  margin-left: 4px;
+  color: var(--gray-600);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.admin-statistic-card p {
+  margin: 0;
+  color: var(--gray-600);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
+.admin-statistics-hero {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-statistics-hero > .admin-statistic-card {
+  min-height: 160px;
+}
+
+.admin-statistics-hero > .admin-statistic-card strong {
+  font-size: clamp(2.7rem, 9vw, 4.6rem);
+}
+
+.admin-participant-equation {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.admin-participant-equation > span {
+  color: var(--gold-dark);
+  font-family: var(--serif);
+  font-size: 1.5rem;
+}
+
 .admin-filters {
   display: grid;
   grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(140px, 1fr));
@@ -333,6 +464,44 @@
 .attendance-admin-stats {
   margin-top: 0;
   margin-bottom: 30px;
+}
+
+.student-bulk-selection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+  padding: 20px;
+  border: 1px solid rgba(135, 108, 63, 0.34);
+  background: rgba(237, 228, 210, 0.56);
+}
+
+.student-bulk-selection h3,
+.student-bulk-selection p {
+  margin: 0;
+}
+
+.student-bulk-selection h3 {
+  font-family: var(--serif);
+  font-size: 1.05rem;
+}
+
+.student-bulk-selection p {
+  max-width: 620px;
+  margin-top: 7px;
+  color: var(--gray-600);
+  font-size: 0.76rem;
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+.student-bulk-selection__actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .attendance-admin-filters {
@@ -779,11 +948,24 @@
   .submission-detail-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .admin-statistics-grid--four {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 860px) {
   .admin-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .student-bulk-selection {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .student-bulk-selection__actions {
+    justify-content: flex-start;
   }
 
   .admin-search {
@@ -813,11 +995,30 @@
     font-size: 1.75rem;
   }
 
+  .admin-statistics-section__heading {
+    align-items: start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .admin-participant-equation {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-participant-equation > span {
+    display: none;
+  }
+
   .admin-filters {
     grid-template-columns: 1fr;
   }
 
   .attendance-admin-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .student-bulk-selection__actions {
+    display: grid;
     grid-template-columns: 1fr;
   }
 

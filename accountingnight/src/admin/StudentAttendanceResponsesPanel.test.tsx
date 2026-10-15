@@ -45,6 +45,9 @@ describe('student attendance admin UI', () => {
     expect(html).toContain('학생회 활동');
     expect(html).toContain('최신 회신순');
     expect(html).toContain('우선순위순');
+    expect(html).toContain('1순위 전체 선정하기');
+    expect(html).toContain('2순위 전체 선정하기');
+    expect(html).toContain('되돌리기');
     expect(html).toContain('<th class="admin-sequence-cell">순번</th>');
     expect(html).toContain('<td class="admin-sequence-cell">1</td>');
     expect(html).toContain('2025년 회계학과 학생회장');

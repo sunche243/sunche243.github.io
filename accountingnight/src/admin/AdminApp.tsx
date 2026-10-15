@@ -22,6 +22,7 @@ import { AttendanceResponsesPanel } from './AttendanceResponsesPanel';
 import { deleteAttendanceResponseFromList, updateAttendanceResponseInList } from './attendanceAdminUtils';
 import { FormFieldsPanel } from './FormFieldsPanel';
 import { StudentAttendanceResponsesPanel } from './StudentAttendanceResponsesPanel';
+import { StatisticsPanel } from './StatisticsPanel';
 import { SubmissionsPanel } from './SubmissionsPanel';
 import {
   deleteStudentAttendanceResponseFromList,
@@ -29,7 +30,7 @@ import {
 } from './studentAttendanceAdminUtils';
 
 type AdminPhase = 'checking' | 'login' | 'ready';
-type AdminTab = 'submissions' | 'attendance' | 'student' | 'fields';
+type AdminTab = 'submissions' | 'attendance' | 'student' | 'statistics' | 'fields';
 
 function ConfigurationNotice() {
   return (
@@ -209,7 +210,7 @@ export function AdminApp() {
           <button className="admin-refresh" type="button" onClick={() => void refresh()} disabled={loading}>{loading ? '불러오는 중' : '새로고침'}</button>
         </div>
 
-        {tab !== 'attendance' && tab !== 'student' ? (
+        {tab === 'submissions' || tab === 'fields' ? (
           <section className="admin-stats" aria-label="기존 후원 및 약정 신청 통계">
             <article><span>전체 응답</span><strong>{stats.totalResponses}<small>명</small></strong></article>
             <article><span>발전기금 약정 인원</span><strong>{stats.pledgeCount}<small>명</small></strong></article>
@@ -224,6 +225,7 @@ export function AdminApp() {
           <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => setTab('submissions')}>발전기금·참석 회신</button>
           <button type="button" className={tab === 'attendance' ? 'is-active' : ''} aria-current={tab === 'attendance' ? 'page' : undefined} onClick={() => setTab('attendance')}>참석 여부</button>
           <button type="button" className={tab === 'student' ? 'is-active' : ''} aria-current={tab === 'student' ? 'page' : undefined} onClick={() => setTab('student')}>학생 참석</button>
+          <button type="button" className={tab === 'statistics' ? 'is-active' : ''} aria-current={tab === 'statistics' ? 'page' : undefined} onClick={() => setTab('statistics')}>통계</button>
           <button type="button" className={tab === 'fields' ? 'is-active' : ''} aria-current={tab === 'fields' ? 'page' : undefined} onClick={() => setTab('fields')}>폼 항목 관리</button>
         </nav>
 
@@ -245,6 +247,12 @@ export function AdminApp() {
             onDeleted={handleStudentAttendanceDeleted}
             onError={setError}
             onSuccess={showToast}
+          />
+        ) : tab === 'statistics' ? (
+          <StatisticsPanel
+            submissions={submissions}
+            attendanceResponses={attendanceResponses}
+            studentAttendanceResponses={studentAttendanceResponses}
           />
         ) : (
           <FormFieldsPanel fields={fields} onRefresh={refresh} onError={setError} />

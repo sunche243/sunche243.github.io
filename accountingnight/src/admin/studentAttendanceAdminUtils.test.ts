@@ -2,8 +2,12 @@ import { describe, expect, it } from 'vitest';
 import type { StudentAttendanceResponse } from '../types/studentAttendance';
 import {
   calculateStudentAttendanceAdminStats,
+  createStudentBulkSelectionSnapshot,
+  createStudentBulkSelectionUndoValue,
+  createStudentBulkSelectionValue,
   deleteStudentAttendanceResponseFromList,
   filterStudentAttendanceResponses,
+  getStudentBulkSelectionCandidates,
   getStudentSelectionPriority,
   sortStudentAttendanceResponses,
   updateStudentAttendanceResponseInList,
@@ -41,6 +45,46 @@ describe('student attendance admin utilities', () => {
     expect(getStudentSelectionPriority({ ...inexperienced, student_council_fee_status: 'paid' })).toBe(2);
     expect(getStudentSelectionPriority(inexperienced)).toBe(3);
     expect(getStudentSelectionPriority({ ...inexperienced, student_council_fee_status: 'unverified' })).toBeNull();
+  });
+
+  it('selects only unselected applicants in the requested bulk priority', () => {
+    const priorityOnePending = { ...experienced, id: 'priority-one-pending', selection_status: 'pending' as const, participation_fee_status: 'not_applicable' as const };
+    const priorityOneCancelled = { ...experienced, id: 'priority-one-cancelled', selection_status: 'cancelled' as const, participation_fee_status: 'not_applicable' as const };
+    const priorityTwo = { ...inexperienced, id: 'priority-two', student_council_fee_status: 'paid' as const, selection_status: 'pending' as const, waitlist_order: null };
+
+    expect(getStudentBulkSelectionCandidates([
+      experienced,
+      priorityOnePending,
+      priorityOneCancelled,
+      priorityTwo,
+      inexperienced,
+    ], 1)).toEqual([priorityOnePending]);
+    expect(getStudentBulkSelectionCandidates([priorityOnePending, priorityTwo, inexperienced], 2)).toEqual([priorityTwo]);
+  });
+
+  it('restores only the fields changed by a bulk selection while preserving later manual metadata', () => {
+    const waiting = { ...inexperienced, waitlist_order: 3 };
+    const snapshot = createStudentBulkSelectionSnapshot(waiting);
+    const selectedValue = createStudentBulkSelectionValue(waiting);
+    const afterBulkSelection = {
+      ...waiting,
+      ...selectedValue,
+      contacted_at: '2026-10-09T00:00:00Z',
+      admin_memo: '일괄 선정 후 작성한 메모',
+    };
+
+    expect(createStudentBulkSelectionUndoValue(afterBulkSelection, snapshot)).toEqual({
+      student_council_fee_status: 'unpaid',
+      selection_status: 'waitlisted',
+      waitlist_order: 3,
+      participation_fee_status: 'not_applicable',
+      contacted: true,
+      admin_memo: '일괄 선정 후 작성한 메모',
+    });
+    expect(createStudentBulkSelectionUndoValue({
+      ...afterBulkSelection,
+      participation_fee_status: 'paid',
+    }, snapshot)).toBeNull();
   });
 
   it('calculates selection and participation-fee stats', () => {

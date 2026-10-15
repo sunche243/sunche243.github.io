@@ -17,8 +17,12 @@ import {
 import { formatAdminDate } from './adminUtils';
 import { downloadStudentAttendanceExcel } from './excel';
 import {
+  createStudentBulkSelectionSnapshot,
+  createStudentBulkSelectionUndoValue,
+  createStudentBulkSelectionValue,
   calculateStudentAttendanceAdminStats,
   filterStudentAttendanceResponses,
+  getStudentBulkSelectionCandidates,
   getStudentSelectionPriority,
   studentCouncilFeeStatusLabels,
   studentParticipationFeeStatusLabels,
@@ -30,6 +34,8 @@ import {
   type StudentAttendanceAdminEditErrors,
   type StudentAttendanceAdminFilters,
   type StudentAttendanceAdminSort,
+  type StudentBulkSelectionPriority,
+  type StudentBulkSelectionSnapshot,
   type StudentSelectionManagementDraft,
 } from './studentAttendanceAdminUtils';
 
@@ -303,15 +309,96 @@ export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManage
   const [managing, setManaging] = useState<StudentAttendanceResponse | null>(null);
   const [deleting, setDeleting] = useState<StudentAttendanceResponse | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [bulkAction, setBulkAction] = useState<'select-1' | 'select-2' | 'undo' | null>(null);
+  const [lastBulkSelection, setLastBulkSelection] = useState<{
+    priority: StudentBulkSelectionPriority;
+    changes: StudentBulkSelectionSnapshot[];
+  } | null>(null);
   const filtered = useMemo(() => filterStudentAttendanceResponses(responses, filters), [responses, filters]);
   const sorted = useMemo(() => sortStudentAttendanceResponses(filtered, sort), [filtered, sort]);
   const stats = useMemo(() => calculateStudentAttendanceAdminStats(responses), [responses]);
+  const priorityOneCandidates = useMemo(() => getStudentBulkSelectionCandidates(responses, 1), [responses]);
+  const priorityTwoCandidates = useMemo(() => getStudentBulkSelectionCandidates(responses, 2), [responses]);
 
   async function exportExcel() {
     setExporting(true);
     try { await downloadStudentAttendanceExcel(responses); }
     catch { onError('학생 참석 Excel 파일을 생성하지 못했습니다.'); }
     finally { setExporting(false); }
+  }
+
+  async function selectPriority(priority: StudentBulkSelectionPriority) {
+    if (bulkAction) return;
+    const targets = priority === 1 ? priorityOneCandidates : priorityTwoCandidates;
+    if (!targets.length) return;
+
+    setBulkAction(priority === 1 ? 'select-1' : 'select-2');
+    onError('');
+    const results = await Promise.allSettled(targets.map(async (response) => {
+      const value = createStudentBulkSelectionValue(response);
+      await updateStudentSelectionManagement(response.id, value);
+      return { response, value };
+    }));
+    const successful = results.flatMap((result) => result.status === 'fulfilled' ? [result.value] : []);
+    successful.forEach(({ response, value }) => onManagementUpdated(response.id, value));
+
+    if (successful.length) {
+      setLastBulkSelection({
+        priority,
+        changes: successful.map(({ response }) => createStudentBulkSelectionSnapshot(response)),
+      });
+    }
+
+    const failedCount = results.length - successful.length;
+    if (failedCount > 0) {
+      onError(`${priority}순위 일괄 선정 중 ${failedCount}명의 저장에 실패했습니다. 저장된 ${successful.length}명만 되돌릴 수 있습니다.`);
+    } else {
+      onSuccess(`${priority}순위 ${successful.length}명을 선정했습니다.`);
+    }
+    setBulkAction(null);
+  }
+
+  async function undoLastBulkSelection() {
+    if (bulkAction || !lastBulkSelection) return;
+    setBulkAction('undo');
+    onError('');
+
+    const undoTargets = lastBulkSelection.changes.flatMap((snapshot) => {
+      const response = responses.find((item) => item.id === snapshot.id);
+      if (!response) return [];
+      const value = createStudentBulkSelectionUndoValue(response, snapshot);
+      return value ? [{ response, snapshot, value }] : [];
+    });
+
+    if (!undoTargets.length) {
+      setLastBulkSelection(null);
+      setBulkAction(null);
+      onSuccess('되돌릴 일괄 선정 변경이 없습니다. 이후 수기로 변경된 항목은 건드리지 않았습니다.');
+      return;
+    }
+
+    const results = await Promise.allSettled(undoTargets.map(async ({ response, snapshot, value }) => {
+      await updateStudentSelectionManagement(response.id, value);
+      return { response, snapshot, value };
+    }));
+    const successful = results.flatMap((result) => result.status === 'fulfilled' ? [result.value] : []);
+    successful.forEach(({ response, value }) => onManagementUpdated(response.id, value));
+
+    const failedSnapshots = results.flatMap((result, index) => (
+      result.status === 'rejected' ? [undoTargets[index].snapshot] : []
+    ));
+    setLastBulkSelection(failedSnapshots.length ? {
+      priority: lastBulkSelection.priority,
+      changes: failedSnapshots,
+    } : null);
+
+    const skippedCount = lastBulkSelection.changes.length - undoTargets.length;
+    if (failedSnapshots.length > 0) {
+      onError(`일괄 선정 되돌리기 중 ${failedSnapshots.length}명의 저장에 실패했습니다. 다시 시도할 수 있습니다.`);
+    } else {
+      onSuccess(`최근 일괄 선정 ${successful.length}명을 되돌렸습니다.${skippedCount ? ` 이후 수기로 변경된 ${skippedCount}명은 건드리지 않았습니다.` : ''}`);
+    }
+    setBulkAction(null);
   }
 
   return (
@@ -323,6 +410,17 @@ export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManage
         <article><span>선정</span><strong>{stats.selected}<small>명</small></strong></article>
         <article><span>대기</span><strong>{stats.waitlisted}<small>명</small></strong></article>
         <article><span>참가비 납부</span><strong>{stats.participationFeePaid}<small>명</small></strong></article>
+      </section>
+      <section className="student-bulk-selection" aria-labelledby="student-bulk-selection-title">
+        <div>
+          <h3 id="student-bulk-selection-title">우선순위 일괄 선정</h3>
+          <p>이미 선정됐거나 취소된 학생은 변경하지 않습니다. 되돌리기는 가장 최근 일괄 선정에서 변경된 학생에게만 적용됩니다.</p>
+        </div>
+        <div className="student-bulk-selection__actions">
+          <button className="admin-button" type="button" onClick={() => void selectPriority(1)} disabled={Boolean(bulkAction) || !priorityOneCandidates.length}>{bulkAction === 'select-1' ? '1순위 선정 중...' : `1순위 전체 선정하기 (${priorityOneCandidates.length}명)`}</button>
+          <button className="admin-button" type="button" onClick={() => void selectPriority(2)} disabled={Boolean(bulkAction) || !priorityTwoCandidates.length}>{bulkAction === 'select-2' ? '2순위 선정 중...' : `2순위 전체 선정하기 (${priorityTwoCandidates.length}명)`}</button>
+          <button className="admin-button admin-button--secondary" type="button" onClick={() => void undoLastBulkSelection()} disabled={Boolean(bulkAction) || !lastBulkSelection}>{bulkAction === 'undo' ? '되돌리는 중...' : lastBulkSelection ? `되돌리기 (${lastBulkSelection.priority}순위 ${lastBulkSelection.changes.length}명)` : '되돌리기'}</button>
+        </div>
       </section>
       <div className="admin-filters student-attendance-admin-filters">
         <label className="admin-search"><span>이름, 전화번호, 학번, 활동 내용 또는 메모 검색</span><input value={filters.query} onChange={(event) => setFilters((current) => ({ ...current, query: event.target.value }))} /></label>

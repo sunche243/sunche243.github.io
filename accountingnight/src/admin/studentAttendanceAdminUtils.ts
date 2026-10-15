@@ -35,6 +35,14 @@ export const studentParticipationFeeStatusLabels: Record<StudentParticipationFee
 
 export type StudentSelectionPriority = 1 | 2 | 3 | null;
 export type StudentAttendanceAdminSort = 'latest' | 'priority';
+export type StudentBulkSelectionPriority = 1 | 2;
+
+export interface StudentBulkSelectionSnapshot {
+  id: string;
+  selectionStatus: StudentSelectionStatus;
+  waitlistOrder: number | null;
+  participationFeeStatus: StudentParticipationFeeStatus;
+}
 
 export interface StudentAttendanceAdminFilters {
   query: string;
@@ -93,6 +101,59 @@ export function getStudentSelectionPriority(
   if (response.student_council_fee_status === 'paid') return 2;
   if (response.student_council_fee_status === 'unpaid') return 3;
   return null;
+}
+
+export function getStudentBulkSelectionCandidates(
+  responses: StudentAttendanceResponse[],
+  priority: StudentBulkSelectionPriority,
+): StudentAttendanceResponse[] {
+  return responses.filter((response) => (
+    getStudentSelectionPriority(response) === priority
+    && ['pending', 'waitlisted', 'not_selected'].includes(response.selection_status)
+  ));
+}
+
+export function createStudentBulkSelectionValue(
+  response: StudentAttendanceResponse,
+): StudentSelectionManagementFields {
+  return {
+    student_council_fee_status: response.student_council_fee_status,
+    selection_status: 'selected',
+    waitlist_order: null,
+    participation_fee_status: 'unpaid',
+    contacted: Boolean(response.contacted_at),
+    admin_memo: response.admin_memo,
+  };
+}
+
+export function createStudentBulkSelectionSnapshot(
+  response: StudentAttendanceResponse,
+): StudentBulkSelectionSnapshot {
+  return {
+    id: response.id,
+    selectionStatus: response.selection_status,
+    waitlistOrder: response.waitlist_order,
+    participationFeeStatus: response.participation_fee_status,
+  };
+}
+
+export function createStudentBulkSelectionUndoValue(
+  response: StudentAttendanceResponse,
+  snapshot: StudentBulkSelectionSnapshot,
+): StudentSelectionManagementFields | null {
+  const stillMatchesBulkSelection = response.selection_status === 'selected'
+    && response.waitlist_order === null
+    && response.participation_fee_status === 'unpaid';
+  if (!stillMatchesBulkSelection) return null;
+
+  return {
+    student_council_fee_status: response.student_council_fee_status,
+    selection_status: snapshot.selectionStatus,
+    waitlist_order: snapshot.waitlistOrder,
+    participation_fee_status: snapshot.participationFeeStatus,
+    contacted: Boolean(response.contacted_at),
+    admin_memo: response.admin_memo,
+  };
 }
 
 export function validateStudentAttendanceAdminEdit(
