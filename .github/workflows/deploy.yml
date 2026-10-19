@@ -29,6 +29,7 @@ jobs:
           cache-dependency-path: |
             accountingnight/package-lock.json
             slideshow-player/package-lock.json
+            table/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -65,6 +66,22 @@ jobs:
         run: npm run build
         working-directory: slideshow-player
 
+      - name: Install table planner dependencies
+        run: npm ci
+        working-directory: table
+
+      - name: Lint table planner
+        run: npm run lint
+        working-directory: table
+
+      - name: Test table planner
+        run: npm run test
+        working-directory: table
+
+      - name: Build table planner
+        run: npm run build
+        working-directory: table
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
@@ -78,11 +95,14 @@ jobs:
             --exclude='.DS_Store' \
             --exclude='accountingnight/' \
             --exclude='slideshow-player/' \
+            --exclude='table/' \
             ./ _site/
           mkdir -p _site/accountingnight
           cp -R accountingnight/dist/. _site/accountingnight/
           mkdir -p _site/slideshow-player
           cp -R slideshow-player/dist/. _site/slideshow-player/
+          mkdir -p _site/table
+          cp -R table/dist/. _site/table/
           touch _site/.nojekyll
 
       - name: Upload artifact

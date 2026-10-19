@@ -7,7 +7,7 @@ import writeExcelFile from 'write-excel-file/node';
 import type { AttendanceResponse } from '../types/attendance';
 import type { FormField, Submission } from '../types/registration';
 import type { StudentAttendanceResponse } from '../types/studentAttendance';
-import { buildAttendanceExcelSheet, buildExcelSheet, buildStudentAttendanceExcelSheet } from './excel';
+import { buildAttendanceExcelSheet, buildExcelSheet, buildSelectedStudentsSeatingExcelSheet, buildStudentAttendanceExcelSheet } from './excel';
 
 const field: FormField = {
   id: 'archived-field',
@@ -149,6 +149,19 @@ describe('Excel export rows', () => {
     expect(sheet[1][7]).toBe('납부');
     expect(sheet[1][9]).toBe('선정');
     expect(sheet[1][11]).toBe('납부');
+  });
+
+  it('builds a seating sheet from selected attending students only', () => {
+    const sheet = buildSelectedStudentsSeatingExcelSheet([
+      studentAttendanceResponse,
+      { ...studentAttendanceResponse, id: 'waitlisted', selection_status: 'waitlisted', name: '대기자' },
+      { ...studentAttendanceResponse, id: 'declined', attendance_status: 'not_attending', name: '불참자' },
+    ]);
+    const headings = sheet[0].map((cell) => typeof cell === 'object' && cell && 'value' in cell ? cell.value : cell);
+    expect(headings).toEqual(['이름', '구분(학번)', '식별정보(전화번호)', '학생회 활동 여부', '학생회비', '행사 참가비']);
+    expect(sheet).toHaveLength(2);
+    expect(sheet[1][0]).toBe('박재학');
+    expect(sheet[1][1]).toBe('24학번');
   });
 
   it('exports C, D, and G as typed number cells while preserving inactive fields', () => {

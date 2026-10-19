@@ -42,6 +42,7 @@ describe('student attendance admin UI', () => {
     );
 
     expect(html).toContain('학생 참석 신청');
+    expect(html).toContain('테이블 배치하기');
     expect(html).toContain('학생회 활동');
     expect(html).toContain('최신 회신순');
     expect(html).toContain('우선순위순');

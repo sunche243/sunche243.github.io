@@ -252,3 +252,37 @@ export async function downloadStudentAttendanceExcel(
     fontSize: 10,
   }).toFile(`회계인의밤_학생참석_${date}.xlsx`);
 }
+
+export function buildSelectedStudentsSeatingExcelSheet(
+  responses: StudentAttendanceResponse[],
+): SheetData {
+  const selected = responses
+    .filter((response) => response.attendance_status === 'attending' && response.selection_status === 'selected')
+    .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+  return [
+    ['이름', '구분(학번)', '식별정보(전화번호)', '학생회 활동 여부', '학생회비', '행사 참가비'].map(header),
+    ...selected.map((response) => [
+      response.name,
+      response.admission_year ? `${response.admission_year}학번` : '학번 미입력',
+      phoneCell(response.phone),
+      response.student_council_experience ? '경험 있음' : '경험 없음',
+      studentCouncilFeeStatusLabels[response.student_council_fee_status],
+      studentParticipationFeeStatusLabels[response.participation_fee_status],
+    ]),
+  ];
+}
+
+export async function downloadSelectedStudentsSeatingExcel(
+  responses: StudentAttendanceResponse[],
+): Promise<void> {
+  const { default: writeExcelFile } = await import('write-excel-file/browser');
+  const date = new Date().toLocaleDateString('sv-SE', { timeZone: 'Asia/Seoul' }).replaceAll('-', '');
+  await writeExcelFile(buildSelectedStudentsSeatingExcelSheet(responses), {
+    sheet: '선정자 좌석 배치',
+    columns: [{ width: 14 }, { width: 16 }, { width: 20 }, { width: 18 }, { width: 14 }, { width: 14 }],
+    stickyRowsCount: 1,
+  }, {
+    fontFamily: '맑은 고딕',
+    fontSize: 10,
+  }).toFile(`회계인의밤_선정자_좌석배치_${date}.xlsx`);
+}

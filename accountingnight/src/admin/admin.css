@@ -196,6 +196,13 @@
   gap: 24px;
 }
 
+.student-attendance-heading-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .admin-title-row h1,
 .admin-panel__heading h2 {
   margin: 7px 0 0;

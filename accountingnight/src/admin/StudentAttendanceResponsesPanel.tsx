@@ -15,7 +15,8 @@ import {
   updateStudentSelectionManagement,
 } from './adminService';
 import { formatAdminDate } from './adminUtils';
-import { downloadStudentAttendanceExcel } from './excel';
+import { downloadSelectedStudentsSeatingExcel, downloadStudentAttendanceExcel } from './excel';
+import { saveSelectedStudentsForSeating } from './seatingTransfer';
 import {
   createStudentBulkSelectionSnapshot,
   createStudentBulkSelectionUndoValue,
@@ -309,6 +310,7 @@ export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManage
   const [managing, setManaging] = useState<StudentAttendanceResponse | null>(null);
   const [deleting, setDeleting] = useState<StudentAttendanceResponse | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [openingSeating, setOpeningSeating] = useState(false);
   const [bulkAction, setBulkAction] = useState<'select-1' | 'select-2' | 'undo' | null>(null);
   const [lastBulkSelection, setLastBulkSelection] = useState<{
     priority: StudentBulkSelectionPriority;
@@ -325,6 +327,24 @@ export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManage
     try { await downloadStudentAttendanceExcel(responses); }
     catch { onError('학생 참석 Excel 파일을 생성하지 못했습니다.'); }
     finally { setExporting(false); }
+  }
+
+  async function openSeatingPlanner() {
+    if (openingSeating) return;
+    const selectedCount = responses.filter((response) => response.attendance_status === 'attending' && response.selection_status === 'selected').length;
+    if (!selectedCount) {
+      onError('좌석 배치로 보낼 선정 인원이 없습니다. 먼저 학생을 선정해 주세요.');
+      return;
+    }
+    setOpeningSeating(true); onError('');
+    try {
+      await downloadSelectedStudentsSeatingExcel(responses);
+      saveSelectedStudentsForSeating(responses);
+      window.location.assign('/table/');
+    } catch {
+      setOpeningSeating(false);
+      onError('선정자 Excel 파일을 생성하지 못했습니다.');
+    }
   }
 
   async function selectPriority(priority: StudentBulkSelectionPriority) {
@@ -403,7 +423,7 @@ export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManage
 
   return (
     <section className="admin-panel" aria-labelledby="student-attendance-responses-title">
-      <div className="admin-panel__heading"><div><p>STUDENT ATTENDANCE RESPONSES</p><h2 id="student-attendance-responses-title">학생 참석 신청</h2></div><button className="admin-button admin-button--secondary" type="button" onClick={exportExcel} disabled={exporting || !responses.length}>{exporting ? '생성 중' : 'Excel 다운로드'}</button></div>
+      <div className="admin-panel__heading"><div><p>STUDENT ATTENDANCE RESPONSES</p><h2 id="student-attendance-responses-title">학생 참석 신청</h2></div><div className="student-attendance-heading-actions"><button className="admin-button" type="button" onClick={() => void openSeatingPlanner()} disabled={openingSeating}>{openingSeating ? '이동 준비 중...' : '테이블 배치하기'}</button><button className="admin-button admin-button--secondary" type="button" onClick={exportExcel} disabled={exporting || !responses.length}>{exporting ? '생성 중' : 'Excel 다운로드'}</button></div></div>
       <section className="admin-stats attendance-admin-stats" aria-label="학생 참석 통계">
         <article><span>전체 회신</span><strong>{stats.total}<small>건</small></strong></article>
         <article><span>참석 신청</span><strong>{stats.attending}<small>명</small></strong></article>
