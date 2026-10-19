@@ -66,6 +66,146 @@
   background: var(--ivory);
 }
 
+.student-attendance-closed {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 10%, rgba(181, 143, 75, 0.16), transparent 42%),
+    var(--ivory);
+}
+
+.student-attendance-closed::before,
+.student-attendance-closed::after {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border: 1px solid rgba(181, 143, 75, 0.2);
+  border-radius: 50%;
+  content: '';
+  pointer-events: none;
+}
+
+.student-attendance-closed::before {
+  top: -150px;
+  left: -130px;
+}
+
+.student-attendance-closed::after {
+  right: -130px;
+  bottom: -150px;
+}
+
+.student-attendance-closed__inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  max-width: 760px;
+  min-height: 680px;
+  place-items: center;
+  align-content: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.student-attendance-closed__ornament {
+  display: grid;
+  width: min(100%, 360px);
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  color: var(--gold-dark);
+}
+
+.student-attendance-closed__ornament span {
+  height: 1px;
+  background: currentColor;
+  opacity: 0.45;
+}
+
+.student-attendance-closed__ornament b {
+  font-family: var(--serif);
+  font-size: 2.25rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.student-attendance-closed__eyebrow {
+  margin: 0;
+  color: var(--gold-dark);
+  font-family: var(--serif);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.student-attendance-closed h2 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(2.35rem, 7vw, 4rem);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.04em;
+}
+
+.student-attendance-closed__message,
+.student-attendance-closed__notice {
+  margin: 0;
+  color: var(--gray-700);
+  line-height: 1.9;
+  word-break: keep-all;
+}
+
+.student-attendance-closed__message {
+  font-size: 1rem;
+}
+
+.student-attendance-closed__deadline {
+  display: grid;
+  min-width: min(100%, 380px);
+  gap: 6px;
+  padding: 20px 28px;
+  border-block: 1px solid rgba(135, 108, 63, 0.4);
+}
+
+.student-attendance-closed__deadline span,
+.student-attendance-closed__deadline small {
+  color: var(--gray-600);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.student-attendance-closed__deadline strong {
+  font-family: var(--serif);
+  font-size: clamp(1.25rem, 4vw, 1.7rem);
+  font-weight: 600;
+}
+
+.student-attendance-closed__notice {
+  font-size: 0.86rem;
+}
+
+.student-attendance-closed .button {
+  min-width: min(100%, 260px);
+}
+
+@media (max-width: 520px) {
+  .student-attendance-closed__inner {
+    min-height: 610px;
+    gap: 20px;
+    padding-block: 72px;
+  }
+
+  .student-attendance-closed__message br,
+  .student-attendance-closed__notice br {
+    display: none;
+  }
+
+  .student-attendance-closed__deadline {
+    padding-inline: 14px;
+  }
+}
+
 .student-attendance-actions {
   display: grid;
   gap: 12px;

@@ -1,5 +1,13 @@
 import type { AttendanceResponseStatus } from '../types/attendance';
+import { isStudentAttendanceClosed } from '../config/studentAttendanceDeadline';
 import { getSupabase, SupabaseConfigurationError } from './supabase';
+
+export class StudentAttendanceClosedError extends Error {
+  constructor() {
+    super('재학생 참석 신청이 마감되었습니다.');
+    this.name = 'StudentAttendanceClosedError';
+  }
+}
 
 export interface SubmitStudentAttendanceResponseInput {
   name: string;
@@ -18,6 +26,8 @@ export interface SubmitStudentAttendanceResponseInput {
 export async function submitStudentAttendanceResponse(
   input: SubmitStudentAttendanceResponseInput,
 ): Promise<string> {
+  if (isStudentAttendanceClosed()) throw new StudentAttendanceClosedError();
+
   const supabase = getSupabase();
   if (!supabase) throw new SupabaseConfigurationError();
 

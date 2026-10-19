@@ -1,7 +1,11 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { RevealSection } from '../components/RevealSection';
 import { studentAttendancePrivacyPolicy } from '../config/privacy';
-import { submitStudentAttendanceResponse } from '../services/studentAttendance';
+import { isStudentAttendanceClosed } from '../config/studentAttendanceDeadline';
+import {
+  StudentAttendanceClosedError,
+  submitStudentAttendanceResponse,
+} from '../services/studentAttendance';
 import { isSupabaseConfigured, SupabaseConfigurationError } from '../services/supabase';
 import type { StudentAttendanceDraft } from '../types/studentAttendance';
 import { scheduleAttendanceSuccessNavigation } from '../utils/attendance';
@@ -210,10 +214,11 @@ export function StudentCouncilExperienceFields({
 }
 
 interface StudentAttendanceFormProps {
+  onClosed?: () => void;
   onComplete?: () => void;
 }
 
-export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps) {
+export function StudentAttendanceForm({ onClosed, onComplete }: StudentAttendanceFormProps) {
   const formStartedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
   const attendanceSectionRef = useRef<HTMLElement>(null);
@@ -259,6 +264,10 @@ export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting || submitted) return;
+    if (isStudentAttendanceClosed()) {
+      onClosed?.();
+      return;
+    }
 
     const validation = validateStudentAttendanceResponse({
       draft,
@@ -301,6 +310,10 @@ export function StudentAttendanceForm({ onComplete }: StudentAttendanceFormProps
       setSubmitted(true);
       onComplete?.();
     } catch (error) {
+      if (error instanceof StudentAttendanceClosedError) {
+        onClosed?.();
+        return;
+      }
       setErrors({
         form: error instanceof SupabaseConfigurationError
           ? '현재 재학생 참석 여부 회신 기능을 준비하고 있습니다.'

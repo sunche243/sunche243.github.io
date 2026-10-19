@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { rpc } = vi.hoisted(() => ({ rpc: vi.fn() }));
 
@@ -7,7 +7,7 @@ vi.mock('./supabase', () => ({
   SupabaseConfigurationError: class SupabaseConfigurationError extends Error {},
 }));
 
-import { submitStudentAttendanceResponse } from './studentAttendance';
+import { StudentAttendanceClosedError, submitStudentAttendanceResponse } from './studentAttendance';
 
 const input = {
   name: '김동국',
@@ -25,8 +25,14 @@ const input = {
 
 describe('student attendance submission service', () => {
   beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-10-20T12:00:00+09:00'));
     rpc.mockReset();
     rpc.mockResolvedValue({ data: 'response-id', error: null });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('uses the isolated student attendance RPC and fields', async () => {
@@ -71,5 +77,12 @@ describe('student attendance submission service', () => {
       p_student_council_fee_paid: null,
       p_selection_criteria_consent: false,
     });
+  });
+
+  it('blocks the RPC call once the student response deadline has passed', async () => {
+    vi.setSystemTime(new Date('2026-10-21T00:00:00+09:00'));
+
+    await expect(submitStudentAttendanceResponse(input)).rejects.toBeInstanceOf(StudentAttendanceClosedError);
+    expect(rpc).not.toHaveBeenCalled();
   });
 });
