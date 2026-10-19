@@ -95,6 +95,7 @@ export function TableApp() {
   const [analyzingFloorPlan, setAnalyzingFloorPlan] = useState(false);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showEmptySeats, setShowEmptySeats] = useState(false);
   const backupInputRef = useRef<HTMLInputElement>(null);
   const project = history.present;
 
@@ -109,7 +110,7 @@ export function TableApp() {
 
   const resetProject = useCallback((payload: SeatingProjectPayload, id: string) => {
     setHistory({ past: [], present: payload, future: [] });
-    setCurrentId(id); setDirty(false); setSelectedPersonId(null); setWorkbook(null); setFloorPlanDraft(null);
+    setCurrentId(id); setDirty(false); setSelectedPersonId(null); setShowEmptySeats(false); setWorkbook(null); setFloorPlanDraft(null);
   }, []);
 
   const saveNow = useCallback((showMessage = true) => {
@@ -161,6 +162,7 @@ export function TableApp() {
     const occupied = seats.some((seat) => seat.personId);
     if (occupied && !window.confirm('현재 좌석 배치를 새 설정으로 다시 만들까요? 배정된 좌석은 초기화됩니다.')) return;
     commit((current) => ({ ...current, ...generateLayout(current.settings) }));
+    setShowEmptySeats(false);
     setStatusMessage('설정에 맞춰 새 배치 초안을 만들었습니다.');
     setTab('layout');
   }
@@ -226,7 +228,7 @@ export function TableApp() {
       tables: floorPlanDraft.tables,
       theaterSeats: floorPlanDraft.theaterSeats,
     }));
-    setFloorPlanDraft(null); setStatusMessage('업체 배치도 초안을 적용했습니다. 드래그해서 세부 위치를 조정할 수 있습니다.'); setTab('layout');
+    setFloorPlanDraft(null); setShowEmptySeats(false); setStatusMessage('업체 배치도 초안을 적용했습니다. 드래그해서 세부 위치를 조정할 수 있습니다.'); setTab('layout');
   }
 
   function startNewProject() {
@@ -356,7 +358,7 @@ export function TableApp() {
             {floorPlanDraft ? (
               <section className="floor-plan-review" aria-labelledby="floor-plan-review-title">
                 <div className="table-panel__heading"><div><p>AUTO DETECT · {floorPlanDraft.confidence.toUpperCase()}</p><h2 id="floor-plan-review-title">아래 배치도가 맞습니까?</h2></div><span>{floorPlanDraft.detectedCount}개 요소를 감지했습니다. 승인 후에도 직접 수정할 수 있습니다.</span></div>
-                <SeatCanvas project={{ ...project, floorPlan: floorPlanDraft.source, tables: floorPlanDraft.tables, theaterSeats: floorPlanDraft.theaterSeats }} selectedPersonId={null} searchQuery="" readOnly onSelectPerson={EMPTY_NOOP} onMovePerson={EMPTY_NOOP} onMoveTable={EMPTY_NOOP} onRenameTable={EMPTY_NOOP} onRotateTable={EMPTY_NOOP} onToggleTableLock={EMPTY_NOOP} onToggleSeatLock={EMPTY_NOOP} />
+                <SeatCanvas project={{ ...project, floorPlan: floorPlanDraft.source, tables: floorPlanDraft.tables, theaterSeats: floorPlanDraft.theaterSeats }} selectedPersonId={null} searchQuery="" showEmptySeats={false} readOnly onSelectPerson={EMPTY_NOOP} onMovePerson={EMPTY_NOOP} onMoveTable={EMPTY_NOOP} onRenameTable={EMPTY_NOOP} onRotateTable={EMPTY_NOOP} onToggleTableLock={EMPTY_NOOP} onToggleSeatLock={EMPTY_NOOP} />
                 <div className="review-actions"><button type="button" onClick={() => setFloorPlanDraft(null)}>다시 업로드</button><button className="is-primary" type="button" onClick={approveFloorPlan}>네, 이 배치도 사용하기</button></div>
               </section>
             ) : null}
@@ -397,6 +399,7 @@ export function TableApp() {
             <div className="layout-toolbar">
               <div><button type="button" onClick={undo} disabled={!history.past.length}>실행 취소</button><button type="button" onClick={redo} disabled={!history.future.length}>다시 실행</button></div>
               <label>참석자 검색<input value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="이름·소속·식별 정보" /></label>
+              <label className="empty-seat-toggle"><input type="checkbox" checked={showEmptySeats} onChange={(event) => setShowEmptySeats(event.target.checked)} />빈 좌석 표시</label>
               <button className="is-primary" type="button" onClick={() => commit(autoAssignPeople)} disabled={!project.people.length}>자동 좌석 배치</button>
               <button type="button" onClick={() => void exportProjectPng(project)}>PNG 내보내기</button>
             </div>
@@ -411,6 +414,7 @@ export function TableApp() {
               project={project}
               selectedPersonId={selectedPersonId}
               searchQuery={searchQuery}
+              showEmptySeats={showEmptySeats}
               onSelectPerson={setSelectedPersonId}
               onMovePerson={(personId, seatId) => commit((current) => movePerson(current, personId, seatId))}
               onMoveTable={(tableId, x, y) => commit((current) => ({ ...current, tables: current.tables.map((table) => table.id === tableId ? { ...table, x, y } : table) }))}

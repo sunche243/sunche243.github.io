@@ -70,21 +70,23 @@ export async function exportProjectPng(project: SeatingProjectPayload): Promise<
       context.rotate((table.rotation * Math.PI) / 180);
       context.fillStyle = '#1d1a15';
       if (project.settings.layoutType === 'round') {
-        context.beginPath(); context.arc(0, 0, 66, 0, Math.PI * 2); context.fill();
+        context.beginPath(); context.arc(0, 0, 54, 0, Math.PI * 2); context.fill();
       } else if (frontFacing) {
-        context.fillRect(-sizeX * 0.45, -54, sizeX * 0.9, 78);
+        context.fillRect(-sizeX * 0.42, -44, sizeX * 0.84, 62);
       } else {
-        context.fillRect(-72, -50, 144, 100);
+        context.fillRect(-60, -42, 120, 84);
       }
       context.fillStyle = '#f7f0df'; context.font = '700 22px sans-serif';
       context.fillText(table.name, 0, 0, 135);
       table.seats.forEach((seat) => {
+        const name = personName(project, seat);
+        if (!name) return;
         const x = ((seat.x - 50) / 100) * sizeX;
         const y = ((seat.y - 50) / 100) * sizeY;
         context.fillStyle = '#fffdf8'; context.strokeStyle = '#9a753f'; context.lineWidth = 2;
         context.beginPath(); context.roundRect(x - 38, y - 22, 76, 44, 9); context.fill(); context.stroke();
         context.fillStyle = '#17130d'; context.font = '600 16px sans-serif';
-        context.fillText(personName(project, seat) || seat.label, x, y, 72);
+        context.fillText(name, x, y, 72);
       });
       context.restore();
     });

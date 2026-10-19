@@ -5,6 +5,7 @@ interface SeatCanvasProps {
   project: SeatingProjectPayload;
   selectedPersonId: string | null;
   searchQuery: string;
+  showEmptySeats: boolean;
   readOnly?: boolean;
   onSelectPerson: (personId: string | null) => void;
   onMovePerson: (personId: string, seatId: string | null) => void;
@@ -29,6 +30,7 @@ export function SeatCanvas({
   project,
   selectedPersonId,
   searchQuery,
+  showEmptySeats,
   readOnly = false,
   onSelectPerson,
   onMovePerson,
@@ -43,7 +45,7 @@ export function SeatCanvas({
   const normalizedSearch = searchQuery.trim().toLocaleLowerCase('ko');
   const frontFacing = project.settings.layoutType === 'square' && project.settings.squareMode === 'front';
   const stageHeight = frontFacing ? Math.max(720, project.tables.length * 210 + 140) : 720;
-  const tableWidth = frontFacing ? Math.max(190, project.settings.seatsPerTable * 66 + 70) : 190;
+  const tableWidth = frontFacing ? Math.max(170, project.settings.seatsPerTable * 58 + 60) : 190;
 
   function startTableDrag(event: ReactPointerEvent<HTMLButtonElement>, table: SeatingTable) {
     if (readOnly || table.locked) return;
@@ -88,6 +90,7 @@ export function SeatCanvas({
 
   function renderSeat(seat: SeatingSeat, compact = false) {
     const person = seat.personId ? peopleById.get(seat.personId) : undefined;
+    if (!person && !showEmptySeats && !compact) return null;
     const highlighted = Boolean(person && normalizedSearch && `${person.name} ${person.group} ${person.identifier}`.toLocaleLowerCase('ko').includes(normalizedSearch));
     return (
       <button
@@ -95,7 +98,13 @@ export function SeatCanvas({
         className={`canvas-seat${compact ? ' canvas-seat--theater' : ''}${seat.locked ? ' is-locked' : ''}${highlighted ? ' is-highlighted' : ''}${selectedPersonId === person?.id ? ' is-selected' : ''}`}
         style={{ left: `${seat.x}%`, top: `${seat.y}%` }}
         type="button"
-        title={person ? `${person.name} · ${person.group}${seat.locked ? ' · 잠금' : ''}` : `${seat.label} · 빈 좌석`}
+        title={
+          person
+            ? `${person.name} · ${person.group}${seat.locked ? ' · 잠금' : ''}`
+            : showEmptySeats
+              ? `${seat.label} · 빈 좌석`
+              : '빈 좌석'
+        }
         draggable={!readOnly && Boolean(person) && !seat.locked}
         onDragStart={(event) => {
           if (!person) return;
@@ -110,7 +119,7 @@ export function SeatCanvas({
           if (!readOnly) onToggleSeatLock(seat.id);
         }}
       >
-        <span>{person?.name ?? seat.label}</span>
+        <span>{person?.name ?? (showEmptySeats ? seat.label : '')}</span>
         {person && !compact ? <small>{person.group}</small> : null}
         {seat.locked ? <i aria-label="좌석 잠금">●</i> : null}
       </button>
