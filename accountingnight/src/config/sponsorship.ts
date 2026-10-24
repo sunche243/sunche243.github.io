@@ -14,18 +14,18 @@ export interface PledgeOptionDetail {
 }
 
 export const pledgeOptionDetails: Record<PledgeOption, PledgeOptionDetail> = {
-  century_100: {
+  guardian_50: {
     optionNumber: 1,
-    label: '100주년 발전 구좌',
-    title: '100만 원 후원 + 행사 참석',
-    amount: 1_000_000,
+    label: '50주년 수호 구좌',
+    title: '50만원 후원 + 행사참석',
+    amount: 500_000,
     attendanceStatus: 'attending',
   },
-  guardian_50: {
+  century_100: {
     optionNumber: 2,
-    label: '50주년 수호 구좌',
-    title: '50만 원 후원 + 행사 참석',
-    amount: 500_000,
+    label: '100주년 발전구좌',
+    title: '100만원 후원 + 행사 참석',
+    amount: 1_000_000,
     attendanceStatus: 'attending',
   },
   free_attending: {
