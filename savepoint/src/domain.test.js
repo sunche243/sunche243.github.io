@@ -1,9 +1,115 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import {escapeHTML,newProject,validateContent,parseConversationFile,safeURL,extractSuggestions,resumePrompt,matches,progress} from './domain.js';
-test('untrusted conversation text is escaped as text, unsafe resource protocols are rejected',()=>{assert.equal(escapeHTML('<img src=x onerror="alert(1)">'),'&lt;img src=x onerror=&quot;alert(1)&quot;&gt;');assert.equal(safeURL('javascript:alert(1)'),null);assert.equal(safeURL('data:text/html,x'),null);assert.equal(safeURL('https://example.com'),'https://example.com/');});
-test('ChatGPT imports only selected branch and readable user / assistant messages',()=>{const data=[{title:'계획',current_node:'c',mapping:{a:{parent:null,message:{author:{role:'user'},content:{parts:['안녕']}}},b:{parent:'a',message:{author:{role:'assistant'},content:{parts:['첫 분기']}}},c:{parent:'a',message:{author:{role:'assistant'},content:{parts:['선택한 분기']}}},tool:{parent:'c',message:{author:{role:'tool'},content:{parts:['비공개 도구 출력']}}}}}];const result=parseConversationFile(JSON.stringify(data));assert.match(result[0].text,/선택한 분기/);assert.doesNotMatch(result[0].text,/첫 분기|비공개 도구 출력/);});
-test('import handles text, rejects unknown JSON and empty messages',()=>{assert.equal(parseConversationFile('회의 메모')[0].text,'회의 메모');assert.throws(()=>parseConversationFile('{"secret":"value"}'));assert.equal(parseConversationFile('[{"title":"empty","messages":[]}]').length,0);});
-test('backup validation rejects malformed, forged ids and inherited categories',()=>{const p=newProject({title:'시험'});assert.equal(validateContent(p),p);assert.throws(()=>validateContent({...p,tasks:[{id:'bad" onclick="x',text:'hi',done:false}]}));assert.throws(()=>validateContent({...p,category:'toString'}));assert.throws(()=>validateContent({...p,links:[{title:'bad',url:'javascript:alert(1)'}]}));assert.throws(()=>validateContent({...p,notes:[{}]}));});
-test('resume includes decisions, incomplete tasks and context; completed tasks stay out',()=>{const p=newProject({title:'보고서'});p.decisions=[{id:crypto.randomUUID(),text:'서면으로 제출하기로 확정'}];p.tasks=[{id:crypto.randomUUID(),text:'인원 확인',done:false},{id:crypto.randomUUID(),text:'이미 한 일',done:true}];p.notes=[{id:crypto.randomUUID(),title:'회의',text:'호텔 자료',createdAt:new Date().toISOString()}];const text=resumePrompt(p);assert.match(text,/서면으로 제출/);assert.match(text,/인원 확인/);assert.doesNotMatch(text,/이미 한 일/);assert.equal(progress(p),50);assert.equal(matches(p,'호텔'),true);});
-test('suggestions deduplicate and do not pretend to have generated AI answers',()=>{const result=extractSuggestions('예산을 먼저 확인해야 한다\n예산을 먼저 확인해야 한다\n메일로 보내기로 결정');assert.equal(result.tasks.length,1);assert.equal(result.decisions.length,1);});
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  escapeHTML,
+  newProject,
+  validateContent,
+  parseConversationFile,
+  safeURL,
+  extractSuggestions,
+  resumePrompt,
+  matches,
+  progress,
+} from "./domain.js";
+test("untrusted conversation text is escaped as text, unsafe resource protocols are rejected", () => {
+  assert.equal(
+    escapeHTML('<img src=x onerror="alert(1)">'),
+    "&lt;img src=x onerror=&quot;alert(1)&quot;&gt;",
+  );
+  assert.equal(safeURL("javascript:alert(1)"), null);
+  assert.equal(safeURL("data:text/html,x"), null);
+  assert.equal(safeURL("https://example.com"), "https://example.com/");
+});
+test("ChatGPT imports only selected branch and readable user / assistant messages", () => {
+  const data = [
+    {
+      title: "계획",
+      current_node: "c",
+      mapping: {
+        a: {
+          parent: null,
+          message: { author: { role: "user" }, content: { parts: ["안녕"] } },
+        },
+        b: {
+          parent: "a",
+          message: {
+            author: { role: "assistant" },
+            content: { parts: ["첫 분기"] },
+          },
+        },
+        c: {
+          parent: "a",
+          message: {
+            author: { role: "assistant" },
+            content: { parts: ["선택한 분기"] },
+          },
+        },
+        tool: {
+          parent: "c",
+          message: {
+            author: { role: "tool" },
+            content: { parts: ["비공개 도구 출력"] },
+          },
+        },
+      },
+    },
+  ];
+  const result = parseConversationFile(JSON.stringify(data));
+  assert.match(result[0].text, /선택한 분기/);
+  assert.doesNotMatch(result[0].text, /첫 분기|비공개 도구 출력/);
+});
+test("import handles text, rejects unknown JSON and empty messages", () => {
+  assert.equal(parseConversationFile("회의 메모")[0].text, "회의 메모");
+  assert.throws(() => parseConversationFile('{"secret":"value"}'));
+  assert.equal(
+    parseConversationFile('[{"title":"empty","messages":[]}]').length,
+    0,
+  );
+});
+test("backup validation rejects malformed, forged ids and inherited categories", () => {
+  const p = newProject({ title: "시험" });
+  assert.equal(validateContent(p), p);
+  assert.throws(() =>
+    validateContent({
+      ...p,
+      tasks: [{ id: 'bad" onclick="x', text: "hi", done: false }],
+    }),
+  );
+  assert.throws(() => validateContent({ ...p, category: "toString" }));
+  assert.throws(() =>
+    validateContent({
+      ...p,
+      links: [{ title: "bad", url: "javascript:alert(1)" }],
+    }),
+  );
+  assert.throws(() => validateContent({ ...p, notes: [{}] }));
+});
+test("resume includes decisions, incomplete tasks and context; completed tasks stay out", () => {
+  const p = newProject({ title: "보고서" });
+  p.decisions = [{ id: crypto.randomUUID(), text: "서면으로 제출하기로 확정" }];
+  p.tasks = [
+    { id: crypto.randomUUID(), text: "인원 확인", done: false },
+    { id: crypto.randomUUID(), text: "이미 한 일", done: true },
+  ];
+  p.notes = [
+    {
+      id: crypto.randomUUID(),
+      title: "회의",
+      text: "호텔 자료",
+      createdAt: new Date().toISOString(),
+    },
+  ];
+  const text = resumePrompt(p);
+  assert.match(text, /서면으로 제출/);
+  assert.match(text, /인원 확인/);
+  assert.doesNotMatch(text, /이미 한 일/);
+  assert.equal(progress(p), 50);
+  assert.equal(matches(p, "호텔"), true);
+});
+test("suggestions deduplicate and do not pretend to have generated AI answers", () => {
+  const result = extractSuggestions(
+    "예산을 먼저 확인해야 한다\n예산을 먼저 확인해야 한다\n메일로 보내기로 결정",
+  );
+  assert.equal(result.tasks.length, 1);
+  assert.equal(result.decisions.length, 1);
+});

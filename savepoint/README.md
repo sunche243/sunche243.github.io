@@ -23,3 +23,13 @@ No automatic history sync or AI reply generation is connected. Suggestions use s
 ## Verification
 
 Domain tests cover untrusted text/URLs, ChatGPT branch selection, malformed imports/backups and resume contexts. Browser QA covers project/task/note creation, context dialog and desktop/mobile layouts. Database verification confirms owner access, no access for another event administrator, anonymous denial and protected membership/owner/revision columns. The real user's password is never read or changed.
+
+## Personal workflow update
+
+- Capture thoughts without a title or project. An owner-private inbox is created on first use.
+- Edit task text, deadline, planned date, and priority. The planner surfaces overdue work and today's choices first.
+- Focus on one task for 5, 15, or 25 minutes. The timer and drafts survive reloads in the same tab. Finishing can save progress, next action, and task completion together.
+- Edit notes and decisions; copy notes to another project while keeping the original.
+- Drafts are account-scoped sessionStorage records and never include credentials. Logout clears drafts and timer state. Stale drafts require manual review rather than replacing newer records.
+- Disable form fields while saving to prevent losing newly typed text. Cmd/Ctrl+Enter saves the active form.
+- No new paid service, AI API, background job, database table, or access permission was added. Existing owner-only RLS covers the new JSON fields.
