@@ -1,0 +1,1 @@
+{"name":"savepoint","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"vite --host 127.0.0.1","build":"vite build","test":"node --test src/domain.test.js"},"dependencies":{"@supabase/supabase-js":"2.116.0"},"devDependencies":{"vite":"7.3.7"}}

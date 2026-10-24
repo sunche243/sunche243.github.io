@@ -30,6 +30,7 @@ jobs:
             accountingnight/package-lock.json
             slideshow-player/package-lock.json
             table/package-lock.json
+            savepoint/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -82,6 +83,18 @@ jobs:
         run: npm run build
         working-directory: table
 
+      - name: Install Savepoint dependencies
+        run: npm ci
+        working-directory: savepoint
+
+      - name: Test Savepoint
+        run: npm test
+        working-directory: savepoint
+
+      - name: Build Savepoint
+        run: npm run build
+        working-directory: savepoint
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
@@ -96,6 +109,7 @@ jobs:
             --exclude='accountingnight/' \
             --exclude='slideshow-player/' \
             --exclude='table/' \
+            --exclude='savepoint/' \
             ./ _site/
           mkdir -p _site/accountingnight
           cp -R accountingnight/dist/. _site/accountingnight/
@@ -103,6 +117,8 @@ jobs:
           cp -R slideshow-player/dist/. _site/slideshow-player/
           mkdir -p _site/table
           cp -R table/dist/. _site/table/
+          mkdir -p _site/savepoint
+          cp -R savepoint/dist/. _site/savepoint/
           touch _site/.nojekyll
 
       - name: Upload artifact
