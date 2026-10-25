@@ -1,0 +1,19 @@
+{
+  "name": "회계인의 밤 관리자",
+  "short_name": "회계인의 밤",
+  "description": "회계인의 밤 후원 및 참석 회신 관리자",
+  "id": "/accountingnight/admin/",
+  "start_url": "/accountingnight/admin/",
+  "scope": "/accountingnight/admin/",
+  "display": "standalone",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "../apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

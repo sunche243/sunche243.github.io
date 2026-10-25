@@ -196,6 +196,68 @@
   gap: 24px;
 }
 
+.admin-title-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+
+.admin-push-control {
+  display: flex;
+  max-width: 460px;
+  min-height: 58px;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 10px 9px 14px;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+  background: rgba(255, 253, 248, 0.72);
+}
+
+.admin-push-control > div {
+  display: grid;
+  gap: 2px;
+}
+
+.admin-push-control strong {
+  color: var(--gray-900);
+  font-size: 0.76rem;
+}
+
+.admin-push-control span {
+  color: var(--gray-600);
+  font-size: 0.68rem;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.admin-push-control button {
+  min-height: 38px;
+  flex: 0 0 auto;
+  padding: 0 11px;
+  border: 1px solid var(--black);
+  cursor: pointer;
+  color: var(--ivory);
+  background: var(--black);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.admin-push-control--active {
+  border-color: rgba(47, 102, 72, 0.38);
+  background: #e6f2ea;
+}
+
+.admin-push-control--active strong {
+  color: #2f6648;
+}
+
+.admin-push-control--active button {
+  border-color: rgba(17, 17, 17, 0.28);
+  color: var(--gray-800);
+  background: transparent;
+}
+
 .student-attendance-heading-actions {
   display: flex;
   flex-wrap: wrap;
@@ -962,6 +1024,15 @@
 }
 
 @media (max-width: 860px) {
+  .admin-title-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-title-actions {
+    justify-content: space-between;
+  }
+
   .admin-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -992,6 +1063,26 @@
   .admin-title-row,
   .admin-panel__heading {
     align-items: start;
+  }
+
+  .admin-title-actions {
+    width: 100%;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-push-control {
+    max-width: none;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-push-control button {
+    width: 100%;
+  }
+
+  .admin-refresh {
+    align-self: flex-end;
   }
 
   .admin-title-row h1 {

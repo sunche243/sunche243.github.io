@@ -21,6 +21,7 @@ import { calculateAdminStats } from './adminUtils';
 import { AttendanceResponsesPanel } from './AttendanceResponsesPanel';
 import { deleteAttendanceResponseFromList, updateAttendanceResponseInList } from './attendanceAdminUtils';
 import { FormFieldsPanel } from './FormFieldsPanel';
+import { PushNotificationControl } from './PushNotificationControl';
 import { StudentAttendanceResponsesPanel } from './StudentAttendanceResponsesPanel';
 import { StatisticsPanel } from './StatisticsPanel';
 import { SubmissionsPanel } from './SubmissionsPanel';
@@ -31,6 +32,13 @@ import {
 
 type AdminPhase = 'checking' | 'login' | 'ready';
 type AdminTab = 'submissions' | 'attendance' | 'student' | 'statistics' | 'fields';
+
+const ADMIN_TABS: AdminTab[] = ['submissions', 'attendance', 'student', 'statistics', 'fields'];
+
+function getInitialAdminTab(): AdminTab {
+  const requestedTab = new URLSearchParams(window.location.search).get('tab');
+  return ADMIN_TABS.includes(requestedTab as AdminTab) ? requestedTab as AdminTab : 'submissions';
+}
 
 function ConfigurationNotice() {
   return (
@@ -84,7 +92,7 @@ function Login({ onSuccess }: { onSuccess: () => void }) {
 export function AdminApp() {
   const configured = isSupabaseConfigured();
   const [phase, setPhase] = useState<AdminPhase>('checking');
-  const [tab, setTab] = useState<AdminTab>('submissions');
+  const [tab, setTab] = useState<AdminTab>(getInitialAdminTab);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [attendanceResponses, setAttendanceResponses] = useState<AttendanceResponse[]>([]);
   const [studentAttendanceResponses, setStudentAttendanceResponses] = useState<StudentAttendanceResponse[]>([]);
@@ -194,6 +202,13 @@ export function AdminApp() {
     setStudentAttendanceResponses((current) => updateStudentSelectionManagementInList(current, id, value));
   }, []);
 
+  const selectTab = useCallback((nextTab: AdminTab) => {
+    setTab(nextTab);
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', nextTab);
+    window.history.replaceState(null, '', url);
+  }, []);
+
   if (!configured) return <ConfigurationNotice />;
   if (phase === 'checking') return <main className="admin-centered"><p className="admin-loading">관리자 권한을 확인하고 있습니다.</p></main>;
   if (phase === 'login') return <Login onSuccess={() => setPhase('ready')} />;
@@ -207,7 +222,10 @@ export function AdminApp() {
       <main className="admin-main">
         <div className="admin-title-row">
           <div><p>DONGGUK UNIVERSITY</p><h1>회계인의 밤 운영</h1></div>
-          <button className="admin-refresh" type="button" onClick={() => void refresh()} disabled={loading}>{loading ? '불러오는 중' : '새로고침'}</button>
+          <div className="admin-title-actions">
+            <PushNotificationControl onError={setError} onSuccess={showToast} />
+            <button className="admin-refresh" type="button" onClick={() => void refresh()} disabled={loading}>{loading ? '불러오는 중' : '새로고침'}</button>
+          </div>
         </div>
 
         {tab === 'submissions' || tab === 'fields' ? (
@@ -222,11 +240,11 @@ export function AdminApp() {
         {error ? <div className="admin-banner" role="alert">{error}</div> : null}
 
         <nav className="admin-tabs" aria-label="관리자 메뉴">
-          <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => setTab('submissions')}>발전기금·참석 회신</button>
-          <button type="button" className={tab === 'attendance' ? 'is-active' : ''} aria-current={tab === 'attendance' ? 'page' : undefined} onClick={() => setTab('attendance')}>참석 여부</button>
-          <button type="button" className={tab === 'student' ? 'is-active' : ''} aria-current={tab === 'student' ? 'page' : undefined} onClick={() => setTab('student')}>학생 참석</button>
-          <button type="button" className={tab === 'statistics' ? 'is-active' : ''} aria-current={tab === 'statistics' ? 'page' : undefined} onClick={() => setTab('statistics')}>통계</button>
-          <button type="button" className={tab === 'fields' ? 'is-active' : ''} aria-current={tab === 'fields' ? 'page' : undefined} onClick={() => setTab('fields')}>폼 항목 관리</button>
+          <button type="button" className={tab === 'submissions' ? 'is-active' : ''} aria-current={tab === 'submissions' ? 'page' : undefined} onClick={() => selectTab('submissions')}>발전기금·참석 회신</button>
+          <button type="button" className={tab === 'attendance' ? 'is-active' : ''} aria-current={tab === 'attendance' ? 'page' : undefined} onClick={() => selectTab('attendance')}>참석 여부</button>
+          <button type="button" className={tab === 'student' ? 'is-active' : ''} aria-current={tab === 'student' ? 'page' : undefined} onClick={() => selectTab('student')}>학생 참석</button>
+          <button type="button" className={tab === 'statistics' ? 'is-active' : ''} aria-current={tab === 'statistics' ? 'page' : undefined} onClick={() => selectTab('statistics')}>통계</button>
+          <button type="button" className={tab === 'fields' ? 'is-active' : ''} aria-current={tab === 'fields' ? 'page' : undefined} onClick={() => selectTab('fields')}>폼 항목 관리</button>
         </nav>
 
         {tab === 'submissions' ? (
