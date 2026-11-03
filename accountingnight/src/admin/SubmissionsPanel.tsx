@@ -5,6 +5,7 @@ import {
   findSubmissionAnswerByLabel,
   formatWon,
   getPledgeOptionLabel,
+  getSubmissionAttendanceLabel,
   getSubmissionPledgeAmount,
   isAdmissionFieldLabel,
   isAffiliationFieldLabel,
@@ -91,7 +92,7 @@ function SubmissionDetail({
           <div><dt>현재 소속 및 직함</dt><dd>{displayAnswer(affiliation)}</dd></div>
           <div><dt>선택 약정 유형</dt><dd>{getPledgeOptionLabel(submission.pledge_option)}</dd></div>
           <div><dt>약정 금액</dt><dd>{formatWon(getSubmissionPledgeAmount(submission))}</dd></div>
-          <div><dt>참석 여부</dt><dd>{submission.attendance_status ? attendanceLabels[submission.attendance_status] : '미입력'}</dd></div>
+          <div><dt>참석 여부</dt><dd>{getSubmissionAttendanceLabel(submission)}</dd></div>
           <div><dt>접수일</dt><dd>{formatAdminDate(submission.created_at)}</dd></div>
         </dl>
         <div className="submission-custom-answers">
@@ -226,7 +227,7 @@ export function SubmissionsPanel({ submissions, fields, onRefresh, onError }: Su
                 <td>{displayAnswer(affiliation)}</td>
                 <td>{getPledgeOptionLabel(submission.pledge_option)}</td>
                 <td>{formatWon(getSubmissionPledgeAmount(submission))}</td>
-                <td>{submission.attendance_status ? attendanceLabels[submission.attendance_status] : '미입력'}</td>
+                <td>{getSubmissionAttendanceLabel(submission)}</td>
                 <td><span className={`admin-status admin-status--${submission.status}`}>{submissionStatusLabels[submission.status]}</span></td>
                 </tr>
               );

@@ -1,8 +1,11 @@
 import { RevealSection } from '../components/RevealSection';
 import { SectionHeader } from '../components/SectionHeader';
 import { sponsorship, studentInvitation } from '../data/event';
+import { useSponsorshipOnlyMode } from '../sponsor/sponsorMode';
 
 export function Sponsorship() {
+  const sponsorshipOnly = useSponsorshipOnlyMode();
+
   return (
     <RevealSection className="section--dark sponsorship" label="후원 안내">
       <div className="section-inner section-inner--narrow">
@@ -15,7 +18,7 @@ export function Sponsorship() {
           동문 여러분의 소중한 뜻을 함께하고자 합니다.
         </p>
         <a className="button button--gold" href={sponsorship.url}>
-          참석 및 후원 확약하기
+          {sponsorshipOnly ? '발전기금 후원 약정하기' : '참석 및 후원 확약하기'}
         </a>
         <nav className="sponsorship__secondary-links" aria-label="대상별 회신 경로">
           <a href={studentInvitation.url}>재학생 전용 초대장 보기</a>

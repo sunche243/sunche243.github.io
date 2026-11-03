@@ -10,9 +10,9 @@ import {
 } from './studentAttendanceAdminUtils';
 import { attendanceResponseLabels } from '../utils/attendance';
 import {
-  attendanceLabels,
   findSubmissionAnswerByLabel,
   getPledgeOptionLabel,
+  getSubmissionAttendanceLabel,
   getSubmissionPledgeAmount,
   isAdmissionFieldLabel,
   isAffiliationFieldLabel,
@@ -139,7 +139,7 @@ export function buildExcelSheet(submissions: Submission[], fields: FormField[]):
       excelValue(findSubmissionAnswerByLabel(submission, isAffiliationFieldLabel)),
       getPledgeOptionLabel(submission.pledge_option),
       pledgeAmountCell(submission),
-      submission.attendance_status ? attendanceLabels[submission.attendance_status] : '미입력',
+      getSubmissionAttendanceLabel(submission),
       ...exportFields.map(({ id }) => excelValue(submission.answers[id]?.value)),
       submissionStatusLabels[submission.status],
       submission.admin_memo,

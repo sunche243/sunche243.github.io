@@ -36,6 +36,7 @@ describe('admin utilities', () => {
       free_attending: '마음으로 함께하기',
       free_absent: '불참 · 발전기금 약정',
       absent_only: '불참',
+      donation_only: '발전기금 후원 약정',
     });
   });
 

@@ -261,6 +261,16 @@
   word-break: keep-all;
 }
 
+.attendance-closed .attendance-success__response strong {
+  font-size: clamp(1.35rem, 6vw, 1.8rem);
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+.attendance-closed .button {
+  margin-top: 34px;
+}
+
 @media (min-width: 640px) {
   .attendance-options {
     grid-template-columns: repeat(2, minmax(0, 1fr));

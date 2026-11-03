@@ -16,7 +16,8 @@ export type PledgeOption =
   | 'guardian_50'
   | 'free_attending'
   | 'free_absent'
-  | 'absent_only';
+  | 'absent_only'
+  | 'donation_only';
 export type StoredPledgeOption = PledgeOption | 'legacy_units' | 'legacy_no_pledge';
 export type SubmissionStatus = 'new' | 'contacted' | 'confirmed' | 'cancelled';
 export type DynamicAnswerValue = string | number | boolean;

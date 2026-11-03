@@ -32,6 +32,26 @@
   word-break: keep-all;
 }
 
+.sponsor-intro__notice {
+  display: grid;
+  gap: 8px;
+  padding: 20px 18px;
+  border: 1px solid rgba(135, 108, 63, 0.45);
+  background: rgba(200, 170, 112, 0.12);
+  color: var(--gray-900);
+  line-height: 1.75;
+  word-break: keep-all;
+}
+
+.sponsor-intro__notice strong {
+  color: var(--gold-dark);
+  font-size: 0.95rem;
+}
+
+.sponsor-intro__notice span {
+  font-size: 0.86rem;
+}
+
 .registration-section {
   padding-top: 104px;
   padding-bottom: max(116px, calc(92px + env(safe-area-inset-bottom)));
@@ -279,6 +299,14 @@
   display: grid;
   gap: 5px;
   min-width: 0;
+}
+
+.pledge-option__body--standalone {
+  padding: 20px 18px;
+}
+
+.pledge-option--sponsorship-only .pledge-amount-field {
+  margin-left: 18px;
 }
 
 .pledge-option__number {

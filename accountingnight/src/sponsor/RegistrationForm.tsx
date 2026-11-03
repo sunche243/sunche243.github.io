@@ -28,6 +28,7 @@ import { clearFormErrors } from '../utils/formErrors';
 
 interface RegistrationFormProps {
   onComplete: () => void;
+  sponsorshipOnly: boolean;
 }
 
 function getFieldPlaceholder(field: FormField): string | undefined {
@@ -154,7 +155,7 @@ function StepHeading({ number, title, description }: { number: number; title: st
   );
 }
 
-export function RegistrationForm({ onComplete }: RegistrationFormProps) {
+export function RegistrationForm({ onComplete, sponsorshipOnly }: RegistrationFormProps) {
   const formStartedAt = useRef(Date.now());
   const formRef = useRef<HTMLFormElement>(null);
   const [fields, setFields] = useState<FormField[]>([]);
@@ -162,7 +163,7 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
   const [draft, setDraft] = useState<RegistrationDraft>({
     name: '',
     phone: '',
-    pledgeOption: null,
+    pledgeOption: sponsorshipOnly ? 'donation_only' : null,
     pledgeAmount: 0,
     privacyConsent: false,
   });
@@ -196,6 +197,17 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (!sponsorshipOnly) return;
+
+    setDraft((current) => ({
+      ...current,
+      pledgeOption: 'donation_only',
+      pledgeAmount: current.pledgeOption === 'donation_only' ? current.pledgeAmount : 0,
+    }));
+    setErrors((current) => clearFormErrors(current, 'pledgeOption', 'pledgeAmount'));
+  }, [sponsorshipOnly]);
 
   useEffect(() => {
     if (!submitted) return;
@@ -296,14 +308,16 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
         <div className="section-inner registration-success" role="status">
           <p className="registration-success__eyebrow">THANK YOU</p>
           <h2 ref={successHeadingRef} tabIndex={-1}>
-            {registrantName}님 약정 및 참석 여부가 정상적으로 등록되었습니다.
+            {sponsorshipOnly
+              ? `${registrantName}님 발전기금 후원 약정이 정상적으로 등록되었습니다.`
+              : `${registrantName}님 약정 및 참석 여부가 정상적으로 등록되었습니다.`}
           </h2>
           <p>동국대학교 대외협력실에서 확인 후<br />필요한 절차를 개별적으로 안내드리겠습니다.</p>
           <dl>
             <div><dt>성함</dt><dd>{registrantName}</dd></div>
-            <div><dt>선택 옵션</dt><dd>{pledgeOptionDetails[draft.pledgeOption].label}</dd></div>
+            <div><dt>선택 옵션</dt><dd>{sponsorshipOnly ? '발전기금 후원 약정' : pledgeOptionDetails[draft.pledgeOption].label}</dd></div>
             <div><dt>약정 금액</dt><dd>{formatWon(selection.amount)}</dd></div>
-            <div><dt>참석 여부</dt><dd>{attendanceLabels[selection.attendanceStatus]}</dd></div>
+            {!sponsorshipOnly ? <div><dt>참석 여부</dt><dd>{attendanceLabels[selection.attendanceStatus]}</dd></div> : null}
           </dl>
           <p className="registration-success__note">본 등록은 기부금 납부 또는 결제 완료를 의미하지 않습니다.</p>
         </div>
@@ -312,7 +326,11 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
   }
 
   return (
-    <RevealSection id="registration" className="section--paper registration-section" label="참석 및 발전기금 약정">
+    <RevealSection
+      id="registration"
+      className="section--paper registration-section"
+      label={sponsorshipOnly ? '발전기금 후원 약정' : '참석 및 발전기금 약정'}
+    >
       <div className="section-inner registration-layout">
         <form ref={formRef} className="registration-form" onSubmit={handleSubmit} noValidate>
           <section className="registration-step" aria-labelledby="registration-step-1-title">
@@ -320,7 +338,9 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
               <StepHeading
                 number={1}
                 title="동문 기본 정보"
-                description="행사 당일 원활한 의전과 네트워킹, 그리고 추후 기부금 약정 안내를 위해 정확한 기재를 부탁드립니다."
+                description={sponsorshipOnly
+                  ? '추후 기부금 약정 안내를 위해 정확한 기재를 부탁드립니다.'
+                  : '행사 당일 원활한 의전과 네트워킹, 그리고 추후 기부금 약정 안내를 위해 정확한 기재를 부탁드립니다.'}
               />
             </div>
             <div className="registration-core-group">
@@ -396,11 +416,54 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
 
           <section className="registration-step" aria-labelledby="registration-step-2-title">
             <div id="registration-step-2-title">
-              <StepHeading number={2} title="참석 여부 및 발전기금 약정" description="아래 항목 중 하나를 선택해 주십시오." />
+              <StepHeading
+                number={2}
+                title={sponsorshipOnly ? '발전기금 후원 약정' : '참석 여부 및 발전기금 약정'}
+                description={sponsorshipOnly ? '후원을 희망하시는 금액을 입력해 주십시오.' : '아래 항목 중 하나를 선택해 주십시오.'}
+              />
             </div>
-            <fieldset className="pledge-options">
-              <legend className="sr-only">참석 및 발전기금 약정 옵션</legend>
-              {pledgeOptions.map((option) => {
+            {sponsorshipOnly ? (
+              <fieldset className="pledge-options">
+                <legend className="sr-only">발전기금 후원 약정</legend>
+                <div className="pledge-option pledge-option--sponsorship-only is-selected">
+                  <div className="pledge-option__body pledge-option__body--standalone">
+                    <span className="pledge-option__number">DEVELOPMENT FUND</span>
+                    <strong>[발전기금 후원 약정]</strong>
+                    <span className="pledge-option__title">새로운 50년을 위한 발전기금으로 마음을 전합니다.</span>
+                    <span className="pledge-option__minimum" id="sponsorship-only-amount-notice">
+                      원하시는 금액으로 자유롭게 후원하실 수 있습니다.
+                    </span>
+                  </div>
+                  <div className="pledge-amount-field">
+                    <label htmlFor="sponsorship-only-amount">후원 약정액 <span aria-label="필수">*</span></label>
+                    <div className="pledge-amount-input">
+                      <input
+                        id="sponsorship-only-amount"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9,]*"
+                        min={1}
+                        max={MAX_PLEDGE_AMOUNT}
+                        required
+                        autoComplete="off"
+                        value={draft.pledgeAmount ? draft.pledgeAmount.toLocaleString('ko-KR') : ''}
+                        onChange={(event) => updateDraft('pledgeAmount', normalizePledgeAmountInput(event.target.value))}
+                        aria-invalid={Boolean(errors.pledgeAmount)}
+                        aria-describedby={errors.pledgeAmount
+                          ? 'sponsorship-only-amount-notice pledge-amount-error'
+                          : 'sponsorship-only-amount-notice'}
+                        placeholder="금액을 입력해주세요"
+                      />
+                      <span>원</span>
+                    </div>
+                    {errors.pledgeAmount ? <span className="field-error" id="pledge-amount-error">{errors.pledgeAmount}</span> : null}
+                  </div>
+                </div>
+              </fieldset>
+            ) : (
+              <fieldset className="pledge-options">
+                <legend className="sr-only">참석 및 발전기금 약정 옵션</legend>
+                {pledgeOptions.map((option) => {
                 const detail = pledgeOptionDetails[option];
                 const selected = draft.pledgeOption === option;
                 const customAmount = detail.amount === null;
@@ -458,9 +521,10 @@ export function RegistrationForm({ onComplete }: RegistrationFormProps) {
                     ) : null}
                   </div>
                 );
-              })}
-              {errors.pledgeOption ? <span className="field-error" id="pledge-option-error">{errors.pledgeOption}</span> : null}
-            </fieldset>
+                })}
+                {errors.pledgeOption ? <span className="field-error" id="pledge-option-error">{errors.pledgeOption}</span> : null}
+              </fieldset>
+            )}
           </section>
 
           <section className="registration-step registration-step--tax" aria-labelledby="registration-step-3-title">

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export function StickySponsorCta({ completed }: { completed: boolean }) {
+export function StickySponsorCta({ completed, sponsorshipOnly }: { completed: boolean; sponsorshipOnly: boolean }) {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -36,7 +36,9 @@ export function StickySponsorCta({ completed }: { completed: boolean }) {
 
   return (
     <div className={`sponsor-sticky-cta ${visible ? 'is-visible' : ''}`} aria-hidden={!visible}>
-      <a className="button button--gold" href="#registration" tabIndex={visible ? 0 : -1}>참석 및 후원 확약하기</a>
+      <a className="button button--gold" href="#registration" tabIndex={visible ? 0 : -1}>
+        {sponsorshipOnly ? '발전기금 후원 약정하기' : '참석 및 후원 확약하기'}
+      </a>
     </div>
   );
 }

@@ -34,6 +34,7 @@ export const pledgeOptionLabels: Record<StoredPledgeOption, string> = {
   free_attending: '마음으로 함께하기',
   free_absent: '불참 · 발전기금 약정',
   absent_only: '불참',
+  donation_only: '발전기금 후원 약정',
   legacy_units: '기존 구좌 약정',
   legacy_no_pledge: '기존 무약정 응답',
 };
@@ -78,6 +79,11 @@ export function getSubmissionPledgeAmount(submission: Submission): number {
 
 export function getPledgeOptionLabel(option: StoredPledgeOption | null): string {
   return option ? pledgeOptionLabels[option] : '기존 응답';
+}
+
+export function getSubmissionAttendanceLabel(submission: Submission): string {
+  if (submission.pledge_option === 'donation_only') return '미수집';
+  return submission.attendance_status ? attendanceLabels[submission.attendance_status] : '미입력';
 }
 
 function normalizedFieldLabel(label: string): string {

@@ -56,6 +56,15 @@ const guardianSubmission: Submission = {
   pledge_amount: 500_000,
 };
 
+const donationOnlySubmission: Submission = {
+  ...submission,
+  id: 'submission-donation-only',
+  pledge_option: 'donation_only',
+  pledge_amount: 300_000,
+  sponsorship_units: 0,
+  attendance_status: 'undecided',
+};
+
 const attendanceResponse: AttendanceResponse = {
   id: 'attendance-1',
   created_at: '2026-10-01T00:00:00Z',
@@ -177,6 +186,13 @@ describe('Excel export rows', () => {
     expect(sheet[1][3]).toMatchObject({ value: 98, type: Number, format: '00' });
     expect(sheet[1][6]).toMatchObject({ value: 1_000_000, type: Number, format: '₩#,##0' });
     expect(sheet[1]).toContain('동국대학교');
+  });
+
+  it('exports sponsorship-only responses without inventing an attendance answer', () => {
+    const sheet = buildExcelSheet([donationOnlySubmission], []);
+
+    expect(sheet[1][5]).toBe('발전기금 후원 약정');
+    expect(sheet[1][7]).toBe('미수집');
   });
 
   it('keeps empty C, D, and G values as empty cells', () => {

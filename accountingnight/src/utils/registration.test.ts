@@ -36,6 +36,7 @@ describe('registration utilities', () => {
     ['free_attending', 275_000, 275_000, 'attending'],
     ['free_absent', 125_000, 125_000, 'not_attending'],
     ['absent_only', 0, 0, 'not_attending'],
+    ['donation_only', 125_000, 125_000, 'undecided'],
   ] as const)('maps %s to its amount and attendance', (option, customAmount, amount, attendanceStatus) => {
     expect(getPledgeSelection(option, customAmount)).toEqual({ amount, attendanceStatus });
   });
@@ -142,6 +143,23 @@ describe('registration utilities', () => {
     expect(pledgeOptionDetails.free_absent.minimumAmount).toBe(1);
     expect(pledgeOptionDetails.free_absent.minimumNotice).toBe('원하시는 금액으로 자유롭게 마음을 전하실 수 있습니다.');
     expect(pledgeOptionDetails.free_absent.minimumNotice).not.toContain('100만 원 이상');
+  });
+
+  it('validates sponsorship-only amounts without an attendance response', () => {
+    const result = validateRegistration({
+      draft: { ...draft, pledgeOption: 'donation_only', pledgeAmount: 500_000 },
+      fields: [field],
+      answers: { 'field-1': '동국대학교' },
+      honeypot: '',
+      formStartedAt: 1_000,
+      now: 5_000,
+    });
+
+    expect(result.valid).toBe(true);
+    expect(getPledgeSelection('donation_only', 500_000)).toEqual({
+      amount: 500_000,
+      attendanceStatus: 'undecided',
+    });
   });
 
   it('requires a pledge option, privacy consent, and active required dynamic fields', () => {

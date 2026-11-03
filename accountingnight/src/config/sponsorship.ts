@@ -10,7 +10,7 @@ export interface PledgeOptionDetail {
   amount: number | null;
   minimumAmount?: number;
   minimumNotice?: string;
-  attendanceStatus: Exclude<AttendanceStatus, 'undecided'>;
+  attendanceStatus: AttendanceStatus;
 }
 
 export const pledgeOptionDetails: Record<PledgeOption, PledgeOptionDetail> = {
@@ -53,6 +53,21 @@ export const pledgeOptionDetails: Record<PledgeOption, PledgeOptionDetail> = {
     amount: 0,
     attendanceStatus: 'not_attending',
   },
+  donation_only: {
+    optionNumber: 6,
+    label: '발전기금 후원 약정',
+    title: '새로운 50년을 위한 발전기금으로 마음을 전합니다.',
+    amount: null,
+    minimumAmount: 1,
+    minimumNotice: '원하시는 금액으로 자유롭게 후원하실 수 있습니다.',
+    attendanceStatus: 'undecided',
+  },
 };
 
-export const pledgeOptions = Object.keys(pledgeOptionDetails) as PledgeOption[];
+export const pledgeOptions: PledgeOption[] = [
+  'guardian_50',
+  'century_100',
+  'free_attending',
+  'free_absent',
+  'absent_only',
+];

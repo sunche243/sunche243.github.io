@@ -100,4 +100,19 @@ describe('admin dashboard statistics', () => {
   it('returns a zero selection rate when there are no student applications', () => {
     expect(calculateAdminDashboardStatistics([], [], []).studentSelectionRate).toBe(0);
   });
+
+  it('counts sponsorship-only pledges without classifying them as attending or absent', () => {
+    const donationOnly: Submission = {
+      ...sponsorshipAbsent,
+      id: 'donation-only',
+      pledge_option: 'donation_only',
+      attendance_status: 'undecided',
+    };
+    const stats = calculateAdminDashboardStatistics([donationOnly], [], []);
+
+    expect(stats.pledgeCount).toBe(1);
+    expect(stats.sponsorshipAttendees).toBe(0);
+    expect(stats.sponsorshipNotAttending).toBe(0);
+    expect(stats.currentParticipants).toBe(0);
+  });
 });

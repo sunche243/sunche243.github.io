@@ -34,7 +34,7 @@ export interface SubmitRegistrationInput {
   phone: string;
   pledgeOption: PledgeOption;
   pledgeAmount: number;
-  attendanceStatus: Exclude<AttendanceStatus, 'undecided'>;
+  attendanceStatus: AttendanceStatus;
   answers: DynamicAnswers;
   privacyConsent: boolean;
   honeypot: string;
@@ -45,17 +45,22 @@ export async function submitRegistration(input: SubmitRegistrationInput): Promis
   const supabase = getSupabase();
   if (!supabase) throw new SupabaseConfigurationError();
 
-  const { data, error } = await supabase.rpc('submit_sponsorship', {
+  const commonParameters = {
     p_name: input.name,
     p_phone: input.phone,
-    p_pledge_option: input.pledgeOption,
     p_pledge_amount: input.pledgeAmount,
-    p_attendance_status: input.attendanceStatus,
     p_answers: input.answers,
     p_privacy_consent: input.privacyConsent,
     p_website: input.honeypot,
     p_started_at: new Date(input.formStartedAt).toISOString(),
-  });
+  };
+  const { data, error } = input.pledgeOption === 'donation_only'
+    ? await supabase.rpc('submit_sponsorship_only', commonParameters)
+    : await supabase.rpc('submit_sponsorship', {
+      ...commonParameters,
+      p_pledge_option: input.pledgeOption,
+      p_attendance_status: input.attendanceStatus,
+    });
 
   if (error) throw new Error('신청 정보를 등록하지 못했습니다. 잠시 후 다시 시도해주세요.');
   return String(data);
