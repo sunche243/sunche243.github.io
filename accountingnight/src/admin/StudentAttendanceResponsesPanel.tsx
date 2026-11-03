@@ -68,13 +68,13 @@ export function StudentAttendanceEditDialog({
   onSuccess,
 }: StudentAttendanceEditDialogProps) {
   const [draft, setDraft] = useState<StudentAttendanceAdminEditDraft>({
-    name: response.name,
-    phone: response.phone,
+    name: response.name ?? '',
+    phone: response.phone ?? '',
     admissionYear: response.admission_year ?? '',
     studentCouncilExperience: response.student_council_experience,
     studentCouncilDetails: response.student_council_details ?? '',
     studentCouncilFeeStatus: response.student_council_fee_status,
-    attendanceStatus: response.attendance_status,
+    attendanceStatus: response.attendance_status ?? '',
   });
   const [errors, setErrors] = useState<StudentAttendanceAdminEditErrors>({});
   const [saving, setSaving] = useState(false);
@@ -297,7 +297,7 @@ export function StudentAttendanceDeleteDialog({ response, onClose, onDeleted, on
   return (
     <AdminDialog titleId="student-attendance-delete-title" descriptionId="student-attendance-delete-description" onClose={() => { if (!deleting) onClose(); }}>
       <div className="admin-dialog__header"><div><p>DELETE STUDENT RESPONSE</p><h2 id="student-attendance-delete-title">학생 참석 응답 삭제</h2></div><button type="button" onClick={onClose} disabled={deleting} aria-label="학생 참석 응답 삭제 확인 창 닫기">×</button></div>
-      <div className="attendance-delete-copy" id="student-attendance-delete-description"><p><strong>{response.name}</strong>님의 <strong>{attendanceResponseLabels[response.attendance_status]}</strong> 응답을 삭제하시겠습니까?</p><p>이 작업은 되돌릴 수 없습니다.</p></div>
+      <div className="attendance-delete-copy" id="student-attendance-delete-description"><p><strong>{response.name || '성명 미입력'}</strong>님의 <strong>{response.attendance_status ? attendanceResponseLabels[response.attendance_status] : '미입력'}</strong> 응답을 삭제하시겠습니까?</p><p>이 작업은 되돌릴 수 없습니다.</p></div>
       <div className="admin-dialog__actions admin-dialog__actions--end"><button className="admin-button admin-button--secondary" type="button" onClick={onClose} disabled={deleting} data-autofocus>취소</button><button className="admin-button admin-button--danger" type="button" onClick={remove} disabled={deleting}>{deleting ? '삭제 중...' : '삭제'}</button></div>
     </AdminDialog>
   );
@@ -456,12 +456,12 @@ export function StudentAttendanceResponsesPanel({ responses, onUpdated, onManage
         <tbody>{sorted.map((response, index) => {
           const priority = getStudentSelectionPriority(response);
           return <tr key={response.id}>
-            <td className="admin-sequence-cell">{index + 1}</td><td>{formatAdminDate(response.updated_at ?? response.created_at)}</td><td><strong>{response.name}</strong></td><td>{response.phone}</td><td>{response.admission_year || '−'}</td>
+            <td className="admin-sequence-cell">{index + 1}</td><td>{formatAdminDate(response.updated_at ?? response.created_at)}</td><td><strong>{response.name || '−'}</strong></td><td>{response.phone || '−'}</td><td>{response.admission_year || '−'}</td>
             <td>{response.attendance_status === 'attending' ? priority ? `${priority}순위` : '확인 필요' : '−'}</td>
             <td>{response.student_council_experience === null ? '−' : response.student_council_experience ? `경험 있음${response.student_council_details ? ` · ${response.student_council_details}` : ''}` : '경험 없음'}</td>
             <td>{studentCouncilFeeStatusLabels[response.student_council_fee_status]}</td><td>{studentSelectionStatusLabels[response.selection_status]}</td><td>{response.waitlist_order ?? '−'}</td><td>{studentParticipationFeeStatusLabels[response.participation_fee_status]}</td><td>{response.contacted_at ? '완료' : '미완료'}</td>
-            <td><span className={`attendance-status attendance-status--${response.attendance_status}`}>{attendanceResponseLabels[response.attendance_status]}</span></td>
-            <td className="attendance-actions-cell"><div className="admin-row-actions"><button type="button" onClick={() => setEditing(response)} aria-label={`${response.name}님의 학생 참석 응답 수정`}>응답</button><button type="button" onClick={() => setManaging(response)} aria-label={`${response.name}님의 학생 선정 관리`}>선정</button><button className="admin-row-action--danger" type="button" onClick={() => setDeleting(response)} aria-label={`${response.name}님의 학생 참석 응답 삭제`}>삭제</button></div></td>
+            <td><span className={`attendance-status attendance-status--${response.attendance_status ?? 'undecided'}`}>{response.attendance_status ? attendanceResponseLabels[response.attendance_status] : '미입력'}</span></td>
+            <td className="attendance-actions-cell"><div className="admin-row-actions"><button type="button" onClick={() => setEditing(response)} aria-label={`${response.name ? `${response.name}님의` : '성명 미입력'} 학생 참석 응답 수정`}>응답</button><button type="button" onClick={() => setManaging(response)} aria-label={`${response.name ? `${response.name}님의` : '성명 미입력'} 학생 선정 관리`}>선정</button><button className="admin-row-action--danger" type="button" onClick={() => setDeleting(response)} aria-label={`${response.name ? `${response.name}님의` : '성명 미입력'} 학생 참석 응답 삭제`}>삭제</button></div></td>
           </tr>;
         })}{!sorted.length ? <tr><td className="admin-empty" colSpan={14}>조건에 맞는 학생 참석 회신이 없습니다.</td></tr> : null}</tbody>
       </table></div>

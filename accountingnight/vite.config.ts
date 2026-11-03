@@ -36,6 +36,7 @@ export default defineConfig({
         student: `${projectRoot}student/index.html`,
         studentAttendance: `${projectRoot}student/attendance/index.html`,
         admin: `${projectRoot}admin/index.html`,
+        adminData: `${projectRoot}admin/data/index.html`,
       },
     },
   },

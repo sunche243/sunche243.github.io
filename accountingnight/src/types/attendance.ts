@@ -4,12 +4,13 @@ export interface AttendanceResponse {
   id: string;
   created_at: string;
   updated_at?: string;
-  name: string;
-  phone: string;
+  name: string | null;
+  phone: string | null;
   admission_year: string | null;
   affiliation: string | null;
-  attendance_status: AttendanceResponseStatus;
-  privacy_consent_at: string;
+  attendance_status: AttendanceResponseStatus | null;
+  privacy_consent_at: string | null;
+  created_by_admin?: string | null;
 }
 
 export interface AttendanceResponseEditableFields {

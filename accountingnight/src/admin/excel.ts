@@ -90,7 +90,8 @@ function numericCell(
   };
 }
 
-function phoneCell(value: string): Cell {
+function phoneCell(value: string | null | undefined): Cell {
+  if (!value) return null;
   const trimmed = value.trim();
   const normalized = /^(?:010\d{8}|010-\d{4}-\d{4})$/.test(trimmed)
     ? trimmed.replaceAll('-', '')
@@ -106,6 +107,7 @@ function admissionYearCell(value: string | number | boolean | undefined): Cell {
 }
 
 function pledgeAmountCell(submission: Submission): Cell {
+  if (submission.created_by_admin && submission.pledge_amount === null) return null;
   if (!Number.isFinite(submission.pledge_amount) && !Number.isFinite(submission.sponsorship_units)) {
     return null;
   }
@@ -133,11 +135,11 @@ export function buildExcelSheet(submissions: Submission[], fields: FormField[]):
     headings.map(header),
     ...submissions.map((submission) => [
       { value: new Date(submission.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
-      submission.name,
+      submission.name ?? '',
       phoneCell(submission.phone),
       admissionYearCell(findSubmissionAnswerByLabel(submission, isAdmissionFieldLabel)),
       excelValue(findSubmissionAnswerByLabel(submission, isAffiliationFieldLabel)),
-      getPledgeOptionLabel(submission.pledge_option),
+      submission.created_by_admin && !submission.pledge_option ? '미입력' : getPledgeOptionLabel(submission.pledge_option),
       pledgeAmountCell(submission),
       getSubmissionAttendanceLabel(submission),
       ...exportFields.map(({ id }) => excelValue(submission.answers[id]?.value)),
@@ -168,11 +170,11 @@ export function buildAttendanceExcelSheet(responses: AttendanceResponse[]): Shee
     ['최종 회신일시', '성명', '전화번호', '입학년도', '현재 소속 및 직함', '참석 여부'].map(header),
     ...responses.map((response) => [
       { value: new Date(response.updated_at ?? response.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
-      response.name,
+      response.name ?? '',
       phoneCell(response.phone),
       admissionYearCell(response.admission_year ?? undefined),
       response.affiliation ?? '',
-      attendanceResponseLabels[response.attendance_status],
+      response.attendance_status ? attendanceResponseLabels[response.attendance_status] : '미입력',
     ]),
   ];
 }
@@ -204,14 +206,14 @@ export function buildStudentAttendanceExcelSheet(responses: StudentAttendanceRes
     ['최종 회신일시', '성명', '전화번호', '입학년도', '우선순위', '학생회 활동 여부', '활동 연도 및 직책', '학생회비', '참석 신청 여부', '선정 상태', '대기 순번', '행사 참가비', '개별 연락', '관리 메모'].map(header),
     ...responses.map((response) => [
       { value: new Date(response.updated_at ?? response.created_at), type: Date, format: 'yyyy-mm-dd hh:mm' },
-      response.name,
+      response.name ?? '',
       phoneCell(response.phone),
       admissionYearCell(response.admission_year ?? undefined),
       getStudentSelectionPriority(response) ? `${getStudentSelectionPriority(response)}순위` : '',
       response.student_council_experience === null ? '' : response.student_council_experience ? '경험 있음' : '경험 없음',
       response.student_council_details ?? '',
       studentCouncilFeeStatusLabels[response.student_council_fee_status],
-      attendanceResponseLabels[response.attendance_status],
+      response.attendance_status ? attendanceResponseLabels[response.attendance_status] : '미입력',
       studentSelectionStatusLabels[response.selection_status],
       response.waitlist_order ?? '',
       studentParticipationFeeStatusLabels[response.participation_fee_status],
@@ -258,11 +260,11 @@ export function buildSelectedStudentsSeatingExcelSheet(
 ): SheetData {
   const selected = responses
     .filter((response) => response.attendance_status === 'attending' && response.selection_status === 'selected')
-    .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
+    .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'ko'));
   return [
     ['이름', '구분(학번)', '식별정보(전화번호)', '학생회 활동 여부', '학생회비', '행사 참가비'].map(header),
     ...selected.map((response) => [
-      response.name,
+      response.name ?? '',
       response.admission_year ? `${response.admission_year}학번` : '학번 미입력',
       phoneCell(response.phone),
       response.student_council_experience ? '경험 있음' : '경험 없음',

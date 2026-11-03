@@ -28,17 +28,28 @@ create table if not exists public.submissions (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  name text not null check (char_length(btrim(name)) between 1 and 80),
-  phone text not null check (phone ~ '^010[0-9]{8}$'),
+  name text check (name is null or char_length(btrim(name)) between 1 and 80),
+  phone text check (phone is null or phone ~ '^010[0-9]{8}$'),
   wants_sponsorship boolean not null default false,
   sponsorship_units integer not null default 0,
-  pledge_option text not null,
-  pledge_amount bigint not null,
+  pledge_option text,
+  pledge_amount bigint,
   attendance_status text check (attendance_status in ('attending', 'not_attending', 'undecided')),
   answers jsonb not null default '{}'::jsonb check (jsonb_typeof(answers) = 'object'),
   status text not null default 'new' check (status in ('new', 'contacted', 'confirmed', 'cancelled')),
   admin_memo text not null default '' check (char_length(admin_memo) <= 5000),
-  privacy_consent_at timestamptz not null,
+  privacy_consent_at timestamptz,
+  created_by_admin uuid,
+  constraint submissions_public_required_fields_check check (
+    created_by_admin is not null
+    or (
+      name is not null
+      and phone is not null
+      and pledge_option is not null
+      and pledge_amount is not null
+      and privacy_consent_at is not null
+    )
+  ),
   constraint submissions_sponsorship_units_check check (sponsorship_units between 0 and 100),
   constraint submissions_pledge_option_check check (
     pledge_option in (
@@ -53,7 +64,8 @@ create table if not exists public.submissions (
     )
   ),
   constraint submissions_pledge_consistency_check check (
-    (pledge_option = 'century_100' and pledge_amount = 1000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 2)
+    created_by_admin is not null
+    or (pledge_option = 'century_100' and pledge_amount = 1000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 2)
     or (pledge_option = 'guardian_50' and pledge_amount = 500000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 1)
     or (pledge_option = 'free_attending' and pledge_amount between 1000000 and 10000000000 and attendance_status = 'attending' and wants_sponsorship and sponsorship_units = 0)
     or (pledge_option = 'free_absent' and pledge_amount between 1 and 10000000000 and attendance_status = 'not_attending' and wants_sponsorship and sponsorship_units = 0)
@@ -68,27 +80,37 @@ create table if not exists public.attendance_responses (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  name text not null check (char_length(btrim(name)) between 1 and 80),
-  phone text not null check (phone ~ '^010[0-9]{8}$'),
+  name text check (name is null or char_length(btrim(name)) between 1 and 80),
+  phone text check (phone is null or phone ~ '^010[0-9]{8}$'),
   admission_year text null check (admission_year is null or admission_year ~ '^[0-9]{2}$'),
   affiliation text null check (affiliation is null or char_length(affiliation) between 1 and 200),
-  attendance_status text not null check (attendance_status in ('attending', 'not_attending')),
-  privacy_consent_at timestamptz not null,
-  superseded_at timestamptz
+  attendance_status text check (attendance_status in ('attending', 'not_attending')),
+  privacy_consent_at timestamptz,
+  superseded_at timestamptz,
+  created_by_admin uuid,
+  constraint attendance_responses_public_required_fields_check check (
+    created_by_admin is not null
+    or (
+      name is not null
+      and phone is not null
+      and attendance_status is not null
+      and privacy_consent_at is not null
+    )
+  )
 );
 
 create table if not exists public.student_attendance_responses (
   id uuid primary key default gen_random_uuid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  name text not null check (char_length(btrim(name)) between 1 and 80),
-  phone text not null check (phone ~ '^010[0-9]{8}$'),
+  name text check (name is null or char_length(btrim(name)) between 1 and 80),
+  phone text check (phone is null or phone ~ '^010[0-9]{8}$'),
   admission_year text null check (admission_year is null or admission_year ~ '^[0-9]{2}$'),
   student_council_experience boolean,
   student_council_details text null,
   student_council_fee_status text not null default 'unverified',
-  attendance_status text not null check (attendance_status in ('attending', 'not_attending')),
-  privacy_consent_at timestamptz not null,
+  attendance_status text check (attendance_status in ('attending', 'not_attending')),
+  privacy_consent_at timestamptz,
   selection_criteria_consent_at timestamptz,
   selection_status text not null default 'pending',
   waitlist_order integer,
@@ -96,8 +118,19 @@ create table if not exists public.student_attendance_responses (
   contacted_at timestamptz,
   admin_memo text not null default '',
   superseded_at timestamptz,
+  created_by_admin uuid,
+  constraint student_attendance_responses_public_required_fields_check check (
+    created_by_admin is not null
+    or (
+      name is not null
+      and phone is not null
+      and attendance_status is not null
+      and privacy_consent_at is not null
+    )
+  ),
   constraint student_attendance_responses_council_details_check check (
-    (
+    created_by_admin is not null
+    or (
       student_council_experience is true
       and student_council_details is not null
       and char_length(btrim(student_council_details)) between 1 and 500
@@ -128,7 +161,8 @@ create table if not exists public.student_attendance_responses (
     char_length(admin_memo) <= 2000
   ),
   constraint student_attendance_responses_attending_contract_check check (
-    attendance_status <> 'attending'
+    created_by_admin is not null
+    or attendance_status <> 'attending'
     or (
       admission_year is not null
       and student_council_experience is not null
@@ -220,6 +254,149 @@ as $$
     from public.admins
     where user_id = (select auth.uid())
   );
+$$;
+
+create or replace function public.create_admin_response(
+  p_response_type text,
+  p_name text,
+  p_phone text,
+  p_admission_year text,
+  p_affiliation text,
+  p_pledge_amount bigint,
+  p_attendance_status text,
+  p_student_council_experience boolean,
+  p_student_council_details text,
+  p_student_council_fee_status text,
+  p_admin_memo text
+)
+returns uuid
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  v_admin_id uuid := (select auth.uid());
+  v_response_id uuid;
+  v_name text := nullif(btrim(coalesce(p_name, '')), '');
+  v_phone text := nullif(replace(btrim(coalesce(p_phone, '')), '-', ''), '');
+  v_admission_year text := nullif(btrim(coalesce(p_admission_year, '')), '');
+  v_affiliation text := nullif(btrim(coalesce(p_affiliation, '')), '');
+  v_attendance_status text := nullif(btrim(coalesce(p_attendance_status, '')), '');
+  v_student_council_details text := nullif(btrim(coalesce(p_student_council_details, '')), '');
+  v_student_council_fee_status text := nullif(btrim(coalesce(p_student_council_fee_status, '')), '');
+  v_admin_memo text := nullif(btrim(coalesce(p_admin_memo, '')), '');
+  v_answers jsonb := '{}'::jsonb;
+begin
+  if not public.is_admin() then
+    raise exception 'Not authorized' using errcode = '42501';
+  end if;
+
+  if p_response_type is null or p_response_type not in ('sponsorship', 'attendance', 'student') then
+    raise exception 'Invalid response type';
+  end if;
+  if v_name is not null and char_length(v_name) > 80 then
+    raise exception 'Invalid name';
+  end if;
+  if v_phone is not null and v_phone !~ '^010[0-9]{8}$' then
+    raise exception 'Invalid phone';
+  end if;
+  if v_admission_year is not null and v_admission_year !~ '^[0-9]{2}$' then
+    raise exception 'Invalid admission year';
+  end if;
+  if v_affiliation is not null and char_length(v_affiliation) > 200 then
+    raise exception 'Invalid affiliation';
+  end if;
+  if p_pledge_amount is not null and p_pledge_amount not between 0 and 10000000000 then
+    raise exception 'Invalid pledge amount';
+  end if;
+  if v_attendance_status is not null and v_attendance_status not in ('attending', 'not_attending') then
+    raise exception 'Invalid attendance status';
+  end if;
+  if v_student_council_details is not null and char_length(v_student_council_details) > 500 then
+    raise exception 'Invalid student council details';
+  end if;
+  if v_student_council_fee_status is not null
+    and v_student_council_fee_status not in ('unverified', 'paid', 'unpaid', 'not_applicable') then
+    raise exception 'Invalid student council fee status';
+  end if;
+  if v_admin_memo is not null and char_length(v_admin_memo) > 2000 then
+    raise exception 'Invalid admin memo';
+  end if;
+
+  if p_response_type = 'sponsorship' then
+    if v_admission_year is not null then
+      v_answers := v_answers || jsonb_build_object(
+        'admin-admission-year',
+        jsonb_build_object('label', '입학년도(학번)', 'value', v_admission_year)
+      );
+    end if;
+    if v_affiliation is not null then
+      v_answers := v_answers || jsonb_build_object(
+        'admin-affiliation',
+        jsonb_build_object('label', '현재 소속 및 직함', 'value', v_affiliation)
+      );
+    end if;
+
+    insert into public.submissions (
+      name, phone, wants_sponsorship, sponsorship_units, pledge_option,
+      pledge_amount, attendance_status, answers, admin_memo,
+      privacy_consent_at, created_by_admin
+    ) values (
+      v_name,
+      v_phone,
+      coalesce(p_pledge_amount > 0, false),
+      0,
+      case
+        when p_pledge_amount is null then null
+        when p_pledge_amount > 0 then 'donation_only'
+        else 'legacy_no_pledge'
+      end,
+      p_pledge_amount,
+      v_attendance_status,
+      v_answers,
+      coalesce(v_admin_memo, ''),
+      null,
+      v_admin_id
+    )
+    returning id into v_response_id;
+  elsif p_response_type = 'attendance' then
+    insert into public.attendance_responses (
+      name, phone, admission_year, affiliation, attendance_status,
+      privacy_consent_at, superseded_at, created_by_admin
+    ) values (
+      v_name, v_phone, v_admission_year, v_affiliation, v_attendance_status,
+      null, null, v_admin_id
+    )
+    returning id into v_response_id;
+  else
+    insert into public.student_attendance_responses (
+      name, phone, admission_year, student_council_experience,
+      student_council_details, student_council_fee_status, attendance_status,
+      privacy_consent_at, selection_criteria_consent_at, selection_status,
+      waitlist_order, participation_fee_status, admin_memo, superseded_at,
+      created_by_admin
+    ) values (
+      v_name,
+      v_phone,
+      v_admission_year,
+      p_student_council_experience,
+      case when p_student_council_experience is true then v_student_council_details else null end,
+      coalesce(v_student_council_fee_status, 'unverified'),
+      v_attendance_status,
+      null,
+      null,
+      case when v_attendance_status = 'not_attending' then 'not_applicable' else 'pending' end,
+      null,
+      'not_applicable',
+      coalesce(v_admin_memo, ''),
+      null,
+      v_admin_id
+    )
+    returning id into v_response_id;
+  end if;
+
+  return v_response_id;
+end;
 $$;
 
 create or replace function public.submit_attendance_response(
@@ -1151,12 +1328,18 @@ grant select on table public.admins to authenticated;
 grant select on table public.form_fields to anon, authenticated;
 grant insert, update on table public.form_fields to authenticated;
 grant select, delete on table public.submissions to authenticated;
+grant insert on table public.submissions to authenticated;
 grant update (status, admin_memo) on table public.submissions to authenticated;
 grant select on table public.attendance_responses to authenticated;
+grant insert on table public.attendance_responses to authenticated;
 grant select on table public.student_attendance_responses to authenticated;
+grant insert on table public.student_attendance_responses to authenticated;
 
 revoke all on function public.is_admin() from public, anon;
 grant execute on function public.is_admin() to authenticated;
+
+revoke all on function public.create_admin_response(text, text, text, text, text, bigint, text, boolean, text, text, text) from public, anon, authenticated;
+grant execute on function public.create_admin_response(text, text, text, text, text, bigint, text, boolean, text, text, text) to authenticated;
 
 revoke all on function public.submit_sponsorship(text, text, text, bigint, text, jsonb, boolean, text, timestamptz) from public;
 grant execute on function public.submit_sponsorship(text, text, text, bigint, text, jsonb, boolean, text, timestamptz) to anon, authenticated;
@@ -1221,6 +1404,15 @@ on public.submissions for select
 to authenticated
 using ((select public.is_admin()));
 
+drop policy if exists submissions_admin_insert on public.submissions;
+create policy submissions_admin_insert
+on public.submissions for insert
+to authenticated
+with check (
+  (select public.is_admin())
+  and created_by_admin = (select auth.uid())
+);
+
 drop policy if exists submissions_admin_update on public.submissions;
 create policy submissions_admin_update
 on public.submissions for update
@@ -1240,17 +1432,32 @@ on public.attendance_responses for select
 to authenticated
 using ((select public.is_admin()));
 
+drop policy if exists attendance_responses_admin_insert on public.attendance_responses;
+create policy attendance_responses_admin_insert
+on public.attendance_responses for insert
+to authenticated
+with check (
+  (select public.is_admin())
+  and created_by_admin = (select auth.uid())
+);
+
 drop policy if exists student_attendance_responses_admin_read on public.student_attendance_responses;
 create policy student_attendance_responses_admin_read
 on public.student_attendance_responses for select
 to authenticated
 using ((select public.is_admin()));
 
--- No direct INSERT grant or policy exists for submissions.
--- Public visitors can only submit through submit_sponsorship(), which controls every writable column.
--- attendance_responses permits authenticated administrator reads only.
--- Creates use submit_attendance_response(); mutations use the authenticated-only admin RPCs.
--- student_attendance_responses follows the same isolation model with dedicated student RPCs.
+drop policy if exists student_attendance_responses_admin_insert on public.student_attendance_responses;
+create policy student_attendance_responses_admin_insert
+on public.student_attendance_responses for insert
+to authenticated
+with check (
+  (select public.is_admin())
+  and created_by_admin = (select auth.uid())
+);
+
+-- Public visitors can only create responses through the dedicated validated submit RPCs.
+-- Direct inserts are limited by RLS to authenticated administrators and rows tagged with their user ID.
 
 -- Administrator Web Push subscriptions and privacy-preserving notification outbox.
 create extension if not exists pg_net with schema extensions;

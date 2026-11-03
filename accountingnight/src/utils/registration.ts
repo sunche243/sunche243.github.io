@@ -73,7 +73,9 @@ export function normalizePledgeAmountInput(value: string): number {
 }
 
 export function getSubmissionPledgeAmount(submission: Submission): number {
-  if (Number.isFinite(submission.pledge_amount)) return Math.max(0, submission.pledge_amount);
+  if (typeof submission.pledge_amount === 'number' && Number.isFinite(submission.pledge_amount)) {
+    return Math.max(0, submission.pledge_amount);
+  }
   return calculateSponsorshipAmount(submission.sponsorship_units);
 }
 

@@ -34,8 +34,8 @@ function normalizeSubmission(row: Record<string, unknown>): Submission {
     id: String(row.id),
     created_at: String(row.created_at),
     updated_at: row.updated_at ? String(row.updated_at) : undefined,
-    name: String(row.name),
-    phone: String(row.phone),
+    name: row.name === null ? null : String(row.name),
+    phone: row.phone === null ? null : String(row.phone),
     wants_sponsorship: Boolean(row.wants_sponsorship),
     sponsorship_units: sponsorshipUnits,
     pledge_option: row.pledge_option ? row.pledge_option as Submission['pledge_option'] : null,
@@ -46,7 +46,10 @@ function normalizeSubmission(row: Record<string, unknown>): Submission {
     answers: normalizeAnswers(row.answers),
     status: row.status as SubmissionStatus,
     admin_memo: String(row.admin_memo ?? ''),
-    privacy_consent_at: String(row.privacy_consent_at),
+    privacy_consent_at: row.privacy_consent_at === null ? null : String(row.privacy_consent_at),
+    created_by_admin: row.created_by_admin === null || row.created_by_admin === undefined
+      ? null
+      : String(row.created_by_admin),
   };
 }
 
@@ -107,7 +110,7 @@ export async function fetchAttendanceResponses(): Promise<AttendanceResponse[]> 
   const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('attendance_responses')
-    .select('id,created_at,updated_at,name,phone,admission_year,affiliation,attendance_status,privacy_consent_at')
+    .select('id,created_at,updated_at,name,phone,admission_year,affiliation,attendance_status,privacy_consent_at,created_by_admin')
     .is('superseded_at', null)
     .order('updated_at', { ascending: false });
   if (error) throw new Error('참석 여부 회신을 불러오지 못했습니다. 새 migration 적용 여부를 확인해주세요.');
@@ -116,12 +119,15 @@ export async function fetchAttendanceResponses(): Promise<AttendanceResponse[]> 
     id: String(row.id),
     created_at: String(row.created_at),
     updated_at: row.updated_at ? String(row.updated_at) : undefined,
-    name: String(row.name),
-    phone: String(row.phone),
+    name: row.name === null ? null : String(row.name),
+    phone: row.phone === null ? null : String(row.phone),
     admission_year: row.admission_year === null ? null : String(row.admission_year),
     affiliation: row.affiliation === null ? null : String(row.affiliation),
     attendance_status: row.attendance_status as AttendanceResponse['attendance_status'],
-    privacy_consent_at: String(row.privacy_consent_at),
+    privacy_consent_at: row.privacy_consent_at === null ? null : String(row.privacy_consent_at),
+    created_by_admin: row.created_by_admin === null || row.created_by_admin === undefined
+      ? null
+      : String(row.created_by_admin),
   }));
 }
 
@@ -151,7 +157,7 @@ export async function fetchStudentAttendanceResponses(): Promise<StudentAttendan
   const supabase = requireSupabase();
   const { data, error } = await supabase
     .from('student_attendance_responses')
-    .select('id,created_at,updated_at,name,phone,admission_year,student_council_experience,student_council_details,student_council_fee_status,attendance_status,privacy_consent_at,selection_criteria_consent_at,selection_status,waitlist_order,participation_fee_status,contacted_at,admin_memo,superseded_at')
+    .select('id,created_at,updated_at,name,phone,admission_year,student_council_experience,student_council_details,student_council_fee_status,attendance_status,privacy_consent_at,selection_criteria_consent_at,selection_status,waitlist_order,participation_fee_status,contacted_at,admin_memo,superseded_at,created_by_admin')
     .is('superseded_at', null)
     .order('updated_at', { ascending: false });
   if (error) throw new Error('학생 참석 회신을 불러오지 못했습니다. 새 migration 적용 여부를 확인해주세요.');
@@ -160,8 +166,8 @@ export async function fetchStudentAttendanceResponses(): Promise<StudentAttendan
     id: String(row.id),
     created_at: String(row.created_at),
     updated_at: row.updated_at ? String(row.updated_at) : undefined,
-    name: String(row.name),
-    phone: String(row.phone),
+    name: row.name === null ? null : String(row.name),
+    phone: row.phone === null ? null : String(row.phone),
     admission_year: row.admission_year === null ? null : String(row.admission_year),
     student_council_experience: row.student_council_experience === null
       ? null
@@ -169,7 +175,7 @@ export async function fetchStudentAttendanceResponses(): Promise<StudentAttendan
     student_council_details: row.student_council_details === null ? null : String(row.student_council_details),
     student_council_fee_status: row.student_council_fee_status as StudentAttendanceResponse['student_council_fee_status'],
     attendance_status: row.attendance_status as StudentAttendanceResponse['attendance_status'],
-    privacy_consent_at: String(row.privacy_consent_at),
+    privacy_consent_at: row.privacy_consent_at === null ? null : String(row.privacy_consent_at),
     selection_criteria_consent_at: row.selection_criteria_consent_at === null
       ? null
       : String(row.selection_criteria_consent_at),
@@ -179,6 +185,9 @@ export async function fetchStudentAttendanceResponses(): Promise<StudentAttendan
     contacted_at: row.contacted_at === null ? null : String(row.contacted_at),
     admin_memo: String(row.admin_memo ?? ''),
     superseded_at: row.superseded_at === null ? null : String(row.superseded_at),
+    created_by_admin: row.created_by_admin === null || row.created_by_admin === undefined
+      ? null
+      : String(row.created_by_admin),
   }));
 }
 

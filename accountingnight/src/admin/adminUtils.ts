@@ -21,8 +21,8 @@ export function filterSubmissions(submissions: Submission[], filters: AdminFilte
 
   return submissions.filter((submission) => {
     const matchesQuery = !query ||
-      submission.name.toLocaleLowerCase('ko-KR').includes(query) ||
-      (normalizedQueryPhone.length > 0 && submission.phone.includes(normalizedQueryPhone));
+      (submission.name?.toLocaleLowerCase('ko-KR').includes(query) ?? false) ||
+      (normalizedQueryPhone.length > 0 && (submission.phone?.includes(normalizedQueryPhone) ?? false));
     const matchesStatus = filters.status === 'all' || submission.status === filters.status;
     const matchesAttendance = filters.attendance === 'all' ||
       (filters.attendance === 'not_selected'

@@ -19,14 +19,14 @@ export interface StudentAttendanceResponse {
   id: string;
   created_at: string;
   updated_at?: string;
-  name: string;
-  phone: string;
+  name: string | null;
+  phone: string | null;
   admission_year: string | null;
   student_council_experience: boolean | null;
   student_council_details: string | null;
   student_council_fee_status: StudentCouncilFeeStatus;
-  attendance_status: AttendanceResponseStatus;
-  privacy_consent_at: string;
+  attendance_status: AttendanceResponseStatus | null;
+  privacy_consent_at: string | null;
   selection_criteria_consent_at: string | null;
   selection_status: StudentSelectionStatus;
   waitlist_order: number | null;
@@ -34,6 +34,7 @@ export interface StudentAttendanceResponse {
   contacted_at: string | null;
   admin_memo: string;
   superseded_at: string | null;
+  created_by_admin?: string | null;
 }
 
 export interface StudentAttendanceResponseEditableFields {

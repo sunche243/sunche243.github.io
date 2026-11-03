@@ -165,7 +165,7 @@ describe('student attendance admin utilities', () => {
 
   it('updates and deletes responses without touching immutable timestamps', () => {
     const value = {
-      name: '김동국 수정', phone: experienced.phone, admission_year: null,
+      name: '김동국 수정', phone: experienced.phone!, admission_year: null,
       student_council_experience: null, student_council_details: null,
       student_council_fee_status: 'not_applicable' as const, attendance_status: 'not_attending' as const,
     };

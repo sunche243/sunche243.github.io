@@ -42,11 +42,11 @@ export function AttendanceEditDialog({
   onSuccess,
 }: AttendanceEditDialogProps) {
   const [draft, setDraft] = useState<AttendanceAdminEditDraft>({
-    name: response.name,
-    phone: response.phone,
+    name: response.name ?? '',
+    phone: response.phone ?? '',
     admissionYear: response.admission_year ?? '',
     affiliation: response.affiliation ?? '',
-    attendanceStatus: response.attendance_status,
+    attendanceStatus: response.attendance_status ?? '',
   });
   const [errors, setErrors] = useState<AttendanceAdminEditErrors>({});
   const [saving, setSaving] = useState(false);
@@ -225,7 +225,7 @@ export function AttendanceDeleteDialog({
         <button type="button" onClick={requestClose} disabled={deleting} aria-label="삭제 확인 창 닫기">×</button>
       </div>
       <div className="attendance-delete-copy" id="attendance-delete-description">
-        <p><strong>{response.name}</strong>님의 <strong>{attendanceResponseLabels[response.attendance_status]}</strong> 응답을 삭제하시겠습니까?</p>
+        <p><strong>{response.name || '성명 미입력'}</strong>님의 <strong>{response.attendance_status ? attendanceResponseLabels[response.attendance_status] : '미입력'}</strong> 응답을 삭제하시겠습니까?</p>
         <p>이 작업은 되돌릴 수 없습니다.</p>
       </div>
       <div className="admin-dialog__actions admin-dialog__actions--end">
@@ -316,26 +316,26 @@ export function AttendanceResponsesPanel({
           </thead>
           <tbody>
             {filtered.map((response) => {
-              const duplicateCount = phoneCounts.get(response.phone) ?? 1;
+              const duplicateCount = response.phone ? phoneCounts.get(response.phone) ?? 1 : 1;
               return (
                 <tr key={response.id}>
                   <td>{formatAdminDate(response.updated_at ?? response.created_at)}</td>
-                  <td><strong>{response.name}</strong></td>
+                  <td><strong>{response.name || '−'}</strong></td>
                   <td>
-                    {response.phone}
+                    {response.phone || '−'}
                     {duplicateCount > 1 ? <span className="admin-duplicate">동일 번호 {duplicateCount}회</span> : null}
                   </td>
                   <td>{response.admission_year || '−'}</td>
                   <td>{response.affiliation || '−'}</td>
                   <td>
-                    <span className={`attendance-status attendance-status--${response.attendance_status}`}>
-                      {attendanceResponseLabels[response.attendance_status]}
+                    <span className={`attendance-status attendance-status--${response.attendance_status ?? 'undecided'}`}>
+                      {response.attendance_status ? attendanceResponseLabels[response.attendance_status] : '미입력'}
                     </span>
                   </td>
                   <td className="attendance-actions-cell">
                     <div className="admin-row-actions">
-                      <button type="button" onClick={() => setEditing(response)} aria-label={`${response.name}님의 참석 여부 응답 수정`}>수정</button>
-                      <button className="admin-row-action--danger" type="button" onClick={() => setDeleting(response)} aria-label={`${response.name}님의 참석 여부 응답 삭제`}>삭제</button>
+                      <button type="button" onClick={() => setEditing(response)} aria-label={`${response.name || '성명 미입력'} 참석 여부 응답 수정`}>수정</button>
+                      <button className="admin-row-action--danger" type="button" onClick={() => setDeleting(response)} aria-label={`${response.name || '성명 미입력'} 참석 여부 응답 삭제`}>삭제</button>
                     </div>
                   </td>
                 </tr>

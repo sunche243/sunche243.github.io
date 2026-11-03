@@ -81,17 +81,17 @@ function SubmissionDetail({
       <div className="admin-dialog__header">
         <div>
           <p>SUBMISSION DETAIL</p>
-          <h2 id="submission-detail-title">{submission.name}</h2>
+          <h2 id="submission-detail-title">{submission.name || '성명 미입력'}</h2>
         </div>
         <button type="button" onClick={onClose} aria-label="상세 닫기">×</button>
       </div>
       <div className="submission-detail-grid">
         <dl>
-          <div><dt>전화번호</dt><dd><a href={`tel:${submission.phone}`}>{submission.phone}</a></dd></div>
+          <div><dt>전화번호</dt><dd>{submission.phone ? <a href={`tel:${submission.phone}`}>{submission.phone}</a> : '−'}</dd></div>
           <div><dt>입학년도(학번)</dt><dd>{displayAnswer(admission)}</dd></div>
           <div><dt>현재 소속 및 직함</dt><dd>{displayAnswer(affiliation)}</dd></div>
-          <div><dt>선택 약정 유형</dt><dd>{getPledgeOptionLabel(submission.pledge_option)}</dd></div>
-          <div><dt>약정 금액</dt><dd>{formatWon(getSubmissionPledgeAmount(submission))}</dd></div>
+          <div><dt>선택 약정 유형</dt><dd>{submission.created_by_admin && !submission.pledge_option ? '미입력' : getPledgeOptionLabel(submission.pledge_option)}</dd></div>
+          <div><dt>약정 금액</dt><dd>{submission.created_by_admin && submission.pledge_amount === null ? '−' : formatWon(getSubmissionPledgeAmount(submission))}</dd></div>
           <div><dt>참석 여부</dt><dd>{getSubmissionAttendanceLabel(submission)}</dd></div>
           <div><dt>접수일</dt><dd>{formatAdminDate(submission.created_at)}</dd></div>
         </dl>
@@ -218,15 +218,15 @@ export function SubmissionsPanel({ submissions, fields, onRefresh, onError }: Su
                 tabIndex={0}
                 onClick={() => setSelected(submission)}
                 onKeyDown={(event) => openWithKeyboard(event, submission)}
-                aria-label={`${submission.name} 신청 상세 보기`}
+                aria-label={`${submission.name || '성명 미입력'} 신청 상세 보기`}
               >
                 <td>{formatAdminDate(submission.created_at)}</td>
-                <td><strong>{submission.name}</strong></td>
-                <td>{submission.phone}</td>
+                <td><strong>{submission.name || '−'}</strong></td>
+                <td>{submission.phone || '−'}</td>
                 <td>{displayAnswer(admission)}</td>
                 <td>{displayAnswer(affiliation)}</td>
-                <td>{getPledgeOptionLabel(submission.pledge_option)}</td>
-                <td>{formatWon(getSubmissionPledgeAmount(submission))}</td>
+                <td>{submission.created_by_admin && !submission.pledge_option ? '미입력' : getPledgeOptionLabel(submission.pledge_option)}</td>
+                <td>{submission.created_by_admin && submission.pledge_amount === null ? '−' : formatWon(getSubmissionPledgeAmount(submission))}</td>
                 <td>{getSubmissionAttendanceLabel(submission)}</td>
                 <td><span className={`admin-status admin-status--${submission.status}`}>{submissionStatusLabels[submission.status]}</span></td>
                 </tr>

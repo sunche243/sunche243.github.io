@@ -12,12 +12,12 @@ export interface SeatingTransferPerson {
 export function selectedStudentsForSeating(responses: StudentAttendanceResponse[]): SeatingTransferPerson[] {
   return responses
     .filter((response) => response.attendance_status === 'attending' && response.selection_status === 'selected')
-    .sort((a, b) => a.name.localeCompare(b.name, 'ko'))
+    .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '', 'ko'))
     .map((response) => ({
       id: `student-${response.id}`,
-      name: response.name,
+      name: response.name ?? '성명 미입력',
       group: response.admission_year ? `${response.admission_year}학번` : '학번 미입력',
-      identifier: response.phone,
+      identifier: response.phone ?? '',
     }));
 }
 

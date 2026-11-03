@@ -117,7 +117,7 @@ describe('attendance admin utilities', () => {
   it('updates an attendance row without changing immutable timestamps and recalculates stats', () => {
     const updated = updateAttendanceResponseInList([attending, notAttending], attending.id, {
       name: '홍길동 수정',
-      phone: attending.phone,
+      phone: attending.phone!,
       admission_year: null,
       affiliation: null,
       attendance_status: 'not_attending',
@@ -134,19 +134,19 @@ describe('attendance admin utilities', () => {
 
   it('recalculates duplicate phone markers after an update or deletion', () => {
     const duplicate = { ...notAttending, phone: attending.phone };
-    expect(countAttendanceResponsesByPhone([attending, duplicate]).get(attending.phone)).toBe(2);
+    expect(countAttendanceResponsesByPhone([attending, duplicate]).get(attending.phone!)).toBe(2);
 
     const updated = updateAttendanceResponseInList([attending, duplicate], duplicate.id, {
-      name: duplicate.name,
+      name: duplicate.name!,
       phone: '01099998888',
       admission_year: duplicate.admission_year,
       affiliation: duplicate.affiliation,
-      attendance_status: duplicate.attendance_status,
+      attendance_status: duplicate.attendance_status!,
     });
-    expect(countAttendanceResponsesByPhone(updated).get(attending.phone)).toBe(1);
+    expect(countAttendanceResponsesByPhone(updated).get(attending.phone!)).toBe(1);
 
     const remaining = deleteAttendanceResponseFromList([attending, duplicate], duplicate.id);
     expect(remaining).toEqual([attending]);
-    expect(countAttendanceResponsesByPhone(remaining).get(attending.phone)).toBe(1);
+    expect(countAttendanceResponsesByPhone(remaining).get(attending.phone!)).toBe(1);
   });
 });

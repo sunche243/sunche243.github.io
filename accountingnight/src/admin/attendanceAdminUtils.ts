@@ -107,8 +107,8 @@ export function filterAttendanceResponses(
 
   return responses.filter((response) => {
     const matchesQuery = !query
-      || response.name.toLocaleLowerCase('ko-KR').includes(query)
-      || (normalizedPhoneQuery.length > 0 && response.phone.includes(normalizedPhoneQuery))
+      || (response.name?.toLocaleLowerCase('ko-KR').includes(query) ?? false)
+      || (normalizedPhoneQuery.length > 0 && (response.phone?.includes(normalizedPhoneQuery) ?? false))
       || (response.admission_year?.toLocaleLowerCase('ko-KR').includes(query) ?? false)
       || (response.affiliation?.toLocaleLowerCase('ko-KR').includes(query) ?? false);
     const matchesStatus = filters.status === 'all' || response.attendance_status === filters.status;
@@ -119,6 +119,7 @@ export function filterAttendanceResponses(
 
 export function countAttendanceResponsesByPhone(responses: AttendanceResponse[]): Map<string, number> {
   return responses.reduce((counts, response) => {
+    if (!response.phone) return counts;
     counts.set(response.phone, (counts.get(response.phone) ?? 0) + 1);
     return counts;
   }, new Map<string, number>());

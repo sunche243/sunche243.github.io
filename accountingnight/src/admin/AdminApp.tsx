@@ -223,6 +223,7 @@ export function AdminApp() {
         <div className="admin-title-row">
           <div><p>DONGGUK UNIVERSITY</p><h1>회계인의 밤 운영</h1></div>
           <div className="admin-title-actions">
+            <a className="admin-button admin-button--secondary" href="./data/">데이터 직접 입력</a>
             <PushNotificationControl onError={setError} onSuccess={showToast} />
             <button className="admin-refresh" type="button" onClick={() => void refresh()} disabled={loading}>{loading ? '불러오는 중' : '새로고침'}</button>
           </div>

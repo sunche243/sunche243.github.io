@@ -45,17 +45,18 @@ export interface Submission {
   id: string;
   created_at: string;
   updated_at?: string;
-  name: string;
-  phone: string;
+  name: string | null;
+  phone: string | null;
   wants_sponsorship: boolean;
   sponsorship_units: number;
   pledge_option: StoredPledgeOption | null;
-  pledge_amount: number;
+  pledge_amount: number | null;
   attendance_status: AttendanceStatus | null;
   answers: SubmissionAnswers;
   status: SubmissionStatus;
   admin_memo: string;
-  privacy_consent_at: string;
+  privacy_consent_at: string | null;
+  created_by_admin?: string | null;
 }
 
 export interface RegistrationDraft {

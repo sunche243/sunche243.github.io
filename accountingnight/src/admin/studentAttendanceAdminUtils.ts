@@ -306,8 +306,8 @@ export function filterStudentAttendanceResponses(
   return responses.filter((response) => {
     const priority = getStudentSelectionPriority(response);
     const matchesQuery = !query
-      || response.name.toLocaleLowerCase('ko-KR').includes(query)
-      || (normalizedPhoneQuery.length > 0 && response.phone.includes(normalizedPhoneQuery))
+      || (response.name?.toLocaleLowerCase('ko-KR').includes(query) ?? false)
+      || (normalizedPhoneQuery.length > 0 && (response.phone?.includes(normalizedPhoneQuery) ?? false))
       || (response.admission_year?.toLocaleLowerCase('ko-KR').includes(query) ?? false)
       || (response.student_council_details?.toLocaleLowerCase('ko-KR').includes(query) ?? false)
       || response.admin_memo.toLocaleLowerCase('ko-KR').includes(query);
@@ -336,7 +336,7 @@ export function sortStudentAttendanceResponses(
       const rightGroup = rightPriority ?? (right.attendance_status === 'attending' ? 4 : 5);
       if (leftGroup !== rightGroup) return leftGroup - rightGroup;
 
-      const nameOrder = left.name.localeCompare(right.name, 'ko-KR');
+      const nameOrder = (left.name ?? '').localeCompare(right.name ?? '', 'ko-KR');
       if (nameOrder !== 0) return nameOrder;
     }
 
@@ -349,7 +349,7 @@ export function sortStudentAttendanceResponses(
         : Number.parseInt(right.admission_year, 10);
       if (leftAdmissionYear !== rightAdmissionYear) return leftAdmissionYear - rightAdmissionYear;
 
-      const nameOrder = left.name.localeCompare(right.name, 'ko-KR');
+      const nameOrder = (left.name ?? '').localeCompare(right.name ?? '', 'ko-KR');
       if (nameOrder !== 0) return nameOrder;
     }
 
